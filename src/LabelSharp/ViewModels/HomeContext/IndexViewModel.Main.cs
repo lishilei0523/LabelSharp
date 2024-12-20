@@ -2,10 +2,13 @@
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
+using SD.Infrastructure.WPF.Visual2Ds;
 using SD.IOC.Core.Mediators;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -16,13 +19,15 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using Path = System.IO.Path;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
     /// <summary>
-    /// 首页视图模型
+    /// 首页视图模型 - 主体部分
     /// </summary>
-    public class IndexViewModel : ScreenBase
+    public partial class IndexViewModel : ScreenBase
     {
         #region # 字段及构造器
 
@@ -75,12 +80,28 @@ namespace LabelSharp.ViewModels.HomeContext
         public string CurrentImageName { get; set; }
         #endregion
 
-        #region 背景颜色 —— Brush BackgroundColor
+        #region 背景颜色 —— SolidColorBrush BackgroundColor
         /// <summary>
         /// 背景颜色
         /// </summary>
         [DependencyProperty]
-        public Brush BackgroundColor { get; set; }
+        public SolidColorBrush BackgroundColor { get; set; }
+        #endregion
+
+        #region 边框颜色 —— Color? BorderColor
+        /// <summary>
+        /// 边框颜色
+        /// </summary>
+        [DependencyProperty]
+        public Color? BorderColor { get; set; }
+        #endregion
+
+        #region 边框粗细 —— int? BorderThickness
+        /// <summary>
+        /// 边框粗细
+        /// </summary>
+        [DependencyProperty]
+        public int? BorderThickness { get; set; }
         #endregion
 
         #region 图像路径列表 —— ObservableCollection<string> ImagePaths
@@ -104,7 +125,13 @@ namespace LabelSharp.ViewModels.HomeContext
         protected override Task OnInitializeAsync(CancellationToken cancellationToken)
         {
             //默认值
+            this._polyAnchors = new List<PointVisual2D>();
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
+            this.BorderColor = Colors.Red;
+            this.BorderThickness = 2;
+            this.ScaleChecked = true;
+            this.Shapes = new ObservableCollection<Shape>();
+            this.ShapeLs = new ObservableCollection<ShapeL>();
 
             return base.OnInitializeAsync(cancellationToken);
         }
@@ -127,17 +154,22 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 设置背景颜色 —— async void SetBackgroundColor()
+        #region 设置样式 —— async void SetStyle()
         /// <summary>
-        /// 设置背景颜色
+        /// 设置样式
         /// </summary>
-        public async void SetBackgroundColor()
+        public async void SetStyle()
         {
-            SelectColorViewModel viewModel = ResolveMediator.Resolve<SelectColorViewModel>();
+            StyleViewModel viewModel = ResolveMediator.Resolve<StyleViewModel>();
+            viewModel.BackgroundColor = this.BackgroundColor.Color;
+            viewModel.BorderColor = this.BorderColor;
+            viewModel.BorderThickness = this.BorderThickness;
             bool? result = await this._windowManager.ShowDialogAsync(viewModel);
             if (result == true)
             {
-                this.BackgroundColor = new SolidColorBrush(viewModel.Color!.Value);
+                this.BackgroundColor.Color = viewModel.BackgroundColor!.Value;
+                this.BorderColor = viewModel.BorderColor!.Value;
+                this.BorderThickness = viewModel.BorderThickness!.Value;
             }
         }
         #endregion
@@ -148,7 +180,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void Support()
         {
-            Process.Start("https://gitee.com/lishilei0523/OpenCV-Studio");
+            Process.Start("https://gitee.com/lishilei0523/LabelSharp");
         }
         #endregion
 

@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="LabelSharp.Views.CommonContext.SelectColorView"
+﻿<mah:MetroWindow x:Class="LabelSharp.Views.CommonContext.StyleView"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,8 +7,8 @@
                  xmlns:cm="http://www.caliburnproject.org"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
-                 Title="选择颜色"
-                 Width="500" Height="260" ResizeMode="NoResize"
+                 Title="设置样式"
+                 Width="500" Height="320" ResizeMode="NoResize"
                  FontSize="14"
                  WindowStartupLocation="CenterOwner"
                  Style="{StaticResource MetroWindow.Styles.Clean}">
@@ -16,7 +16,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <!--表单区-->
-            <RowDefinition Height="160" />
+            <RowDefinition Height="220" />
             <!--占位区-->
             <RowDefinition Height="*" />
             <!--控制区-->
@@ -24,8 +24,17 @@
         </Grid.RowDefinitions>
         <!--表单区-->
         <StackPanel Grid.Row="0" Grid.IsSharedSizeScope="True" Margin="20,30">
-            <sd:FormItem Label="颜色：">
-                <mah:ColorPicker SelectedColor="{Binding Color}" Style="{StaticResource ColorPicker.Styles.Fluent}" />
+            <sd:FormItem Label="背景颜色：">
+                <mah:ColorPicker SelectedColor="{Binding BackgroundColor}" Style="{StaticResource ColorPicker.Styles.Fluent}" />
+            </sd:FormItem>
+            <sd:FormItem Label="边框颜色：">
+                <mah:ColorPicker SelectedColor="{Binding BorderColor}" Style="{StaticResource ColorPicker.Styles.Fluent}" />
+            </sd:FormItem>
+            <sd:FormItem Label="边框粗细：">
+                <mah:NumericUpDown Minimum="1" Maximum="100"
+                                   Padding="-45,0,0,0"
+                                   Value="{Binding BorderThickness, UpdateSourceTrigger=PropertyChanged}"
+                                   Style="{StaticResource NumericUpDown.Styles.Fluent}" />
             </sd:FormItem>
         </StackPanel>
         <!--占位区-->

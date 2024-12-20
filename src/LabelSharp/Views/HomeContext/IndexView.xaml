@@ -18,8 +18,8 @@
 
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
-            <Button Content="重置" cm:Message.Attach="ResetImage()" />
-            <Button Content="背景" cm:Message.Attach="SetBackgroundColor()" />
+            <Button Content="重置" cm:Message.Attach="Reset()" />
+            <Button Content="样式" cm:Message.Attach="SetStyle()" />
         </mah:WindowCommands>
     </mah:MetroWindow.RightWindowCommands>
 
@@ -150,7 +150,13 @@
                               cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                     <mah:FlipView.ItemTemplate>
                         <DataTemplate>
-                            <sd:CanvasEx Mode="Scale">
+                            <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}" 
+                                         cm:Message.Attach="
+                                         [Event ElementDrag] = [Action OnDragElement($source)];
+                                         [Event ElementResize] = [Action OnResizeElement($source)];
+                                         [Event Draw] = [Action OnDraw($source)];
+                                         [Event Drawing] = [Action OnDrawing($source)];
+                                         [Event Drawn] = [Action OnDrawn($source)];">
                                 <sd:CanvasEx.BackgroundImage>
                                     <Image Source="{Binding}" />
                                 </sd:CanvasEx.BackgroundImage>

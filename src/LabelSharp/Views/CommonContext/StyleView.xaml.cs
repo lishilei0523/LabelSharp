@@ -1,11 +1,11 @@
 ﻿namespace LabelSharp.Views.CommonContext
 {
     /// <summary>
-    /// 选择颜色视图
+    /// 样式视图
     /// </summary>
-    public partial class SelectColorView
+    public partial class StyleView
     {
-        public SelectColorView()
+        public StyleView()
         {
             this.InitializeComponent();
         }

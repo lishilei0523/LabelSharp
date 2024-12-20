@@ -168,20 +168,22 @@
                                 <sd:CanvasEx.BackgroundImage>
                                     <Image Source="{Binding}" />
                                 </sd:CanvasEx.BackgroundImage>
-                                <Line Stroke="Black" 
+                                <!--水平参考线-->
+                                <Line Stroke="Black" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
-                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.X1}"
-                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.Y1}"
-                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.X2}"
-                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.Y2}"
+                                      X1="0"
+                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
+                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CurrentImage.Width}"
+                                      Y2="{Binding RelativeSource={RelativeSource Self}, Path=Y1}"
                                       RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
-                                <Line Stroke="Black" 
+                                <!--垂直参考线-->
+                                <Line Stroke="Black" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
-                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.X1}"
-                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.Y1}"
-                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.X2}"
-                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.Y2}"
+                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
+                                      Y1="0"
+                                      X2="{Binding RelativeSource={RelativeSource Self}, Path=X1}"
+                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CurrentImage.Height}"
                                       RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
                             </sd:CanvasEx>

@@ -119,20 +119,20 @@ namespace LabelSharp.ViewModels.HomeContext
         public int? BorderThickness { get; set; }
         #endregion
 
-        #region 水平参考线 —— Line HorizontalLine
+        #region 水平参考线Y坐标 —— double HorizontalLineY
         /// <summary>
-        /// 水平参考线
+        /// 水平参考线Y坐标
         /// </summary>
         [DependencyProperty]
-        public Line HorizontalLine { get; set; }
+        public double HorizontalLineY { get; set; }
         #endregion
 
-        #region 垂直参考线 —— Line VerticalLine
+        #region 垂直参考线X坐标 —— double VerticalLineX
         /// <summary>
-        /// 垂直参考线
+        /// 垂直参考线X坐标
         /// </summary>
         [DependencyProperty]
-        public Line VerticalLine { get; set; }
+        public double VerticalLineX { get; set; }
         #endregion
 
         #region 显示参考线 —— bool ShowGuideLines
@@ -232,8 +232,6 @@ namespace LabelSharp.ViewModels.HomeContext
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
             this.BorderColor = Colors.Red;
             this.BorderThickness = 2;
-            this.HorizontalLine = new Line();
-            this.VerticalLine = new Line();
             this.ShowGuideLines = true;
             this.GuideLinesVisibility = Visibility.Visible;
             this.ScaleChecked = true;
@@ -606,22 +604,12 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
 
                 //参考线坐标调整
-                this.HorizontalLine.X1 = 0;
-                this.HorizontalLine.Y1 = rectifiedPosition.Y > this.CurrentImage.Height
+                this.HorizontalLineY = rectifiedPosition.Y > this.CurrentImage.Height
                     ? this.CurrentImage.Height
                     : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
-                this.HorizontalLine.X2 = this.CurrentImage.Width;
-                this.HorizontalLine.Y2 = rectifiedPosition.Y > this.CurrentImage.Height
-                    ? this.CurrentImage.Height
-                    : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
-                this.VerticalLine.X1 = rectifiedPosition.X > this.CurrentImage.Width
+                this.VerticalLineX = rectifiedPosition.X > this.CurrentImage.Width
                     ? this.CurrentImage.Width
                     : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
-                this.VerticalLine.Y1 = 0;
-                this.VerticalLine.X2 = rectifiedPosition.X > this.CurrentImage.Width
-                    ? this.CurrentImage.Width
-                    : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
-                this.VerticalLine.Y2 = this.CurrentImage.Height;
             }
         }
         #endregion

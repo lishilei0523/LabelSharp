@@ -25,15 +25,13 @@ namespace LabelSharp.Models
         /// <param name="truncated">是否截断</param>
         /// <param name="difficult">是否困难</param>
         /// <param name="shape">形状</param>
-        /// <param name="shapeL">形状数据</param>
-        public Annotation(string label, bool truncated, bool difficult, Shape shape, ShapeL shapeL)
+        public Annotation(string label, bool truncated, bool difficult, Shape shape)
             : this()
         {
             this.Label = label;
             this.Truncated = truncated;
             this.Difficult = difficult;
             this.Shape = shape;
-            this.ShapeL = shapeL;
         }
 
         /// <summary>
@@ -57,13 +55,33 @@ namespace LabelSharp.Models
         /// <summary>
         /// 形状
         /// </summary>
-        [DependencyProperty]
-        public Shape Shape { get; set; }
+        private Shape _shape;
+
+        /// <summary>
+        /// 形状
+        /// </summary>
+        public Shape Shape
+        {
+            get => this._shape;
+            set
+            {
+                this.Set(ref this._shape, value);
+                this.ShapeText = this.ShapeL.Text;
+            }
+        }
 
         /// <summary>
         /// 形状数据
         /// </summary>
+        public ShapeL ShapeL
+        {
+            get => (ShapeL)this.Shape.Tag;
+        }
+
+        /// <summary>
+        /// 形状文本
+        /// </summary>
         [DependencyProperty]
-        public ShapeL ShapeL { get; set; }
+        public string ShapeText { get; set; }
     }
 }

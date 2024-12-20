@@ -1,0 +1,55 @@
+﻿<mah:MetroWindow x:Class="LabelSharp.Views.AnnotationContext.LookView"
+                 xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                 xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                 xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                 xmlns:sd="https://github.com/lishilei0523/SD.Framework"
+                 xmlns:cm="http://www.caliburnproject.org"
+                 xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+                 mc:Ignorable="d"
+                 Title="查看标注信息"
+                 Width="500" Height="420" ResizeMode="NoResize"
+                 FontSize="14"
+                 WindowStartupLocation="CenterOwner"
+                 Style="{StaticResource MetroWindow.Styles.Clean}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!--表单区-->
+            <RowDefinition Height="320" />
+            <!--占位区-->
+            <RowDefinition Height="*" />
+            <!--控制区-->
+            <RowDefinition Height="50" />
+        </Grid.RowDefinitions>
+        <!--表单区-->
+        <StackPanel Grid.Row="0" Grid.IsSharedSizeScope="True" Margin="20,30">
+            <sd:FormItem Label="标签：">
+                <TextBox Text="{Binding Label}" IsReadOnly="True" Style="{StaticResource TextBoxRevealStyle}" />
+            </sd:FormItem>
+            <sd:FormItem Label="是否截断：">
+                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
+            </sd:FormItem>
+            <sd:FormItem Label="是否困难：">
+                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
+            </sd:FormItem>
+            <sd:FormItem Label="形状数据：">
+                <TextBox Text="{Binding ShapeL.Text, Mode=OneWay}"
+                         Height="80"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         IsReadOnly="True"
+                         Style="{StaticResource TextBoxRevealStyle}" />
+            </sd:FormItem>
+        </StackPanel>
+        <!--占位区-->
+        <Grid Grid.Row="1" />
+        <!--控制区-->
+        <Grid Grid.Row="2" Style="{StaticResource Form.Styles.Submit.Grid}">
+            <WrapPanel Style="{StaticResource Form.Styles.Submit.WrapPanel}">
+                <Button Content="取消" cm:Message.Attach="TryCloseAsync('false')" Style="{StaticResource Button.Styles.Fluent.Default}" />
+            </WrapPanel>
+        </Grid>
+    </Grid>
+</mah:MetroWindow>

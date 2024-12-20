@@ -1,10 +1,10 @@
-﻿using SD.Infrastructure.Shapes;
+﻿using LabelSharp.Models;
+using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.CustomControls;
 using SD.Infrastructure.WPF.Enums;
 using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Visual2Ds;
-using SourceChord.FluentWPF.Animations;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,7 +13,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Point = System.Windows.Point;
 
@@ -60,14 +59,6 @@ namespace LabelSharp.ViewModels.HomeContext
 
         #region # 属性
 
-        #region 已选形状数据 —— ShapeL SelectedShapeL
-        /// <summary>
-        /// 已选形状数据
-        /// </summary>
-        [DependencyProperty]
-        public ShapeL SelectedShapeL { get; set; }
-        #endregion
-
         #region 形状集 —— ObservableCollection<Shape> Shapes
         /// <summary>
         /// 形状集
@@ -87,41 +78,6 @@ namespace LabelSharp.ViewModels.HomeContext
         #endregion
 
         #region # 方法
-
-        //Actions
-
-        #region 复制形状 —— void CopyShape()
-        /// <summary>
-        /// 复制形状
-        /// </summary>
-        public void CopyShape()
-        {
-            if (this.SelectedShapeL != null)
-            {
-                Clipboard.SetText(this.SelectedShapeL.Text);
-                base.ToastSuccess("已复制剪贴板！");
-            }
-        }
-        #endregion
-
-        #region 删除形状 —— void RemoveShape()
-        /// <summary>
-        /// 删除形状
-        /// </summary>
-        public void RemoveShape()
-        {
-            if (this.SelectedShapeL != null)
-            {
-                Shape shape = (Shape)this.SelectedShapeL.Tag;
-                CanvasEx canvas = (CanvasEx)shape.Parent;
-
-                this.ShapeLs.Remove(this.SelectedShapeL);
-                this.Shapes.Remove(shape);
-                canvas.Children.Remove(shape);
-            }
-        }
-        #endregion
-
 
         //Events
 
@@ -162,6 +118,14 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.RebuildPolyline(polyline, leftMargin, topMargin);
             }
+            if (canvas.SelectedVisual is Shape shape)
+            {
+                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                if (annotation != null)
+                {
+                    annotation.Shape = shape;
+                }
+            }
         }
         #endregion
 
@@ -190,8 +154,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 }
 
                 this.RebuildLine(line, leftMargin, topMargin);
-
-                return;
             }
             if (canvas.SelectedVisual is Rectangle rectangle)
             {
@@ -209,8 +171,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 }
 
                 this.RebuildRectangle(rectangle, leftMargin, topMargin);
-
-                return;
             }
             if (canvas.SelectedVisual is CircleVisual2D circle)
             {
@@ -219,8 +179,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 circle.Radius = Math.Abs(vector.Length);
 
                 this.RebuildCircle(circle, leftMargin, topMargin);
-
-                return;
             }
             if (canvas.SelectedVisual is EllipseVisual2D ellipse)
             {
@@ -229,8 +187,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 ellipse.RadiusY = Math.Abs(retifiedCenter.Y - canvas.RectifiedMousePosition!.Value.Y);
 
                 this.RebuildEllipse(ellipse, leftMargin, topMargin);
-
-                return;
             }
             if (canvas.SelectedVisual is Polygon polygon)
             {
@@ -254,8 +210,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 }
 
                 this.RebuildPolygon(polygon, leftMargin, topMargin);
-
-                return;
             }
             if (canvas.SelectedVisual is Polyline polyline)
             {
@@ -280,8 +234,14 @@ namespace LabelSharp.ViewModels.HomeContext
                 }
 
                 this.RebuildPolyline(polyline, leftMargin, topMargin);
-
-                return;
+            }
+            if (canvas.SelectedVisual is Shape shape)
+            {
+                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                if (annotation != null)
+                {
+                    annotation.Shape = shape;
+                }
             }
         }
         #endregion
@@ -447,28 +407,20 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 选中形状事件 —— void OnSelectShape()
+        #region 形状鼠标左击事件 —— void OnShapeMouseLeftDown(object sender...
         /// <summary>
-        /// 选中形状事件
+        /// 形状鼠标左击事件
         /// </summary>
-        public void OnSelectShape()
+        public void OnShapeMouseLeftDown(object sender, MouseButtonEventArgs eventArgs)
         {
-            if (this.SelectedShapeL != null)
+            if (this.CanvasMode != CanvasMode.Draw)
             {
-                Shape shape = (Shape)this.SelectedShapeL.Tag;
-                if (shape.Stroke is SolidColorBrush brush)
+                Shape shape = (Shape)sender;
+                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                if (annotation != null)
                 {
-                    BrushAnimation brushAnimation = new BrushAnimation
-                    {
-                        From = new SolidColorBrush(brush.Color.Invert()),
-                        To = shape.Stroke,
-                        Duration = new Duration(TimeSpan.FromSeconds(2))
-                    };
-                    Storyboard storyboard = new Storyboard();
-                    Storyboard.SetTarget(brushAnimation, shape);
-                    Storyboard.SetTargetProperty(brushAnimation, new PropertyPath(Shape.StrokeProperty));
-                    storyboard.Children.Add(brushAnimation);
-                    storyboard.Begin();
+                    this.SelectedAnnotation = null;
+                    this.SelectedAnnotation = annotation;
                 }
             }
         }
@@ -924,8 +876,8 @@ namespace LabelSharp.ViewModels.HomeContext
             polygonL.Tag = polygon;
             this.ShapeLs.Add(polygonL);
             this.Shapes.Add(polygon);
-            this.OnDrawCompleted(polygon, polygonL);
             canvas.Children.Add(polygon);
+            this.OnDrawCompleted(polygon, polygonL);
 
             //清空锚点
             foreach (PointVisual2D anchor in this._polyAnchors)
@@ -970,8 +922,8 @@ namespace LabelSharp.ViewModels.HomeContext
             polylineL.Tag = polyline;
             this.ShapeLs.Add(polylineL);
             this.Shapes.Add(polyline);
-            this.OnDrawCompleted(polyline, polylineL);
             canvas.Children.Add(polyline);
+            this.OnDrawCompleted(polyline, polylineL);
 
             //清空锚点
             foreach (PointVisual2D anchor in this._polyAnchors)
@@ -980,22 +932,6 @@ namespace LabelSharp.ViewModels.HomeContext
             }
             this._polyAnchors.Clear();
             polyline.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
-        }
-        #endregion
-
-        #region 形状鼠标左击事件 —— void OnShapeMouseLeftDown(object sender...
-        /// <summary>
-        /// 形状鼠标左击事件
-        /// </summary>
-        private void OnShapeMouseLeftDown(object sender, MouseButtonEventArgs eventArgs)
-        {
-            if (this.CanvasMode != CanvasMode.Draw)
-            {
-                Shape shape = (Shape)sender;
-                ShapeL shapeL = (ShapeL)shape.Tag;
-                this.SelectedShapeL = null;
-                this.SelectedShapeL = shapeL;
-            }
         }
         #endregion
 

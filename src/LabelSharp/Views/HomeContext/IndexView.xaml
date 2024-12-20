@@ -171,12 +171,39 @@
                             Style="{StaticResource TabControl.Styles.Document}"
                             ItemContainerStyle="{StaticResource TabControlItem.Styles.Document}">
                     <TabItem Header="标注信息">
+                        <ListBox ItemsSource="{Binding Annotations}" SelectedItem="{Binding SelectedAnnotation}"
+                                 cm:Message.Attach="[Event SelectionChanged] = [Action OnAnnotationSelect()]">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="5,10">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="15" />
+                                            <ColumnDefinition Width="80"/>
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <CheckBox Grid.Column="0" IsChecked="True"
+                                                  cm:Message.Attach="
+                                                  [Event Checked] = [Action OnAnnotationCheck($dataContext)];
+                                                  [Event Unchecked] = [Action OnAnnotationUncheck($dataContext)]" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Label}" Margin="20,0,0,0" />
+                                        <TextBlock Grid.Column="2" Text="{Binding ShapeText}" Margin="20,0,0,0" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="查看(_L)" cm:Message.Attach="LookAnnotation()" />
+                                    <MenuItem Header="编辑(_E)" cm:Message.Attach="UpdateAnnotation()" />
+                                    <MenuItem Header="删除(_D)" cm:Message.Attach="RemoveAnnotation()" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                        </ListBox>
                     </TabItem>
                     <TabItem Header="标签信息">
                         <ListBox ItemsSource="{Binding Labels}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Margin="0,4" Text="{Binding}" />
+                                    <TextBlock Margin="5,10" Text="{Binding}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -189,11 +216,6 @@
                                     <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
-                            <ListBox.ContextMenu>
-                                <ContextMenu>
-                                    <MenuItem Header="删除(_D)" cm:Message.Attach="RemoveImage()" />
-                                </ContextMenu>
-                            </ListBox.ContextMenu>
                         </ListBox>
                     </TabItem>
                     <TabItem Header="文件列表">
@@ -201,7 +223,7 @@
                                  cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Margin="0,4" Text="{Binding}" />
+                                    <TextBlock Margin="5,10" Text="{Binding}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

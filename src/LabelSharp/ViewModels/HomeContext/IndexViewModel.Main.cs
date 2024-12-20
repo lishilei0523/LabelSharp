@@ -1,5 +1,6 @@
 ﻿using Caliburn.Micro;
 using LabelSharp.Models;
+using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
@@ -7,8 +8,11 @@ using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
+using SD.Infrastructure.WPF.CustomControls;
+using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Visual2Ds;
 using SD.IOC.Core.Mediators;
+using SourceChord.FluentWPF.Animations;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,6 +24,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
@@ -138,6 +143,14 @@ namespace LabelSharp.ViewModels.HomeContext
         public ObservableCollection<string> Labels { get; set; }
         #endregion
 
+        #region 已选标注信息 —— Annotation SelectedAnnotation
+        /// <summary>
+        /// 已选标注信息
+        /// </summary>
+        [DependencyProperty]
+        public Annotation SelectedAnnotation { get; set; }
+        #endregion
+
         #region 标注信息列表 —— ObservableCollection<Annotation> Annotations
         /// <summary>
         /// 标注信息列表
@@ -168,7 +181,8 @@ namespace LabelSharp.ViewModels.HomeContext
             this.ShapeLs = new ObservableCollection<ShapeL>();
             this.SelectedAnnotationFormat = AnnotationFormat.Yolo;
             this.AnnotationFormats = typeof(AnnotationFormat).GetEnumMembers();
-            this.Labels = new ObservableCollection<string> { "人", "猫", "狗" };
+            this.Labels = new ObservableCollection<string>();
+            this.Annotations = new ObservableCollection<Annotation>();
 
             return base.OnInitializeAsync(cancellationToken);
         }
@@ -296,7 +310,69 @@ namespace LabelSharp.ViewModels.HomeContext
         #endregion
 
 
-        //事件
+        //Actions
+
+        #region 查看标注信息 —— async void LookAnnotation()
+        /// <summary>
+        /// 查看标注信息
+        /// </summary>
+        public async void LookAnnotation()
+        {
+            if (this.SelectedAnnotation != null)
+            {
+                LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
+                viewModel.Load(this.SelectedAnnotation.Label, this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.SelectedAnnotation.ShapeL);
+                await this._windowManager.ShowDialogAsync(viewModel);
+            }
+        }
+        #endregion
+
+        #region 修改标注信息 —— async void UpdateAnnotation()
+        /// <summary>
+        /// 修改标注信息
+        /// </summary>
+        public async void UpdateAnnotation()
+        {
+            if (this.SelectedAnnotation != null)
+            {
+                UpdateViewModel viewModel = ResolveMediator.Resolve<UpdateViewModel>();
+                viewModel.Load(this.SelectedAnnotation.Label, this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.Labels);
+                bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+                if (result == true)
+                {
+                    this.SelectedAnnotation.Label = viewModel.Label;
+                    this.SelectedAnnotation.Truncated = viewModel.Truncated;
+                    this.SelectedAnnotation.Difficult = viewModel.Difficult;
+                    this.ToastSuccess("修改成功！");
+                }
+            }
+        }
+        #endregion
+
+        #region 删除标注信息 —— void RemoveAnnotation()
+        /// <summary>
+        /// 删除标注信息
+        /// </summary>
+        public void RemoveAnnotation()
+        {
+            if (this.SelectedAnnotation != null)
+            {
+                MessageBoxResult result = MessageBox.Show("确定要删除吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (result == MessageBoxResult.OK)
+                {
+                    CanvasEx canvasEx = (CanvasEx)this.SelectedAnnotation.Shape.Parent;
+                    canvasEx.Children.Remove(this.SelectedAnnotation.Shape);
+                    this.Shapes.Remove(this.SelectedAnnotation.Shape);
+                    this.ShapeLs.Remove(this.SelectedAnnotation.ShapeL);
+                    this.Annotations.Remove(this.SelectedAnnotation);
+                    this.ToastSuccess("删除成功！");
+                }
+            }
+        }
+        #endregion
+
+
+        //Events
 
         #region 图像选中事件 —— void OnImageSelect()
         /// <summary>
@@ -312,15 +388,84 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 绘制完成事件 —— void OnDrawCompleted(Shape shape, ShapeL shapeL)
+        #region 绘制完成事件 —— async void OnDrawCompleted(Shape shape, ShapeL shapeL)
         /// <summary>
         /// 绘制完成事件
         /// </summary>
         /// <param name="shape">形状</param>
         /// <param name="shapeL">形状数据</param>
-        public void OnDrawCompleted(Shape shape, ShapeL shapeL)
+        public async void OnDrawCompleted(Shape shape, ShapeL shapeL)
         {
+            AddViewModel viewModel = ResolveMediator.Resolve<AddViewModel>();
+            viewModel.Load(this.Labels);
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
+            {
+                Annotation annotation = new Annotation(viewModel.Label, viewModel.Truncated, viewModel.Difficult, shape);
+                this.Annotations.Add(annotation);
+                if (!this.Labels.Contains(annotation.Label))
+                {
+                    this.Labels.Add(annotation.Label);
+                }
+                this.ToastSuccess("创建成功！");
+            }
+            else
+            {
+                CanvasEx canvasEx = (CanvasEx)shape.Parent;
+                canvasEx.Children.Remove(shape);
+                this.Shapes.Remove(shape);
+                this.ShapeLs.Remove(shapeL);
+            }
 
+            //设置光标
+            Mouse.OverrideCursor = Cursors.Arrow;
+        }
+        #endregion
+
+        #region 标注信息选中事件 —— void OnAnnotationSelect()
+        /// <summary>
+        /// 标注信息选中事件
+        /// </summary>
+        public void OnAnnotationSelect()
+        {
+            if (this.SelectedAnnotation != null)
+            {
+                Shape shape = this.SelectedAnnotation.Shape;
+                if (shape.Stroke is SolidColorBrush brush)
+                {
+                    BrushAnimation brushAnimation = new BrushAnimation
+                    {
+                        From = new SolidColorBrush(brush.Color.Invert()),
+                        To = shape.Stroke,
+                        Duration = new Duration(TimeSpan.FromSeconds(2))
+                    };
+                    Storyboard storyboard = new Storyboard();
+                    Storyboard.SetTarget(brushAnimation, shape);
+                    Storyboard.SetTargetProperty(brushAnimation, new PropertyPath(Shape.StrokeProperty));
+                    storyboard.Children.Add(brushAnimation);
+                    storyboard.Begin();
+                }
+            }
+        }
+        #endregion
+
+        #region 标注信息勾选事件 —— void OnAnnotationCheck(Annotation annotation)
+        /// <summary>
+        /// 标注信息勾选事件
+        /// </summary>
+        public void OnAnnotationCheck(Annotation annotation)
+        {
+            annotation.Shape.Visibility = Visibility.Visible;
+        }
+        #endregion
+
+        #region 标注信息取消勾选事件 —— void OnAnnotationUncheck(Annotation annotation)
+        /// <summary>
+        /// 标注信息取消勾选事件
+        /// </summary>
+        public void OnAnnotationUncheck(Annotation annotation)
+        {
+            annotation.Shape.Visibility = Visibility.Collapsed;
         }
         #endregion
 

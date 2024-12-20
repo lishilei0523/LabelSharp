@@ -169,7 +169,7 @@
                                     <Image Source="{Binding}" />
                                 </sd:CanvasEx.BackgroundImage>
                                 <!--水平参考线-->
-                                <Line Stroke="Black" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
+                                <Line Stroke="#96000000" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                       X1="0"
                                       Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
@@ -178,7 +178,7 @@
                                       RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
                                 <!--垂直参考线-->
-                                <Line Stroke="Black" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
+                                <Line Stroke="#96000000" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                       X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
                                       Y1="0"

@@ -119,6 +119,38 @@ namespace LabelSharp.ViewModels.HomeContext
         public int? BorderThickness { get; set; }
         #endregion
 
+        #region 水平参考线 —— Line HorizontalLine
+        /// <summary>
+        /// 水平参考线
+        /// </summary>
+        [DependencyProperty]
+        public Line HorizontalLine { get; set; }
+        #endregion
+
+        #region 垂直参考线 —— Line VerticalLine
+        /// <summary>
+        /// 垂直参考线
+        /// </summary>
+        [DependencyProperty]
+        public Line VerticalLine { get; set; }
+        #endregion
+
+        #region 显示参考线 —— bool ShowGuideLines
+        /// <summary>
+        /// 显示参考线
+        /// </summary>
+        [DependencyProperty]
+        public bool ShowGuideLines { get; set; }
+        #endregion
+
+        #region 参考线可见性 —— Visibility GuideLinesVisibility
+        /// <summary>
+        /// 参考线可见性
+        /// </summary>
+        [DependencyProperty]
+        public Visibility GuideLinesVisibility { get; set; }
+        #endregion
+
         #region 鼠标X坐标 —— int? MousePositionX
         /// <summary>
         /// 鼠标X坐标
@@ -200,6 +232,10 @@ namespace LabelSharp.ViewModels.HomeContext
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
             this.BorderColor = Colors.Red;
             this.BorderThickness = 2;
+            this.HorizontalLine = new Line();
+            this.VerticalLine = new Line();
+            this.ShowGuideLines = true;
+            this.GuideLinesVisibility = Visibility.Visible;
             this.ScaleChecked = true;
             this.Shapes = new ObservableCollection<Shape>();
             this.ShapeLs = new ObservableCollection<ShapeL>();
@@ -226,6 +262,16 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.ClearAnnotations();
             }
+        }
+        #endregion
+
+        #region 切换参考线 —— void SwitchGuideLinesVisibility()
+        /// <summary>
+        /// 切换参考线
+        /// </summary>
+        public void SwitchGuideLinesVisibility()
+        {
+            this.GuideLinesVisibility = this.ShowGuideLines ? Visibility.Visible : Visibility.Collapsed;
         }
         #endregion
 
@@ -558,6 +604,24 @@ namespace LabelSharp.ViewModels.HomeContext
                 Point rectifiedPosition = canvasEx.MatrixTransform.Inverse!.Transform(position);
                 this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
+
+                //参考线坐标调整
+                this.HorizontalLine.X1 = 0;
+                this.HorizontalLine.Y1 = rectifiedPosition.Y > this.CurrentImage.Height
+                    ? this.CurrentImage.Height
+                    : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
+                this.HorizontalLine.X2 = this.CurrentImage.Width;
+                this.HorizontalLine.Y2 = rectifiedPosition.Y > this.CurrentImage.Height
+                    ? this.CurrentImage.Height
+                    : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
+                this.VerticalLine.X1 = rectifiedPosition.X > this.CurrentImage.Width
+                    ? this.CurrentImage.Width
+                    : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
+                this.VerticalLine.Y1 = 0;
+                this.VerticalLine.X2 = rectifiedPosition.X > this.CurrentImage.Width
+                    ? this.CurrentImage.Width
+                    : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
+                this.VerticalLine.Y2 = this.CurrentImage.Height;
             }
         }
         #endregion

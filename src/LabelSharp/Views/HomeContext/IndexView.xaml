@@ -18,6 +18,11 @@
 
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
+            <mah:WindowCommands Margin="0,0,-20,0">
+                <mah:ToggleSwitch OnContent="参考线开" OffContent="参考线关" Height="34" FontSize="14" FontFamily="微软雅黑"
+                                  IsOn="{Binding ShowGuideLines}"
+                                  cm:Message.Attach="[Event Toggled] = [Action SwitchGuideLinesVisibility()]" />
+            </mah:WindowCommands>
             <Button Content="重置" cm:Message.Attach="Reset()" />
             <Button Content="样式" cm:Message.Attach="SetStyle()" />
         </mah:WindowCommands>
@@ -163,6 +168,22 @@
                                 <sd:CanvasEx.BackgroundImage>
                                     <Image Source="{Binding}" />
                                 </sd:CanvasEx.BackgroundImage>
+                                <Line Stroke="Black" 
+                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
+                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.X1}"
+                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.Y1}"
+                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.X2}"
+                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLine.Y2}"
+                                      RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
+                                      Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
+                                <Line Stroke="Black" 
+                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
+                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.X1}"
+                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.Y1}"
+                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.X2}"
+                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLine.Y2}"
+                                      RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
+                                      Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
                             </sd:CanvasEx>
                         </DataTemplate>
                     </mah:FlipView.ItemTemplate>

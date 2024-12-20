@@ -376,6 +376,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 lineL.Tag = this._line;
                 this.ShapeLs.Add(lineL);
                 this.Shapes.Add(this._line);
+                this.OnDrawCompleted(this._line, lineL);
             }
             if (this._brush != null)
             {
@@ -394,6 +395,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 polylineL.Tag = this._brush;
                 this.ShapeLs.Add(polylineL);
                 this.Shapes.Add(this._brush);
+                this.OnDrawCompleted(this._brush, polylineL);
             }
             if (this._rectangle != null)
             {
@@ -407,6 +409,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 rectangleL.Tag = this._rectangle;
                 this.ShapeLs.Add(rectangleL);
                 this.Shapes.Add(this._rectangle);
+                this.OnDrawCompleted(this._rectangle, rectangleL);
             }
             if (this._circle != null)
             {
@@ -419,6 +422,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 circleL.Tag = this._circle;
                 this.ShapeLs.Add(circleL);
                 this.Shapes.Add(this._circle);
+                this.OnDrawCompleted(this._circle, circleL);
             }
             if (this._ellipse != null)
             {
@@ -432,6 +436,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 ellipseL.Tag = this._ellipse;
                 this.ShapeLs.Add(ellipseL);
                 this.Shapes.Add(this._ellipse);
+                this.OnDrawCompleted(this._ellipse, ellipseL);
             }
 
             this._line = null;
@@ -698,6 +703,7 @@ namespace LabelSharp.ViewModels.HomeContext
             pointL.Tag = point;
             this.ShapeLs.Add(pointL);
             this.Shapes.Add(point);
+            this.OnDrawCompleted(point, pointL);
             point.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
@@ -918,6 +924,7 @@ namespace LabelSharp.ViewModels.HomeContext
             polygonL.Tag = polygon;
             this.ShapeLs.Add(polygonL);
             this.Shapes.Add(polygon);
+            this.OnDrawCompleted(polygon, polygonL);
             canvas.Children.Add(polygon);
 
             //清空锚点
@@ -963,6 +970,7 @@ namespace LabelSharp.ViewModels.HomeContext
             polylineL.Tag = polyline;
             this.ShapeLs.Add(polylineL);
             this.Shapes.Add(polyline);
+            this.OnDrawCompleted(polyline, polylineL);
             canvas.Children.Add(polyline);
 
             //清空锚点

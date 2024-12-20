@@ -46,6 +46,8 @@
                         <MenuItem Header="打开文件(_F)" cm:Message.Attach="OpenImage()" />
                         <MenuItem Header="打开文件夹(_D)" cm:Message.Attach="OpenImageFolder()" />
                         <MenuItem Header="关闭全部(_C)" cm:Message.Attach="CloseAll()" />
+                        <MenuItem Header="保存(_S)" cm:Message.Attach="SaveAnnotations()" />
+                        <MenuItem Header="另存为(_A)" cm:Message.Attach="SaveAsAnnotations()" />
                     </MenuItem>
                     <MenuItem Header="编辑(_E)">
                     </MenuItem>
@@ -55,11 +57,11 @@
                     </MenuItem>
                 </Menu>
                 <WrapPanel Grid.Column="1" Margin="0,0,4,0" VerticalAlignment="Center">
-                    <TextBlock Text="标注模式：" />
-                    <ComboBox ItemsSource="{Binding MatchModes}"
+                    <TextBlock Text="标注格式：" />
+                    <ComboBox ItemsSource="{Binding AnnotationFormats}"
                               DisplayMemberPath="Value"
                               SelectedValuePath="Key"
-                              SelectedValue="{Binding MatchMode}"
+                              SelectedValue="{Binding SelectedAnnotationFormat}"
                               mah:TextBoxHelper.ClearTextButton="False"
                               mah:TextBoxHelper.Watermark="请选择" 
                               Style="{StaticResource ComboBox.Styles.Default}" />
@@ -150,7 +152,7 @@
                               cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                     <mah:FlipView.ItemTemplate>
                         <DataTemplate>
-                            <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}" 
+                            <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}"
                                          cm:Message.Attach="
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
@@ -171,6 +173,13 @@
                     <TabItem Header="标注信息">
                     </TabItem>
                     <TabItem Header="标签信息">
+                        <ListBox ItemsSource="{Binding Labels}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Margin="0,4" Text="{Binding}" />
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                     </TabItem>
                     <TabItem Header="图像列表">
                         <ListBox ItemsSource="{Binding ImagePaths}" SelectedItem="{Binding CurrentImagePath}"

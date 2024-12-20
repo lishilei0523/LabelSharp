@@ -1,7 +1,9 @@
 ﻿using Caliburn.Micro;
+using LabelSharp.Models;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
@@ -112,6 +114,38 @@ namespace LabelSharp.ViewModels.HomeContext
         public ObservableCollection<string> ImagePaths { get; set; }
         #endregion
 
+        #region 已选标注格式 —— AnnotationFormat SelectedAnnotationFormat
+        /// <summary>
+        /// 已选标注格式
+        /// </summary>
+        [DependencyProperty]
+        public AnnotationFormat SelectedAnnotationFormat { get; set; }
+        #endregion
+
+        #region 标注格式字典 —— IDictionary<string, string> AnnotationFormats
+        /// <summary>
+        /// 标注格式字典
+        /// </summary>
+        [DependencyProperty]
+        public IDictionary<string, string> AnnotationFormats { get; set; }
+        #endregion
+
+        #region 标签列表 —— ObservableCollection<string> Labels
+        /// <summary>
+        /// 标签列表
+        /// </summary>
+        [DependencyProperty]
+        public ObservableCollection<string> Labels { get; set; }
+        #endregion
+
+        #region 标注信息列表 —— ObservableCollection<Annotation> Annotations
+        /// <summary>
+        /// 标注信息列表
+        /// </summary>
+        [DependencyProperty]
+        public ObservableCollection<Annotation> Annotations { get; set; }
+        #endregion
+
         #endregion
 
         #region # 方法
@@ -132,6 +166,9 @@ namespace LabelSharp.ViewModels.HomeContext
             this.ScaleChecked = true;
             this.Shapes = new ObservableCollection<Shape>();
             this.ShapeLs = new ObservableCollection<ShapeL>();
+            this.SelectedAnnotationFormat = AnnotationFormat.Yolo;
+            this.AnnotationFormats = typeof(AnnotationFormat).GetEnumMembers();
+            this.Labels = new ObservableCollection<string> { "人", "猫", "狗" };
 
             return base.OnInitializeAsync(cancellationToken);
         }
@@ -272,6 +309,18 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImage = new BitmapImage(new Uri(this.CurrentImagePath));
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
             }
+        }
+        #endregion
+
+        #region 绘制完成事件 —— void OnDrawCompleted(Shape shape, ShapeL shapeL)
+        /// <summary>
+        /// 绘制完成事件
+        /// </summary>
+        /// <param name="shape">形状</param>
+        /// <param name="shapeL">形状数据</param>
+        public void OnDrawCompleted(Shape shape, ShapeL shapeL)
+        {
+
         }
         #endregion
 

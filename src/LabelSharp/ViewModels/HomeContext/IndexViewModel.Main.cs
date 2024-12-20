@@ -87,6 +87,14 @@ namespace LabelSharp.ViewModels.HomeContext
         public string CurrentImageName { get; set; }
         #endregion
 
+        #region 当前图像索引 —— string CurrentImageIndex
+        /// <summary>
+        /// 当前图像索引
+        /// </summary>
+        [DependencyProperty]
+        public int? CurrentImageIndex { get; set; }
+        #endregion
+
         #region 背景颜色 —— SolidColorBrush BackgroundColor
         /// <summary>
         /// 背景颜色
@@ -109,6 +117,22 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public int? BorderThickness { get; set; }
+        #endregion
+
+        #region 鼠标X坐标 —— int? MousePositionX
+        /// <summary>
+        /// 鼠标X坐标
+        /// </summary>
+        [DependencyProperty]
+        public int? MousePositionX { get; set; }
+        #endregion
+
+        #region 鼠标Y坐标 —— int? MousePositionY
+        /// <summary>
+        /// 鼠标Y坐标
+        /// </summary>
+        [DependencyProperty]
+        public int? MousePositionY { get; set; }
         #endregion
 
         #region 图像路径列表 —— ObservableCollection<string> ImagePaths
@@ -191,17 +215,17 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //常用
 
-        #region 重置 —— async void Reset()
+        #region 重置 —— void Reset()
         /// <summary>
         /// 重置
         /// </summary>
-        public async void Reset()
+        public void Reset()
         {
-            this.Busy();
-
-
-
-            this.Idle();
+            MessageBoxResult result = MessageBox.Show("确定要重置吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.OK)
+            {
+                this.ClearAnnotations();
+            }
         }
         #endregion
 
@@ -258,6 +282,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImage = new BitmapImage(new Uri(openFileDialog.FileName));
                 this.CurrentImagePath = openFileDialog.FileName;
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
+                this.CurrentImageIndex = 1;
             }
         }
         #endregion
@@ -287,6 +312,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImage = new BitmapImage(new Uri(this.ImagePaths[0]));
                 this.CurrentImagePath = this.ImagePaths[0];
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
+                this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
             }
         }
         #endregion
@@ -305,7 +331,29 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImage = null;
                 this.CurrentImagePath = null;
                 this.CurrentImageName = null;
+                this.CurrentImageIndex = null;
+                this.ClearAnnotations();
             }
+        }
+        #endregion
+
+        #region 保存 —— async void Save()
+        /// <summary>
+        /// 保存
+        /// </summary>
+        public async void Save()
+        {
+            //TODO 实现
+        }
+        #endregion
+
+        #region 另存为 —— async void SaveAs()
+        /// <summary>
+        /// 另存为
+        /// </summary>
+        public async void SaveAs()
+        {
+            //TODO 实现
         }
         #endregion
 
@@ -321,7 +369,7 @@ namespace LabelSharp.ViewModels.HomeContext
             if (this.SelectedAnnotation != null)
             {
                 LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
-                viewModel.Load(this.SelectedAnnotation.Label, this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.SelectedAnnotation.ShapeL);
+                viewModel.Load(this.SelectedAnnotation.Label.Trim(), this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.SelectedAnnotation.ShapeL);
                 await this._windowManager.ShowDialogAsync(viewModel);
             }
         }
@@ -340,9 +388,14 @@ namespace LabelSharp.ViewModels.HomeContext
                 bool? result = await this._windowManager.ShowDialogAsync(viewModel);
                 if (result == true)
                 {
-                    this.SelectedAnnotation.Label = viewModel.Label;
+                    this.SelectedAnnotation.Label = viewModel.Label.Trim();
                     this.SelectedAnnotation.Truncated = viewModel.Truncated;
                     this.SelectedAnnotation.Difficult = viewModel.Difficult;
+                    if (!this.Labels.Contains(viewModel.Label.Trim()))
+                    {
+                        this.Labels.Add(viewModel.Label.Trim());
+                    }
+
                     this.ToastSuccess("修改成功！");
                 }
             }
@@ -371,6 +424,29 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region 创建标签 —— async void CreateLabel()
+        /// <summary>
+        /// 创建标签
+        /// </summary>
+        public async void CreateLabel()
+        {
+            LabelViewModel viewModel = ResolveMediator.Resolve<LabelViewModel>();
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
+            {
+                if (!this.Labels.Contains(viewModel.Label.Trim()))
+                {
+                    this.Labels.Add(viewModel.Label.Trim());
+                    this.ToastSuccess("创建成功！");
+                }
+                else
+                {
+                    this.ToastError("标签已存在！");
+                }
+            }
+        }
+        #endregion
+
 
         //Events
 
@@ -384,6 +460,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.CurrentImage = new BitmapImage(new Uri(this.CurrentImagePath));
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
+                this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
             }
         }
         #endregion
@@ -401,11 +478,11 @@ namespace LabelSharp.ViewModels.HomeContext
             bool? result = await this._windowManager.ShowDialogAsync(viewModel);
             if (result == true)
             {
-                Annotation annotation = new Annotation(viewModel.Label, viewModel.Truncated, viewModel.Difficult, shape);
+                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.Truncated, viewModel.Difficult, shape);
                 this.Annotations.Add(annotation);
-                if (!this.Labels.Contains(annotation.Label))
+                if (!this.Labels.Contains(annotation.Label.Trim()))
                 {
-                    this.Labels.Add(annotation.Label);
+                    this.Labels.Add(annotation.Label.Trim());
                 }
                 this.ToastSuccess("创建成功！");
             }
@@ -469,6 +546,22 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region 鼠标移动事件 —— void OnMouseMove(CanvasEx canvasEx...
+        /// <summary>
+        /// 鼠标移动事件
+        /// </summary>
+        public void OnMouseMove(CanvasEx canvasEx, MouseEventArgs eventArgs)
+        {
+            if (!string.IsNullOrWhiteSpace(this.CurrentImagePath))
+            {
+                Point position = eventArgs.GetPosition(canvasEx);
+                Point rectifiedPosition = canvasEx.MatrixTransform.Inverse!.Transform(position);
+                this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
+                this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
+            }
+        }
+        #endregion
+
         #region 键盘按下事件 —— void OnKeyDown()
         /// <summary>
         /// 键盘按下事件
@@ -477,11 +570,32 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (Keyboard.IsKeyDown(Key.F5))
             {
-
+                this.Reset();
             }
             if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.S))
             {
+                this.Save();
+            }
+        }
+        #endregion
 
+
+        //Private
+
+        #region 清空标注信息 —— void ClearAnnotations()
+        /// <summary>
+        /// 清空标注信息
+        /// </summary>
+        private void ClearAnnotations()
+        {
+            foreach (Annotation annotation in this.Annotations.ToArray())
+            {
+                CanvasEx canvasEx = (CanvasEx)annotation.Shape.Parent;
+                canvasEx.Children.Remove(annotation.Shape);
+                this.Shapes.Remove(annotation.Shape);
+                this.ShapeLs.Remove(annotation.ShapeL);
+                this.Annotations.Remove(annotation);
+                this.SelectedAnnotation = null;
             }
         }
         #endregion

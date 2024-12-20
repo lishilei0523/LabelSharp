@@ -154,6 +154,7 @@
                         <DataTemplate>
                             <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}"
                                          cm:Message.Attach="
+                                         [Event MouseMove] = [Action OnMouseMove($source,$eventArgs)];
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
                                          [Event Draw] = [Action OnDraw($source)];
@@ -206,6 +207,11 @@
                                     <TextBlock Margin="5,10" Text="{Binding}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
+                            <ListBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="新建(_N)" cm:Message.Attach="CreateLabel()" />
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
                         </ListBox>
                     </TabItem>
                     <TabItem Header="图像列表">
@@ -238,14 +244,29 @@
                 <WrapPanel Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="当前图像：" FontSize="12" />
                     <TextBlock Text="{Binding CurrentImageName}" FontSize="12" />
+                    <TextBlock Text=" | " FontSize="12" />
+                    <TextBlock Text="第" FontSize="12" />
+                    <TextBlock Text="{Binding CurrentImageIndex}" FontSize="12" />
+                    <TextBlock Text="张" FontSize="12" />
+                    <TextBlock Text=" | " FontSize="12" />
+                    <TextBlock Text="共" FontSize="12" />
+                    <TextBlock Text="{Binding ImagePaths.Count}" FontSize="12" />
+                    <TextBlock Text="张" FontSize="12" />
                 </WrapPanel>
                 <WrapPanel Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="Mouse position: " FontSize="12" />
+                    <TextBlock Text="(" FontSize="12" />
+                    <TextBlock Text="{Binding MousePositionX}" FontSize="12" />
+                    <TextBlock Text=", " FontSize="12" />
+                    <TextBlock Text="{Binding MousePositionY}" FontSize="12" />
+                    <TextBlock Text=")" FontSize="12" />
+                    <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Pixel format: " FontSize="12" />
                     <TextBlock Text="{Binding CurrentImage.Format}" FontSize="12" />
-                    <TextBlock Text=", " FontSize="12" />
+                    <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Width: " FontSize="12" />
                     <TextBlock Text="{Binding CurrentImage.Width}" FontSize="12" />
-                    <TextBlock Text=", " FontSize="12" />
+                    <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Height: " FontSize="12" />
                     <TextBlock Text="{Binding CurrentImage.Height}" FontSize="12" />
                 </WrapPanel>

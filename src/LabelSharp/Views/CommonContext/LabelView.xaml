@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="LabelSharp.Views.AnnotationContext.AddView"
+﻿<mah:MetroWindow x:Class="LabelSharp.Views.CommonContext.LabelView"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,8 +7,8 @@
                  xmlns:cm="http://www.caliburnproject.org"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
-                 Title="新建标注信息"
-                 Width="500" Height="320" ResizeMode="NoResize"
+                 Title="新建标签"
+                 Width="500" Height="260" ResizeMode="NoResize"
                  FontSize="14"
                  WindowStartupLocation="CenterOwner"
                  Style="{StaticResource MetroWindow.Styles.Clean}">
@@ -16,7 +16,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <!--表单区-->
-            <RowDefinition Height="220" />
+            <RowDefinition Height="180" />
             <!--占位区-->
             <RowDefinition Height="*" />
             <!--控制区-->
@@ -25,16 +25,7 @@
         <!--表单区-->
         <StackPanel Grid.Row="0" Grid.IsSharedSizeScope="True" Margin="20,30">
             <sd:FormItem Label="标签：">
-                <ComboBox ItemsSource="{Binding Labels}" 
-                          Text="{Binding Label}"
-                          IsEditable="True"
-                          Style="{StaticResource ComboBox.Styles.Fluent}" />
-            </sd:FormItem>
-            <sd:FormItem Label="是否截断：">
-                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
-            </sd:FormItem>
-            <sd:FormItem Label="是否困难：">
-                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
+                <TextBox Text="{Binding Label}" Style="{StaticResource TextBoxRevealStyle}" />
             </sd:FormItem>
         </StackPanel>
         <!--占位区-->

@@ -29,6 +29,9 @@
     <Content Include="$(OpenCvSharp4ExternalNativeDlls)\win-x64\native\*.*">
       <Visible>False</Visible>
     </Content>
+    <Content Include="Content\Models\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -4,6 +4,7 @@ using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using OpenCvSharp;
 using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
@@ -19,6 +20,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,7 +29,10 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Annotation = LabelSharp.Models.Annotation;
 using Path = System.IO.Path;
+using Point = System.Windows.Point;
+using Rect = OpenCvSharp.Rect;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -327,15 +332,16 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImagePath = openFileDialog.FileName;
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
                 this.CurrentImageIndex = 1;
+                this.ClearAnnotations();
             }
         }
         #endregion
 
-        #region 打开文件夹 —— void OpenImageFolder()
+        #region 打开文件夹 —— async void OpenImageFolder()
         /// <summary>
         /// 打开文件夹
         /// </summary>
-        public void OpenImageFolder()
+        public async void OpenImageFolder()
         {
             CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
             {
@@ -357,6 +363,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.CurrentImagePath = this.ImagePaths[0];
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
                 this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
+                this.ClearAnnotations();
+                await this.LoadLabels();
             }
         }
         #endregion
@@ -387,7 +395,31 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void Save()
         {
-            //TODO 实现
+            #region # 验证
+
+            if (this.CurrentImage == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            this.Busy();
+
+            //保存YOLO格式
+            if (this.SelectedAnnotationFormat == AnnotationFormat.Yolo)
+            {
+                string annotationName = Path.GetFileNameWithoutExtension(this.CurrentImagePath);
+                await this.SaveYolo($"{this.ImageFolder}/{annotationName}.txt");
+            }
+
+            //保存标签
+            string labelsPath = $"{this.ImageFolder}/classes.txt";
+            await this.SaveLabels(labelsPath);
+
+            this.Idle();
+            this.ToastSuccess("保存成功！");
         }
         #endregion
 
@@ -494,17 +526,19 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //Events
 
-        #region 图像选中事件 —— void OnImageSelect()
+        #region 图像选中事件 —— async void OnImageSelect()
         /// <summary>
         /// 图像选中事件
         /// </summary>
-        public void OnImageSelect()
+        public async void OnImageSelect()
         {
             if (!string.IsNullOrWhiteSpace(this.CurrentImagePath))
             {
                 this.CurrentImage = new BitmapImage(new Uri(this.CurrentImagePath));
                 this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
                 this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
+
+                await this.LoadYolo();
             }
         }
         #endregion
@@ -649,6 +683,151 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.Annotations.Remove(annotation);
                 this.SelectedAnnotation = null;
             }
+        }
+        #endregion
+
+        #region 加载YOLO格式 —— async Task LoadYolo()
+        /// <summary>
+        /// 加载YOLO格式
+        /// </summary>
+        public async Task LoadYolo()
+        {
+            string annotationName = Path.GetFileNameWithoutExtension(this.CurrentImagePath);
+            string annotationPath = $"{this.ImageFolder}/{annotationName}.txt";
+            if (File.Exists(annotationPath))
+            {
+                string[] lines = await Task.Run(() => File.ReadAllLines(annotationPath));
+                foreach (string line in lines)
+                {
+                    string[] words = line.Split(' ');
+
+                    //标签索引
+                    int labelIndex = int.Parse(words[0]);
+
+                    //矩形部分
+                    float scaledCenterX = float.Parse(words[1]);
+                    float scaledCenterY = float.Parse(words[2]);
+                    float scaledWidth = float.Parse(words[3]);
+                    float scaledHeight = float.Parse(words[4]);
+                    double boxWidth = scaledWidth * this.CurrentImage.Width;
+                    double boxHeight = scaledHeight * this.CurrentImage.Height;
+                    double x = scaledCenterX * this.CurrentImage.Width - boxWidth / 2;
+                    double y = scaledCenterY * this.CurrentImage.Height - boxHeight / 2;
+
+                    //多边形部分
+                    string[] polygonTextArray = new string[words.Length - 5];
+                    IList<Point> points = new List<Point>();
+                    if (polygonTextArray.Length > 0)
+                    {
+                        Array.Copy(words, 4, polygonTextArray, 0, words.Length - 5);
+                        IEnumerable<float> polygon = polygonTextArray.Select(float.Parse);
+                        using Mat mat = Mat.FromArray(polygon);
+                        using Mat reshapedMat = mat.Reshape(1, polygonTextArray.Length / 2);
+                        for (int rowIndex = 0; rowIndex < reshapedMat.Rows; rowIndex++)
+                        {
+                            float scaledPointX = reshapedMat.At<float>(rowIndex, 0);
+                            float scaledPointY = reshapedMat.At<float>(rowIndex, 1);
+                            double pointX = scaledPointX * this.CurrentImage.Width;
+                            double pointY = scaledPointY * this.CurrentImage.Height;
+                            points.Add(new Point(pointX, pointY));
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region 保存YOLO格式 —— async Task SaveYolo(string fileName)
+        /// <summary>
+        /// 保存YOLO格式
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        private async Task SaveYolo(string filePath)
+        {
+            string[] lines = new string[this.Annotations.Count];
+            for (int index = 0; index < lines.Length; index++)
+            {
+                StringBuilder lineBuilder = new StringBuilder();
+                Annotation annotation = this.Annotations[index];
+                int labelIndex = this.Labels.IndexOf(annotation.Label);
+                lineBuilder.Append($"{labelIndex} ");
+                if (annotation.ShapeL is RectangleL rectangleL)
+                {
+                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)this.CurrentImage.Width;
+                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)this.CurrentImage.Height;
+                    float scaledWidth = rectangleL.Width / (float)this.CurrentImage.Width;
+                    float scaledHeight = rectangleL.Height / (float)this.CurrentImage.Height;
+                    lineBuilder.Append($"{scaledCenterX} ");
+                    lineBuilder.Append($"{scaledCenterY} ");
+                    lineBuilder.Append($"{scaledWidth} ");
+                    lineBuilder.Append($"{scaledHeight} ");
+                }
+                if (annotation.ShapeL is PolygonL polygon)
+                {
+                    IEnumerable<Point2f> point2Fs = polygon.Points.Select(point => new Point2f(point.X, point.Y));
+                    Rect boundingBox = Cv2.BoundingRect(point2Fs);
+                    float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)this.CurrentImage.Width;
+                    float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)this.CurrentImage.Height;
+                    float scaledWidth = boundingBox.Width / (float)this.CurrentImage.Width;
+                    float scaledHeight = boundingBox.Height / (float)this.CurrentImage.Height;
+                    lineBuilder.Append($"{scaledCenterX} ");
+                    lineBuilder.Append($"{scaledCenterY} ");
+                    lineBuilder.Append($"{scaledWidth} ");
+                    lineBuilder.Append($"{scaledHeight} ");
+                    foreach (PointL pointL in polygon.Points)
+                    {
+                        float scaledX = pointL.X / (float)this.CurrentImage.Width;
+                        float scaledY = pointL.Y / (float)this.CurrentImage.Height;
+                        lineBuilder.Append($"{scaledX} ");
+                        lineBuilder.Append($"{scaledY} ");
+                    }
+                }
+
+                lines[index] = lineBuilder.ToString().Trim();
+            }
+
+            await Task.Run(() => File.WriteAllLines(filePath, lines));
+        }
+        #endregion
+
+        #region 加载标签 —— async Task LoadLabels()
+        /// <summary>
+        /// 加载标签
+        /// </summary>
+        public async Task LoadLabels()
+        {
+            if (!string.IsNullOrWhiteSpace(this.ImageFolder))
+            {
+                string labelsPath = $"{this.ImageFolder}/classes.txt";
+                if (File.Exists(labelsPath))
+                {
+                    string[] lines = await Task.Run(() => File.ReadAllLines(labelsPath));
+                    foreach (string line in lines)
+                    {
+                        if (!this.Labels.Contains(line))
+                        {
+                            this.Labels.Add(line);
+                        }
+                    }
+                }
+            }
+        }
+        #endregion
+
+        #region 保存标签 —— async Task SaveLabels(string filePath)
+        /// <summary>
+        /// 保存标签
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        public async Task SaveLabels(string filePath)
+        {
+            string[] lines = new string[this.Labels.Count];
+            for (int index = 0; index < lines.Length; index++)
+            {
+                lines[index] = this.Labels[index];
+            }
+
+            await Task.Run(() => File.WriteAllLines(filePath, lines));
         }
         #endregion
 

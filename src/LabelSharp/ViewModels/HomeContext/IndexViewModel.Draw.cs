@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -37,7 +36,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// <summary>
         /// 矩形
         /// </summary>
-        private Rectangle _rectangle;
+        private RectangleVisual2D _rectangle;
 
         /// <summary>
         /// 圆形
@@ -97,7 +96,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.RebuildLine(line, leftMargin, topMargin);
             }
-            if (canvas.SelectedVisual is Rectangle rectangle)
+            if (canvas.SelectedVisual is RectangleVisual2D rectangle)
             {
                 this.RebuildRectangle(rectangle, leftMargin, topMargin);
             }
@@ -154,19 +153,14 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this.RebuildLine(line, leftMargin, topMargin);
             }
-            if (canvas.SelectedVisual is Rectangle rectangle)
+            if (canvas.SelectedVisual is RectangleVisual2D rectangle)
             {
-                Point retifiedVertex = new Point(leftMargin, topMargin);
+                Point retifiedVertex = new Point(rectangle.Location.X + leftMargin, rectangle.Location.Y + topMargin);
                 double width = canvas.RectifiedMousePosition!.Value.X - retifiedVertex.X;
                 double height = canvas.RectifiedMousePosition!.Value.Y - retifiedVertex.Y;
-
-                if (width > 0)
+                if (width > 0 && height > 0)
                 {
-                    rectangle.Width = width;
-                }
-                if (height > 0)
-                {
-                    rectangle.Height = height;
+                    rectangle.Size = new Size(width, height);
                 }
 
                 this.RebuildRectangle(rectangle, leftMargin, topMargin);
@@ -358,10 +352,10 @@ namespace LabelSharp.ViewModels.HomeContext
             }
             if (this._rectangle != null)
             {
-                int x = (int)Math.Ceiling(canvas.GetRectifiedLeft(this._rectangle));
-                int y = (int)Math.Ceiling(canvas.GetRectifiedTop(this._rectangle));
-                int width = (int)Math.Ceiling(this._rectangle.Width);
-                int height = (int)Math.Ceiling(this._rectangle.Height);
+                int x = (int)Math.Ceiling(this._rectangle.Location.X);
+                int y = (int)Math.Ceiling(this._rectangle.Location.Y);
+                int width = (int)Math.Ceiling(this._rectangle.Size.Width);
+                int height = (int)Math.Ceiling(this._rectangle.Size.Height);
                 RectangleL rectangleL = new RectangleL(x, y, width, height);
 
                 this._rectangle.Tag = rectangleL;
@@ -482,14 +476,14 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 重建矩形 —— void RebuildRectangle(Rectangle rectangle, double leftMargin, double topMargin)
+        #region 重建矩形 —— void RebuildRectangle(RectangleVisual2D rectangle, double leftMargin, double topMargin)
         /// <summary>
         /// 重建矩形
         /// </summary>
         /// <param name="rectangle">矩形</param>
         /// <param name="leftMargin">左边距</param>
         /// <param name="topMargin">上边距</param>
-        private void RebuildRectangle(Rectangle rectangle, double leftMargin, double topMargin)
+        private void RebuildRectangle(RectangleVisual2D rectangle, double leftMargin, double topMargin)
         {
             RectangleL rectangleL = (RectangleL)rectangle.Tag;
             int index = this.ShapeLs.IndexOf(rectangleL);
@@ -497,10 +491,10 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.ShapeLs.Remove(rectangleL);
 
-                int x = (int)Math.Ceiling(leftMargin);
-                int y = (int)Math.Ceiling(topMargin);
-                int width = (int)Math.Ceiling(rectangle.Width);
-                int height = (int)Math.Ceiling(rectangle.Height);
+                int x = (int)Math.Ceiling(rectangle.Location.X + leftMargin);
+                int y = (int)Math.Ceiling(rectangle.Location.Y + topMargin);
+                int width = (int)Math.Ceiling(rectangle.Size.Width);
+                int height = (int)Math.Ceiling(rectangle.Size.Width);
                 RectangleL newRectangleL = new RectangleL(x, y, width, height);
 
                 rectangle.Tag = newRectangleL;
@@ -719,7 +713,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (this._rectangle == null)
             {
-                this._rectangle = new Rectangle
+                this._rectangle = new RectangleVisual2D()
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
                     Stroke = new SolidColorBrush(this.BorderColor!.Value),
@@ -730,30 +724,11 @@ namespace LabelSharp.ViewModels.HomeContext
 
             Point rectifiedVertex = canvas.RectifiedStartPosition!.Value;
             Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
+
             int width = (int)Math.Round(Math.Abs(rectifiedPosition.X - rectifiedVertex.X));
             int height = (int)Math.Round(Math.Abs(rectifiedPosition.Y - rectifiedVertex.Y));
-            this._rectangle.Width = width;
-            this._rectangle.Height = height;
-            if (rectifiedPosition.X > rectifiedVertex.X && rectifiedPosition.Y > rectifiedVertex.Y)
-            {
-                Canvas.SetLeft(this._rectangle, rectifiedVertex.X * canvas.ScaledRatio);
-                Canvas.SetTop(this._rectangle, rectifiedVertex.Y * canvas.ScaledRatio);
-            }
-            if (rectifiedPosition.X > rectifiedVertex.X && rectifiedPosition.Y < rectifiedVertex.Y)
-            {
-                Canvas.SetLeft(this._rectangle, rectifiedVertex.X * canvas.ScaledRatio);
-                Canvas.SetTop(this._rectangle, rectifiedPosition.Y * canvas.ScaledRatio);
-            }
-            if (rectifiedPosition.X < rectifiedVertex.X && rectifiedPosition.Y > rectifiedVertex.Y)
-            {
-                Canvas.SetLeft(this._rectangle, rectifiedPosition.X * canvas.ScaledRatio);
-                Canvas.SetTop(this._rectangle, rectifiedVertex.Y * canvas.ScaledRatio);
-            }
-            if (rectifiedPosition.X < rectifiedVertex.X && rectifiedPosition.Y < rectifiedVertex.Y)
-            {
-                Canvas.SetLeft(this._rectangle, rectifiedPosition.X * canvas.ScaledRatio);
-                Canvas.SetTop(this._rectangle, rectifiedPosition.Y * canvas.ScaledRatio);
-            }
+            this._rectangle.Location = rectifiedVertex;
+            this._rectangle.Size = new Size(width, height);
             this._rectangle.RenderTransform = canvas.MatrixTransform;
             this._rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }

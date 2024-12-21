@@ -315,7 +315,7 @@ namespace LabelSharp.ViewModels.HomeContext
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Title = "请选择图像",
-                Filter = "(*.jpg)|*.jpg|(*.png)|*.png|(*.bmp)|*.bmp",
+                Filter = "图片文件(*.jpg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp",
                 AddExtension = true,
                 RestoreDirectory = true
             };

@@ -33,6 +33,7 @@ using Annotation = LabelSharp.Models.Annotation;
 using Path = System.IO.Path;
 using Point = System.Windows.Point;
 using Rect = OpenCvSharp.Rect;
+using Size = System.Windows.Size;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -273,11 +274,11 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //文件
 
-        #region 打开文件 —— void OpenImage()
+        #region 打开文件 —— async void OpenImage()
         /// <summary>
         /// 打开文件
         /// </summary>
-        public void OpenImage()
+        public async void OpenImage()
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
@@ -288,8 +289,11 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (openFileDialog.ShowDialog() == true)
             {
-
                 this.ImageFolder = openFileDialog.FileName.Replace(Path.GetFileName(openFileDialog.FileName), string.Empty);
+
+                //加载标签
+                await this.LoadLabels();
+
                 string imagePath = openFileDialog.FileName;
                 string imageName = Path.GetFileName(imagePath);
                 ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, 1);
@@ -315,6 +319,10 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.Busy();
 
                 this.ImageFolder = folderDialog.FileName;
+
+                //加载标签
+                await this.LoadLabels();
+
                 string[] imagePaths = Directory.GetFiles(this.ImageFolder);
 
                 #region # 验证
@@ -343,8 +351,6 @@ namespace LabelSharp.ViewModels.HomeContext
                         }
                     }
                 }
-
-                await this.LoadLabels();
 
                 this.Idle();
             }
@@ -511,6 +517,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void OnImageSelect()
         {
+            this.ClearAnnotations();
             await this.LoadYolo();
         }
         #endregion
@@ -535,6 +542,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.Labels.Add(annotation.Label.Trim());
                 }
                 this.ToastSuccess("创建成功！");
+                this.Save();
             }
             else
             {
@@ -553,7 +561,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void OnAnnotationSelect()
         {
-            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
             if (annotation != null)
             {
                 Shape shape = annotation.Shape;
@@ -648,13 +656,10 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (this.SelectedImageAnnotation != null)
             {
-                foreach (Annotation annotation in this.SelectedImageAnnotation.Annotations.ToArray())
-                {
-                    this.SelectedImageAnnotation.Shapes.Remove(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Remove(annotation.ShapeL);
-                    this.SelectedImageAnnotation.Annotations.Remove(annotation);
-                    this.SelectedImageAnnotation.SelectedAnnotation = null;
-                }
+                this.SelectedImageAnnotation.Shapes.Clear();
+                this.SelectedImageAnnotation.ShapeLs.Clear();
+                this.SelectedImageAnnotation.Annotations.Clear();
+                this.SelectedImageAnnotation.SelectedAnnotation = null;
             }
         }
         #endregion
@@ -665,50 +670,109 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async Task LoadYolo()
         {
-            if (this.SelectedImageAnnotation != null)
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
             {
-                string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
-                string annotationPath = $"{this.ImageFolder}/{annotationName}.txt";
-                if (File.Exists(annotationPath))
+                return;
+            }
+
+            #endregion
+
+            string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
+            string annotationPath = $"{this.ImageFolder}/{annotationName}.txt";
+
+            #region # 验证
+
+            if (!File.Exists(annotationPath))
+            {
+                return;
+            }
+
+            #endregion
+
+            BitmapSource currentImage = this.SelectedImageAnnotation.Image;
+            string[] lines = await Task.Run(() => File.ReadAllLines(annotationPath));
+            foreach (string line in lines)
+            {
+                string[] words = line.Split(' ');
+
+                //标签索引
+                int labelIndex = int.Parse(words[0]);
+                string label = this.Labels.Count > labelIndex ? this.Labels[labelIndex] : labelIndex.ToString();
+
+                //矩形
+                if (words.Length == 5)
                 {
-                    BitmapSource currentImage = this.SelectedImageAnnotation.Image;
-                    string[] lines = await Task.Run(() => File.ReadAllLines(annotationPath));
-                    foreach (string line in lines)
+                    float scaledCenterX = float.Parse(words[1]);
+                    float scaledCenterY = float.Parse(words[2]);
+                    float scaledWidth = float.Parse(words[3]);
+                    float scaledHeight = float.Parse(words[4]);
+                    int boxWidth = (int)Math.Ceiling(scaledWidth * currentImage.Width);
+                    int boxHeight = (int)Math.Ceiling(scaledHeight * currentImage.Height);
+                    int x = (int)Math.Ceiling(scaledCenterX * currentImage.Width - boxWidth / 2.0f);
+                    int y = (int)Math.Ceiling(scaledCenterY * currentImage.Height - boxHeight / 2.0f);
+
+                    RectangleVisual2D rectangle = new RectangleVisual2D()
                     {
-                        string[] words = line.Split(' ');
+                        Location = new Point(x, y),
+                        Size = new Size(boxWidth, boxHeight),
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
+                        StrokeThickness = this.BorderThickness!.Value
+                    };
+                    RectangleL rectangleL = new RectangleL(x, y, boxWidth, boxHeight);
+                    rectangle.Tag = rectangleL;
+                    rectangleL.Tag = rectangle;
+                    rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
 
-                        //标签索引
-                        int labelIndex = int.Parse(words[0]);
+                    Annotation annotation = new Annotation(label, false, false, rectangle);
 
-                        //矩形部分
-                        float scaledCenterX = float.Parse(words[1]);
-                        float scaledCenterY = float.Parse(words[2]);
-                        float scaledWidth = float.Parse(words[3]);
-                        float scaledHeight = float.Parse(words[4]);
-                        double boxWidth = scaledWidth * currentImage.Width;
-                        double boxHeight = scaledHeight * currentImage.Height;
-                        double x = scaledCenterX * currentImage.Width - boxWidth / 2;
-                        double y = scaledCenterY * currentImage.Height - boxHeight / 2;
+                    this.SelectedImageAnnotation.ShapeLs.Add(rectangleL);
+                    this.SelectedImageAnnotation.Shapes.Add(rectangle);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                }
+                //多边形
+                if (words.Length > 5)
+                {
+                    string[] polygonTextArray = new string[words.Length - 5];
+                    IList<Point> points = new List<Point>();
+                    Array.Copy(words, 5, polygonTextArray, 0, words.Length - 5);
+                    IEnumerable<float> polygonArray = polygonTextArray.Select(float.Parse);
 
-                        //多边形部分
-                        string[] polygonTextArray = new string[words.Length - 5];
-                        IList<Point> points = new List<Point>();
-                        if (polygonTextArray.Length > 0)
-                        {
-                            Array.Copy(words, 4, polygonTextArray, 0, words.Length - 5);
-                            IEnumerable<float> polygon = polygonTextArray.Select(float.Parse);
-                            using Mat mat = Mat.FromArray(polygon);
-                            using Mat reshapedMat = mat.Reshape(1, polygonTextArray.Length / 2);
-                            for (int rowIndex = 0; rowIndex < reshapedMat.Rows; rowIndex++)
-                            {
-                                float scaledPointX = reshapedMat.At<float>(rowIndex, 0);
-                                float scaledPointY = reshapedMat.At<float>(rowIndex, 1);
-                                double pointX = scaledPointX * currentImage.Width;
-                                double pointY = scaledPointY * currentImage.Height;
-                                points.Add(new Point(pointX, pointY));
-                            }
-                        }
+                    using Mat mat = Mat.FromArray(polygonArray);
+                    using Mat reshapedMat = mat.Reshape(1, polygonTextArray.Length / 2);
+                    for (int rowIndex = 0; rowIndex < reshapedMat.Rows; rowIndex++)
+                    {
+                        float scaledPointX = reshapedMat.At<float>(rowIndex, 0);
+                        float scaledPointY = reshapedMat.At<float>(rowIndex, 1);
+                        double pointX = scaledPointX * currentImage.Width;
+                        double pointY = scaledPointY * currentImage.Height;
+                        points.Add(new Point(pointX, pointY));
                     }
+
+                    IEnumerable<PointL> pointIs =
+                        from point in points
+                        let pointX = (int)Math.Ceiling(point.X)
+                        let pointY = (int)Math.Ceiling(point.Y)
+                        select new PointL(pointX, pointY);
+                    PolygonL polygonL = new PolygonL(pointIs);
+                    Polygon polygon = new Polygon
+                    {
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
+                        StrokeThickness = this.BorderThickness!.Value,
+                        Points = new PointCollection(points),
+                        Tag = polygonL
+                    };
+                    polygonL.Tag = polygon;
+                    polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+
+                    Annotation annotation = new Annotation(label, false, false, polygon);
+
+                    this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
+                    this.SelectedImageAnnotation.Shapes.Add(polygon);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
             }
         }
@@ -740,9 +804,9 @@ namespace LabelSharp.ViewModels.HomeContext
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
                 }
-                if (annotation.ShapeL is PolygonL polygon)
+                if (annotation.ShapeL is PolygonL polygonL)
                 {
-                    IEnumerable<Point2f> point2Fs = polygon.Points.Select(point => new Point2f(point.X, point.Y));
+                    IEnumerable<Point2f> point2Fs = polygonL.Points.Select(point => new Point2f(point.X, point.Y));
                     Rect boundingBox = Cv2.BoundingRect(point2Fs);
                     float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)currentImage.Width;
                     float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)currentImage.Height;
@@ -752,7 +816,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
-                    foreach (PointL pointL in polygon.Points)
+                    foreach (PointL pointL in polygonL.Points)
                     {
                         float scaledX = pointL.X / (float)currentImage.Width;
                         float scaledY = pointL.Y / (float)currentImage.Height;

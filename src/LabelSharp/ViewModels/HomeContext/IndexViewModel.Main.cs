@@ -44,6 +44,11 @@ namespace LabelSharp.ViewModels.HomeContext
         #region # 字段及构造器
 
         /// <summary>
+        /// 可用图像格式列表
+        /// </summary>
+        private static readonly string[] _AvailableImageFormats = { ".jpg", ".jpeg", ".png", ".bmp" };
+
+        /// <summary>
         /// 窗体管理器
         /// </summary>
         private readonly IWindowManager _windowManager;
@@ -66,38 +71,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public string ImageFolder { get; set; }
-        #endregion
-
-        #region 当前图像 —— BitmapSource CurrentImage
-        /// <summary>
-        /// 当前图像
-        /// </summary>
-        [DependencyProperty]
-        public BitmapSource CurrentImage { get; set; }
-        #endregion
-
-        #region 当前图像路径 —— string CurrentImagePath
-        /// <summary>
-        /// 当前图像路径
-        /// </summary>
-        [DependencyProperty]
-        public string CurrentImagePath { get; set; }
-        #endregion
-
-        #region 当前图像名称 —— string CurrentImageName
-        /// <summary>
-        /// 当前图像名称
-        /// </summary>
-        [DependencyProperty]
-        public string CurrentImageName { get; set; }
-        #endregion
-
-        #region 当前图像索引 —— string CurrentImageIndex
-        /// <summary>
-        /// 当前图像索引
-        /// </summary>
-        [DependencyProperty]
-        public int? CurrentImageIndex { get; set; }
         #endregion
 
         #region 背景颜色 —— SolidColorBrush BackgroundColor
@@ -172,12 +145,28 @@ namespace LabelSharp.ViewModels.HomeContext
         public int? MousePositionY { get; set; }
         #endregion
 
-        #region 图像路径列表 —— ObservableCollection<string> ImagePaths
+        #region 已选图像标注 —— ImageAnnotation SelectedImageAnnotation
         /// <summary>
-        /// 图像路径列表
+        /// 已选图像标注
         /// </summary>
         [DependencyProperty]
-        public ObservableCollection<string> ImagePaths { get; set; }
+        public ImageAnnotation SelectedImageAnnotation { get; set; }
+        #endregion
+
+        #region 图像标注列表 —— ObservableCollection<ImageAnnotation> ImageAnnotations
+        /// <summary>
+        /// 图像标注列表
+        /// </summary>
+        [DependencyProperty]
+        public ObservableCollection<ImageAnnotation> ImageAnnotations { get; set; }
+        #endregion
+
+        #region 标签列表 —— ObservableCollection<string> Labels
+        /// <summary>
+        /// 标签列表
+        /// </summary>
+        [DependencyProperty]
+        public ObservableCollection<string> Labels { get; set; }
         #endregion
 
         #region 已选标注格式 —— AnnotationFormat SelectedAnnotationFormat
@@ -194,30 +183,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public IDictionary<string, string> AnnotationFormats { get; set; }
-        #endregion
-
-        #region 标签列表 —— ObservableCollection<string> Labels
-        /// <summary>
-        /// 标签列表
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<string> Labels { get; set; }
-        #endregion
-
-        #region 已选标注信息 —— Annotation SelectedAnnotation
-        /// <summary>
-        /// 已选标注信息
-        /// </summary>
-        [DependencyProperty]
-        public Annotation SelectedAnnotation { get; set; }
-        #endregion
-
-        #region 标注信息列表 —— ObservableCollection<Annotation> Annotations
-        /// <summary>
-        /// 标注信息列表
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<Annotation> Annotations { get; set; }
         #endregion
 
         #endregion
@@ -245,7 +210,6 @@ namespace LabelSharp.ViewModels.HomeContext
             this.SelectedAnnotationFormat = AnnotationFormat.Yolo;
             this.AnnotationFormats = typeof(AnnotationFormat).GetEnumMembers();
             this.Labels = new ObservableCollection<string>();
-            this.Annotations = new ObservableCollection<Annotation>();
 
             return base.OnInitializeAsync(cancellationToken);
         }
@@ -326,13 +290,14 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                this.ImageFolder = null;
-                this.ImagePaths = new ObservableCollection<string>(new[] { openFileDialog.FileName });
-                this.CurrentImage = new BitmapImage(new Uri(openFileDialog.FileName));
-                this.CurrentImagePath = openFileDialog.FileName;
-                this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
-                this.CurrentImageIndex = 1;
-                this.ClearAnnotations();
+
+                this.ImageFolder = openFileDialog.FileName.Replace(Path.GetFileName(openFileDialog.FileName), string.Empty);
+                string imagePath = openFileDialog.FileName;
+                BitmapSource image = new BitmapImage(new Uri(imagePath));
+                string imageName = Path.GetFileName(imagePath);
+                ImageAnnotation imageAnnotation = new ImageAnnotation(image, imagePath, imageName, 1);
+                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>(new[] { imageAnnotation });
+                this.SelectedImageAnnotation = imageAnnotation;
             }
         }
         #endregion
@@ -358,12 +323,21 @@ namespace LabelSharp.ViewModels.HomeContext
                     return;
                 }
 
-                this.ImagePaths = new ObservableCollection<string>(imagePaths);
-                this.CurrentImage = new BitmapImage(new Uri(this.ImagePaths[0]));
-                this.CurrentImagePath = this.ImagePaths[0];
-                this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
-                this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
-                this.ClearAnnotations();
+                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
+                for (int index = 0; index < imagePaths.Length; index++)
+                {
+                    string imagePath = imagePaths[index];
+                    string fileExtension = Path.GetExtension(imagePath);
+                    if (_AvailableImageFormats.Contains(fileExtension))
+                    {
+                        BitmapSource image = new BitmapImage(new Uri(imagePath));
+                        string imageName = Path.GetFileName(imagePath);
+                        ImageAnnotation imageAnnotation = new ImageAnnotation(image, imagePath, imageName, index + 1);
+                        this.ImageAnnotations.Add(imageAnnotation);
+                    }
+                }
+                this.SelectedImageAnnotation = this.ImageAnnotations[0];
+
                 await this.LoadLabels();
             }
         }
@@ -379,12 +353,8 @@ namespace LabelSharp.ViewModels.HomeContext
             if (result == MessageBoxResult.OK)
             {
                 this.ImageFolder = null;
-                this.ImagePaths = new ObservableCollection<string>();
-                this.CurrentImage = null;
-                this.CurrentImagePath = null;
-                this.CurrentImageName = null;
-                this.CurrentImageIndex = null;
-                this.ClearAnnotations();
+                this.SelectedImageAnnotation = null;
+                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
             }
         }
         #endregion
@@ -397,7 +367,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             #region # 验证
 
-            if (this.CurrentImage == null)
+            if (this.SelectedImageAnnotation == null)
             {
                 MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -410,7 +380,7 @@ namespace LabelSharp.ViewModels.HomeContext
             //保存YOLO格式
             if (this.SelectedAnnotationFormat == AnnotationFormat.Yolo)
             {
-                string annotationName = Path.GetFileNameWithoutExtension(this.CurrentImagePath);
+                string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
                 await this.SaveYolo($"{this.ImageFolder}/{annotationName}.txt");
             }
 
@@ -442,10 +412,11 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void LookAnnotation()
         {
-            if (this.SelectedAnnotation != null)
+            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            if (annotation != null)
             {
                 LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
-                viewModel.Load(this.SelectedAnnotation.Label.Trim(), this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.SelectedAnnotation.ShapeL);
+                viewModel.Load(annotation.Label.Trim(), annotation.Truncated, annotation.Difficult, annotation.ShapeL);
                 await this._windowManager.ShowDialogAsync(viewModel);
             }
         }
@@ -457,16 +428,17 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void UpdateAnnotation()
         {
-            if (this.SelectedAnnotation != null)
+            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            if (annotation != null)
             {
                 UpdateViewModel viewModel = ResolveMediator.Resolve<UpdateViewModel>();
-                viewModel.Load(this.SelectedAnnotation.Label, this.SelectedAnnotation.Truncated, this.SelectedAnnotation.Difficult, this.Labels);
+                viewModel.Load(annotation.Label, annotation.Truncated, annotation.Difficult, this.Labels);
                 bool? result = await this._windowManager.ShowDialogAsync(viewModel);
                 if (result == true)
                 {
-                    this.SelectedAnnotation.Label = viewModel.Label.Trim();
-                    this.SelectedAnnotation.Truncated = viewModel.Truncated;
-                    this.SelectedAnnotation.Difficult = viewModel.Difficult;
+                    annotation.Label = viewModel.Label.Trim();
+                    annotation.Truncated = viewModel.Truncated;
+                    annotation.Difficult = viewModel.Difficult;
                     if (!this.Labels.Contains(viewModel.Label.Trim()))
                     {
                         this.Labels.Add(viewModel.Label.Trim());
@@ -484,16 +456,17 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void RemoveAnnotation()
         {
-            if (this.SelectedAnnotation != null)
+            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            if (annotation != null)
             {
                 MessageBoxResult result = MessageBox.Show("确定要删除吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (result == MessageBoxResult.OK)
                 {
-                    CanvasEx canvasEx = (CanvasEx)this.SelectedAnnotation.Shape.Parent;
-                    canvasEx.Children.Remove(this.SelectedAnnotation.Shape);
-                    this.Shapes.Remove(this.SelectedAnnotation.Shape);
-                    this.ShapeLs.Remove(this.SelectedAnnotation.ShapeL);
-                    this.Annotations.Remove(this.SelectedAnnotation);
+                    CanvasEx canvasEx = (CanvasEx)annotation.Shape.Parent;
+                    canvasEx.Children.Remove(annotation.Shape);
+                    this.Shapes.Remove(annotation.Shape);
+                    this.ShapeLs.Remove(annotation.ShapeL);
+                    this.SelectedImageAnnotation.Annotations.Remove(annotation);
                     this.ToastSuccess("删除成功！");
                 }
             }
@@ -532,14 +505,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void OnImageSelect()
         {
-            if (!string.IsNullOrWhiteSpace(this.CurrentImagePath))
-            {
-                this.CurrentImage = new BitmapImage(new Uri(this.CurrentImagePath));
-                this.CurrentImageName = Path.GetFileName(this.CurrentImagePath);
-                this.CurrentImageIndex = this.ImagePaths.IndexOf(this.CurrentImagePath) + 1;
-
-                await this.LoadYolo();
-            }
+            await this.LoadYolo();
         }
         #endregion
 
@@ -557,7 +523,7 @@ namespace LabelSharp.ViewModels.HomeContext
             if (result == true)
             {
                 Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.Truncated, viewModel.Difficult, shape);
-                this.Annotations.Add(annotation);
+                this.SelectedImageAnnotation.Annotations.Add(annotation);
                 if (!this.Labels.Contains(annotation.Label.Trim()))
                 {
                     this.Labels.Add(annotation.Label.Trim());
@@ -583,9 +549,10 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void OnAnnotationSelect()
         {
-            if (this.SelectedAnnotation != null)
+            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            if (annotation != null)
             {
-                Shape shape = this.SelectedAnnotation.Shape;
+                Shape shape = annotation.Shape;
                 if (shape.Stroke is SolidColorBrush brush)
                 {
                     BrushAnimation brushAnimation = new BrushAnimation
@@ -630,7 +597,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void OnMouseMove(CanvasEx canvasEx, MouseEventArgs eventArgs)
         {
-            if (!string.IsNullOrWhiteSpace(this.CurrentImagePath))
+            if (this.SelectedImageAnnotation != null)
             {
                 Point position = eventArgs.GetPosition(canvasEx);
                 Point rectifiedPosition = canvasEx.MatrixTransform.Inverse!.Transform(position);
@@ -638,11 +605,12 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
 
                 //参考线坐标调整
-                this.HorizontalLineY = rectifiedPosition.Y > this.CurrentImage.Height
-                    ? this.CurrentImage.Height
+                BitmapSource currentImage = this.SelectedImageAnnotation.Image;
+                this.HorizontalLineY = rectifiedPosition.Y > currentImage.Height
+                    ? currentImage.Height
                     : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
-                this.VerticalLineX = rectifiedPosition.X > this.CurrentImage.Width
-                    ? this.CurrentImage.Width
+                this.VerticalLineX = rectifiedPosition.X > currentImage.Width
+                    ? currentImage.Width
                     : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
             }
         }
@@ -674,15 +642,15 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         private void ClearAnnotations()
         {
-            foreach (Annotation annotation in this.Annotations.ToArray())
-            {
-                CanvasEx canvasEx = (CanvasEx)annotation.Shape.Parent;
-                canvasEx.Children.Remove(annotation.Shape);
-                this.Shapes.Remove(annotation.Shape);
-                this.ShapeLs.Remove(annotation.ShapeL);
-                this.Annotations.Remove(annotation);
-                this.SelectedAnnotation = null;
-            }
+            //foreach (Annotation annotation in this.Annotations.ToArray())
+            //{
+            //    CanvasEx canvasEx = (CanvasEx)annotation.Shape.Parent;
+            //    canvasEx.Children.Remove(annotation.Shape);
+            //    this.Shapes.Remove(annotation.Shape);
+            //    this.ShapeLs.Remove(annotation.ShapeL);
+            //    this.Annotations.Remove(annotation);
+            //    this.SelectedAnnotation = null;
+            //}
         }
         #endregion
 
@@ -692,10 +660,11 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async Task LoadYolo()
         {
-            string annotationName = Path.GetFileNameWithoutExtension(this.CurrentImagePath);
+            string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
             string annotationPath = $"{this.ImageFolder}/{annotationName}.txt";
             if (File.Exists(annotationPath))
             {
+                BitmapSource currentImage = this.SelectedImageAnnotation.Image;
                 string[] lines = await Task.Run(() => File.ReadAllLines(annotationPath));
                 foreach (string line in lines)
                 {
@@ -709,10 +678,10 @@ namespace LabelSharp.ViewModels.HomeContext
                     float scaledCenterY = float.Parse(words[2]);
                     float scaledWidth = float.Parse(words[3]);
                     float scaledHeight = float.Parse(words[4]);
-                    double boxWidth = scaledWidth * this.CurrentImage.Width;
-                    double boxHeight = scaledHeight * this.CurrentImage.Height;
-                    double x = scaledCenterX * this.CurrentImage.Width - boxWidth / 2;
-                    double y = scaledCenterY * this.CurrentImage.Height - boxHeight / 2;
+                    double boxWidth = scaledWidth * currentImage.Width;
+                    double boxHeight = scaledHeight * currentImage.Height;
+                    double x = scaledCenterX * currentImage.Width - boxWidth / 2;
+                    double y = scaledCenterY * currentImage.Height - boxHeight / 2;
 
                     //多边形部分
                     string[] polygonTextArray = new string[words.Length - 5];
@@ -727,8 +696,8 @@ namespace LabelSharp.ViewModels.HomeContext
                         {
                             float scaledPointX = reshapedMat.At<float>(rowIndex, 0);
                             float scaledPointY = reshapedMat.At<float>(rowIndex, 1);
-                            double pointX = scaledPointX * this.CurrentImage.Width;
-                            double pointY = scaledPointY * this.CurrentImage.Height;
+                            double pointX = scaledPointX * currentImage.Width;
+                            double pointY = scaledPointY * currentImage.Height;
                             points.Add(new Point(pointX, pointY));
                         }
                     }
@@ -744,19 +713,20 @@ namespace LabelSharp.ViewModels.HomeContext
         /// <param name="filePath">文件路径</param>
         private async Task SaveYolo(string filePath)
         {
-            string[] lines = new string[this.Annotations.Count];
+            BitmapSource currentImage = this.SelectedImageAnnotation.Image;
+            string[] lines = new string[this.SelectedImageAnnotation.Annotations.Count];
             for (int index = 0; index < lines.Length; index++)
             {
                 StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = this.Annotations[index];
+                Annotation annotation = this.SelectedImageAnnotation.Annotations[index];
                 int labelIndex = this.Labels.IndexOf(annotation.Label);
                 lineBuilder.Append($"{labelIndex} ");
                 if (annotation.ShapeL is RectangleL rectangleL)
                 {
-                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)this.CurrentImage.Width;
-                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)this.CurrentImage.Height;
-                    float scaledWidth = rectangleL.Width / (float)this.CurrentImage.Width;
-                    float scaledHeight = rectangleL.Height / (float)this.CurrentImage.Height;
+                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)currentImage.Width;
+                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)currentImage.Height;
+                    float scaledWidth = rectangleL.Width / (float)currentImage.Width;
+                    float scaledHeight = rectangleL.Height / (float)currentImage.Height;
                     lineBuilder.Append($"{scaledCenterX} ");
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
@@ -766,18 +736,18 @@ namespace LabelSharp.ViewModels.HomeContext
                 {
                     IEnumerable<Point2f> point2Fs = polygon.Points.Select(point => new Point2f(point.X, point.Y));
                     Rect boundingBox = Cv2.BoundingRect(point2Fs);
-                    float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)this.CurrentImage.Width;
-                    float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)this.CurrentImage.Height;
-                    float scaledWidth = boundingBox.Width / (float)this.CurrentImage.Width;
-                    float scaledHeight = boundingBox.Height / (float)this.CurrentImage.Height;
+                    float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)currentImage.Width;
+                    float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)currentImage.Height;
+                    float scaledWidth = boundingBox.Width / (float)currentImage.Width;
+                    float scaledHeight = boundingBox.Height / (float)currentImage.Height;
                     lineBuilder.Append($"{scaledCenterX} ");
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
                     foreach (PointL pointL in polygon.Points)
                     {
-                        float scaledX = pointL.X / (float)this.CurrentImage.Width;
-                        float scaledY = pointL.Y / (float)this.CurrentImage.Height;
+                        float scaledX = pointL.X / (float)currentImage.Width;
+                        float scaledY = pointL.Y / (float)currentImage.Height;
                         lineBuilder.Append($"{scaledX} ");
                         lineBuilder.Append($"{scaledY} ");
                     }

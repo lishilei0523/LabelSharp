@@ -118,7 +118,7 @@ namespace LabelSharp.ViewModels.HomeContext
             }
             if (canvas.SelectedVisual is Shape shape)
             {
-                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
                 if (annotation != null)
                 {
                     annotation.Shape = shape;
@@ -230,7 +230,7 @@ namespace LabelSharp.ViewModels.HomeContext
             }
             if (canvas.SelectedVisual is Shape shape)
             {
-                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
                 if (annotation != null)
                 {
                     annotation.Shape = shape;
@@ -281,7 +281,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             #region # 验证
 
-            if (this.CurrentImage == null)
+            if (this.SelectedImageAnnotation == null)
             {
                 return;
             }
@@ -409,11 +409,11 @@ namespace LabelSharp.ViewModels.HomeContext
             if (this.CanvasMode != CanvasMode.Draw)
             {
                 Shape shape = (Shape)sender;
-                Annotation annotation = this.Annotations.SingleOrDefault(x => x.Shape == shape);
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
                 if (annotation != null)
                 {
-                    this.SelectedAnnotation = null;
-                    this.SelectedAnnotation = annotation;
+                    this.SelectedImageAnnotation.SelectedAnnotation = null;
+                    this.SelectedImageAnnotation.SelectedAnnotation = annotation;
                 }
             }
         }

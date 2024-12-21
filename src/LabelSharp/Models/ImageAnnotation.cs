@@ -30,6 +30,7 @@ namespace LabelSharp.Models
         /// <param name="imageName">图像名称</param>
         /// <param name="imageIndex">图像索引</param>
         public ImageAnnotation(BitmapSource image, string imagePath, string imageName, int imageIndex)
+            : this()
         {
             this.Image = image;
             this.ImagePath = imagePath;
@@ -72,6 +73,12 @@ namespace LabelSharp.Models
         /// </summary>
         [DependencyProperty]
         public ObservableCollection<ShapeL> ShapeLs { get; set; }
+
+        /// <summary>
+        /// 已选标注信息
+        /// </summary>
+        [DependencyProperty]
+        public Annotation SelectedAnnotation { get; set; }
 
         /// <summary>
         /// 标注信息列表

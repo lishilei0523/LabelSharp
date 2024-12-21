@@ -151,13 +151,14 @@
                               MouseHoverBorderEnabled="False" 
                               LeftTransition="Normal"
                               RightTransition="Normal"
-                              ItemsSource="{Binding ImagePaths}"
-                              SelectedItem="{Binding CurrentImagePath}"
+                              ItemsSource="{Binding ImageAnnotations}"
+                              SelectedItem="{Binding SelectedImageAnnotation}"
                               Background="{Binding BackgroundColor}"
                               cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                     <mah:FlipView.ItemTemplate>
                         <DataTemplate>
                             <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}"
+                                         ItemsSource="{Binding Shapes}"
                                          cm:Message.Attach="
                                          [Event MouseMove] = [Action OnMouseMove($source,$eventArgs)];
                                          [Event ElementDrag] = [Action OnDragElement($source)];
@@ -166,14 +167,14 @@
                                          [Event Drawing] = [Action OnDrawing($source)];
                                          [Event Drawn] = [Action OnDrawn($source)];">
                                 <sd:CanvasEx.BackgroundImage>
-                                    <Image Source="{Binding}" />
+                                    <Image Source="{Binding Image}" />
                                 </sd:CanvasEx.BackgroundImage>
                                 <!--水平参考线-->
                                 <Line Stroke="#96000000" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                       X1="0"
                                       Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
-                                      X2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CurrentImage.Width}"
+                                      X2="{Binding Image.Width}"
                                       Y2="{Binding RelativeSource={RelativeSource Self}, Path=Y1}"
                                       RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
@@ -183,7 +184,7 @@
                                       X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
                                       Y1="0"
                                       X2="{Binding RelativeSource={RelativeSource Self}, Path=X1}"
-                                      Y2="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CurrentImage.Height}"
+                                      Y2="{Binding Image.Height}"
                                       RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
                                       Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}" />
                             </sd:CanvasEx>
@@ -195,7 +196,7 @@
                             Style="{StaticResource TabControl.Styles.Document}"
                             ItemContainerStyle="{StaticResource TabControlItem.Styles.Document}">
                     <TabItem Header="标注信息">
-                        <ListBox ItemsSource="{Binding Annotations}" SelectedItem="{Binding SelectedAnnotation}"
+                        <ListBox ItemsSource="{Binding SelectedImageAnnotation.Annotations}" SelectedItem="{Binding SelectedImageAnnotation.SelectedAnnotation}"
                                  cm:Message.Attach="[Event SelectionChanged] = [Action OnAnnotationSelect()]">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
@@ -238,21 +239,21 @@
                         </ListBox>
                     </TabItem>
                     <TabItem Header="图像列表">
-                        <ListBox ItemsSource="{Binding ImagePaths}" SelectedItem="{Binding CurrentImagePath}"
+                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}"
                                  cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding}" />
+                                    <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding Image}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </TabItem>
                     <TabItem Header="文件列表">
-                        <ListBox ItemsSource="{Binding ImagePaths}" SelectedItem="{Binding CurrentImagePath}"
+                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}"
                                  cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Margin="5,10" Text="{Binding}" />
+                                    <TextBlock Margin="5,10" Text="{Binding ImageName}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
@@ -266,14 +267,14 @@
             <Grid>
                 <WrapPanel Margin="10,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <TextBlock Text="当前图像：" FontSize="12" />
-                    <TextBlock Text="{Binding CurrentImageName}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.ImageName}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="第" FontSize="12" />
-                    <TextBlock Text="{Binding CurrentImageIndex}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.ImageIndex}" FontSize="12" />
                     <TextBlock Text="张" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="共" FontSize="12" />
-                    <TextBlock Text="{Binding ImagePaths.Count}" FontSize="12" />
+                    <TextBlock Text="{Binding ImageAnnotations.Count}" FontSize="12" />
                     <TextBlock Text="张" FontSize="12" />
                 </WrapPanel>
                 <WrapPanel Margin="0,0,10,0" HorizontalAlignment="Right" VerticalAlignment="Center">
@@ -285,13 +286,13 @@
                     <TextBlock Text=")" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Pixel format: " FontSize="12" />
-                    <TextBlock Text="{Binding CurrentImage.Format}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Format}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Width: " FontSize="12" />
-                    <TextBlock Text="{Binding CurrentImage.Width}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Width}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Height: " FontSize="12" />
-                    <TextBlock Text="{Binding CurrentImage.Height}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Height}" FontSize="12" />
                 </WrapPanel>
             </Grid>
         </Border>

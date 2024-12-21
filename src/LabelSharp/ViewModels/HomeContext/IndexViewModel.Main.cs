@@ -403,7 +403,7 @@ namespace LabelSharp.ViewModels.HomeContext
             await this.SaveLabels(labelsPath);
 
             this.Idle();
-            this.ToastSuccess("保存成功！");
+            this.ToastSuccess("已保存！");
         }
         #endregion
 
@@ -458,7 +458,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         this.Labels.Add(viewModel.Label.Trim());
                     }
 
-                    this.ToastSuccess("修改成功！");
+                    this.Save();
                 }
             }
         }
@@ -479,7 +479,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Shapes.Remove(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Remove(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Remove(annotation);
-                    this.ToastSuccess("删除成功！");
+                    this.Save();
                 }
             }
         }
@@ -498,7 +498,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 if (!this.Labels.Contains(viewModel.Label.Trim()))
                 {
                     this.Labels.Add(viewModel.Label.Trim());
-                    this.ToastSuccess("创建成功！");
+                    this.Save();
                 }
                 else
                 {
@@ -541,7 +541,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 {
                     this.Labels.Add(annotation.Label.Trim());
                 }
-                this.ToastSuccess("创建成功！");
                 this.Save();
             }
             else
@@ -603,11 +602,11 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 鼠标移动事件 —— void OnMouseMove(CanvasEx canvasEx...
+        #region 画布鼠标移动事件 —— void OnCanvasMouseMove(CanvasEx canvasEx...
         /// <summary>
-        /// 鼠标移动事件
+        /// 画布鼠标移动事件
         /// </summary>
-        public void OnMouseMove(CanvasEx canvasEx, MouseEventArgs eventArgs)
+        public void OnCanvasMouseMove(CanvasEx canvasEx, MouseEventArgs eventArgs)
         {
             if (this.SelectedImageAnnotation != null)
             {
@@ -657,8 +656,11 @@ namespace LabelSharp.ViewModels.HomeContext
             if (this.SelectedImageAnnotation != null)
             {
                 this.SelectedImageAnnotation.Shapes.Clear();
+                this.SelectedImageAnnotation.Shapes = new ObservableCollection<Shape>();
                 this.SelectedImageAnnotation.ShapeLs.Clear();
+                this.SelectedImageAnnotation.ShapeLs = new ObservableCollection<ShapeL>();
                 this.SelectedImageAnnotation.Annotations.Clear();
+                this.SelectedImageAnnotation.Annotations = new ObservableCollection<Annotation>();
                 this.SelectedImageAnnotation.SelectedAnnotation = null;
             }
         }

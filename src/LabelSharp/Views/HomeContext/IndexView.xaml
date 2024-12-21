@@ -160,7 +160,7 @@
                             <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}"
                                          ItemsSource="{Binding Shapes}"
                                          cm:Message.Attach="
-                                         [Event MouseMove] = [Action OnMouseMove($source,$eventArgs)];
+                                         [Event MouseMove] = [Action OnCanvasMouseMove($source,$eventArgs)];
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
                                          [Event Draw] = [Action OnDraw($source)];

@@ -1,13 +1,11 @@
 ﻿using LabelSharp.Models;
 using SD.Infrastructure.Shapes;
-using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.CustomControls;
 using SD.Infrastructure.WPF.Enums;
 using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Visual2Ds;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -52,26 +50,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// 锚点集
         /// </summary>
         private IList<PointVisual2D> _polyAnchors;
-
-        #endregion
-
-        #region # 属性
-
-        #region 形状集 —— ObservableCollection<Shape> Shapes
-        /// <summary>
-        /// 形状集
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<Shape> Shapes { get; set; }
-        #endregion
-
-        #region 形状数据集 —— ObservableCollection<ShapeL> ShapeLs
-        /// <summary>
-        /// 形状数据集
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<ShapeL> ShapeLs { get; set; }
-        #endregion
 
         #endregion
 
@@ -327,8 +305,8 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this._line.Tag = lineL;
                 lineL.Tag = this._line;
-                this.ShapeLs.Add(lineL);
-                this.Shapes.Add(this._line);
+                this.SelectedImageAnnotation.ShapeLs.Add(lineL);
+                this.SelectedImageAnnotation.Shapes.Add(this._line);
                 this.OnDrawCompleted(this._line, lineL);
             }
             if (this._brush != null)
@@ -346,8 +324,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 PolylineL polylineL = new PolylineL(pointIs);
                 this._brush.Tag = polylineL;
                 polylineL.Tag = this._brush;
-                this.ShapeLs.Add(polylineL);
-                this.Shapes.Add(this._brush);
+                this.SelectedImageAnnotation.ShapeLs.Add(polylineL);
+                this.SelectedImageAnnotation.Shapes.Add(this._brush);
                 this.OnDrawCompleted(this._brush, polylineL);
             }
             if (this._rectangle != null)
@@ -360,8 +338,8 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this._rectangle.Tag = rectangleL;
                 rectangleL.Tag = this._rectangle;
-                this.ShapeLs.Add(rectangleL);
-                this.Shapes.Add(this._rectangle);
+                this.SelectedImageAnnotation.ShapeLs.Add(rectangleL);
+                this.SelectedImageAnnotation.Shapes.Add(this._rectangle);
                 this.OnDrawCompleted(this._rectangle, rectangleL);
             }
             if (this._circle != null)
@@ -373,8 +351,8 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this._circle.Tag = circleL;
                 circleL.Tag = this._circle;
-                this.ShapeLs.Add(circleL);
-                this.Shapes.Add(this._circle);
+                this.SelectedImageAnnotation.ShapeLs.Add(circleL);
+                this.SelectedImageAnnotation.Shapes.Add(this._circle);
                 this.OnDrawCompleted(this._circle, circleL);
             }
             if (this._ellipse != null)
@@ -387,8 +365,8 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this._ellipse.Tag = ellipseL;
                 ellipseL.Tag = this._ellipse;
-                this.ShapeLs.Add(ellipseL);
-                this.Shapes.Add(this._ellipse);
+                this.SelectedImageAnnotation.ShapeLs.Add(ellipseL);
+                this.SelectedImageAnnotation.Shapes.Add(this._ellipse);
                 this.OnDrawCompleted(this._ellipse, ellipseL);
             }
 
@@ -432,10 +410,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildPoint(PointVisual2D point, double leftMargin, double topMargin)
         {
             PointL pointL = (PointL)point.Tag;
-            int index = this.ShapeLs.IndexOf(pointL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(pointL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(pointL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(pointL);
 
                 int x = (int)Math.Ceiling(point.X + leftMargin);
                 int y = (int)Math.Ceiling(point.Y + topMargin);
@@ -443,7 +421,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 point.Tag = newPointL;
                 newPointL.Tag = point;
-                this.ShapeLs.Insert(index, newPointL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newPointL);
             }
         }
         #endregion
@@ -458,10 +436,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildLine(Line line, double leftMargin, double topMargin)
         {
             LineL lineL = (LineL)line.Tag;
-            int index = this.ShapeLs.IndexOf(lineL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(lineL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(lineL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(lineL);
 
                 int x1 = (int)Math.Ceiling(line.X1 + leftMargin);
                 int y1 = (int)Math.Ceiling(line.Y1 + topMargin);
@@ -471,7 +449,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 line.Tag = newLineL;
                 newLineL.Tag = line;
-                this.ShapeLs.Insert(index, newLineL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newLineL);
             }
         }
         #endregion
@@ -486,10 +464,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildRectangle(RectangleVisual2D rectangle, double leftMargin, double topMargin)
         {
             RectangleL rectangleL = (RectangleL)rectangle.Tag;
-            int index = this.ShapeLs.IndexOf(rectangleL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(rectangleL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(rectangleL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(rectangleL);
 
                 int x = (int)Math.Ceiling(rectangle.Location.X + leftMargin);
                 int y = (int)Math.Ceiling(rectangle.Location.Y + topMargin);
@@ -499,7 +477,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 rectangle.Tag = newRectangleL;
                 newRectangleL.Tag = rectangle;
-                this.ShapeLs.Insert(index, newRectangleL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newRectangleL);
             }
         }
         #endregion
@@ -514,10 +492,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildCircle(CircleVisual2D circle, double leftMargin, double topMargin)
         {
             CircleL circleL = (CircleL)circle.Tag;
-            int index = this.ShapeLs.IndexOf(circleL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(circleL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(circleL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(circleL);
 
                 int x = (int)Math.Ceiling(circle.Center.X + leftMargin);
                 int y = (int)Math.Ceiling(circle.Center.Y + topMargin);
@@ -526,7 +504,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 circle.Tag = newCircleL;
                 newCircleL.Tag = circle;
-                this.ShapeLs.Insert(index, newCircleL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newCircleL);
             }
         }
         #endregion
@@ -541,10 +519,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildEllipse(EllipseVisual2D ellipse, double leftMargin, double topMargin)
         {
             EllipseL ellipseL = (EllipseL)ellipse.Tag;
-            int index = this.ShapeLs.IndexOf(ellipseL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(ellipseL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(ellipseL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(ellipseL);
 
                 int x = (int)Math.Ceiling(ellipse.Center.X + leftMargin);
                 int y = (int)Math.Ceiling(ellipse.Center.Y + topMargin);
@@ -554,7 +532,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 ellipse.Tag = newEllipseL;
                 newEllipseL.Tag = ellipse;
-                this.ShapeLs.Insert(index, newEllipseL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newEllipseL);
             }
         }
         #endregion
@@ -569,10 +547,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildPolygon(Polygon polygon, double leftMargin, double topMargin)
         {
             PolygonL polygonL = (PolygonL)polygon.Tag;
-            int index = this.ShapeLs.IndexOf(polygonL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(polygonL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(polygonL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(polygonL);
 
                 IList<PointL> pointIs = new List<PointL>();
                 foreach (Point point in polygon.Points)
@@ -586,7 +564,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 polygon.Tag = newPolygonL;
                 newPolygonL.Tag = polygon;
-                this.ShapeLs.Insert(index, newPolygonL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newPolygonL);
             }
         }
         #endregion
@@ -601,10 +579,10 @@ namespace LabelSharp.ViewModels.HomeContext
         private void RebuildPolyline(Polyline polyline, double leftMargin, double topMargin)
         {
             PolylineL polylineL = (PolylineL)polyline.Tag;
-            int index = this.ShapeLs.IndexOf(polylineL);
+            int index = this.SelectedImageAnnotation.ShapeLs.IndexOf(polylineL);
             if (index != -1)
             {
-                this.ShapeLs.Remove(polylineL);
+                this.SelectedImageAnnotation.ShapeLs.Remove(polylineL);
 
                 IList<PointL> pointIs = new List<PointL>();
                 foreach (Point point in polyline.Points)
@@ -618,7 +596,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 polyline.Tag = newPolylineL;
                 newPolylineL.Tag = polyline;
-                this.ShapeLs.Insert(index, newPolylineL);
+                this.SelectedImageAnnotation.ShapeLs.Insert(index, newPolylineL);
             }
         }
         #endregion
@@ -646,8 +624,8 @@ namespace LabelSharp.ViewModels.HomeContext
             canvas.Children.Add(point);
 
             pointL.Tag = point;
-            this.ShapeLs.Add(pointL);
-            this.Shapes.Add(point);
+            this.SelectedImageAnnotation.ShapeLs.Add(pointL);
+            this.SelectedImageAnnotation.Shapes.Add(point);
             this.OnDrawCompleted(point, pointL);
             point.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
@@ -848,10 +826,8 @@ namespace LabelSharp.ViewModels.HomeContext
             };
 
             polygonL.Tag = polygon;
-            this.ShapeLs.Add(polygonL);
-            this.Shapes.Add(polygon);
-            canvas.Children.Add(polygon);
-            this.OnDrawCompleted(polygon, polygonL);
+            this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
+            this.SelectedImageAnnotation.Shapes.Add(polygon);
 
             //清空锚点
             foreach (PointVisual2D anchor in this._polyAnchors)
@@ -859,7 +835,10 @@ namespace LabelSharp.ViewModels.HomeContext
                 canvas.Children.Remove(anchor);
             }
             this._polyAnchors.Clear();
+
+            //事件处理
             polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+            this.OnDrawCompleted(polygon, polygonL);
         }
         #endregion
 
@@ -894,10 +873,8 @@ namespace LabelSharp.ViewModels.HomeContext
             };
 
             polylineL.Tag = polyline;
-            this.ShapeLs.Add(polylineL);
-            this.Shapes.Add(polyline);
-            canvas.Children.Add(polyline);
-            this.OnDrawCompleted(polyline, polylineL);
+            this.SelectedImageAnnotation.ShapeLs.Add(polylineL);
+            this.SelectedImageAnnotation.Shapes.Add(polyline);
 
             //清空锚点
             foreach (PointVisual2D anchor in this._polyAnchors)
@@ -905,7 +882,10 @@ namespace LabelSharp.ViewModels.HomeContext
                 canvas.Children.Remove(anchor);
             }
             this._polyAnchors.Clear();
+
+            //事件处理
             polyline.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+            this.OnDrawCompleted(polyline, polylineL);
         }
         #endregion
 

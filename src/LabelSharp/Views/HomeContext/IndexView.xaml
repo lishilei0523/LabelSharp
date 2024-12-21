@@ -167,7 +167,7 @@
                                          [Event Drawing] = [Action OnDrawing($source)];
                                          [Event Drawn] = [Action OnDrawn($source)];">
                                 <sd:CanvasEx.BackgroundImage>
-                                    <Image Source="{Binding Image}" />
+                                    <Image Source="{Binding ImagePath}" />
                                 </sd:CanvasEx.BackgroundImage>
                                 <!--水平参考线-->
                                 <Line Stroke="#96000000" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
@@ -243,7 +243,7 @@
                                  cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding Image}" />
+                                    <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding ImagePath}" />
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>

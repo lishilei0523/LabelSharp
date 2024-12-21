@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -25,14 +26,12 @@ namespace LabelSharp.Models
         /// <summary>
         /// 创建图像标注构造器
         /// </summary>
-        /// <param name="image">图像</param>
         /// <param name="imagePath">图像路径</param>
         /// <param name="imageName">图像名称</param>
         /// <param name="imageIndex">图像索引</param>
-        public ImageAnnotation(BitmapSource image, string imagePath, string imageName, int imageIndex)
+        public ImageAnnotation(string imagePath, string imageName, int imageIndex)
             : this()
         {
-            this.Image = image;
             this.ImagePath = imagePath;
             this.ImageName = imageName;
             this.ImageIndex = imageIndex;
@@ -41,8 +40,10 @@ namespace LabelSharp.Models
         /// <summary>
         /// 图像
         /// </summary>
-        [DependencyProperty]
-        public BitmapSource Image { get; set; }
+        public BitmapSource Image
+        {
+            get => new BitmapImage(new Uri(this.ImagePath));
+        }
 
         /// <summary>
         /// 图像路径

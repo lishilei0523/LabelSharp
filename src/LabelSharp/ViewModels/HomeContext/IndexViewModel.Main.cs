@@ -50,6 +50,17 @@ namespace LabelSharp.ViewModels.HomeContext
         private static readonly string[] _AvailableImageFormats = { ".jpg", ".jpeg", ".png", ".bmp" };
 
         /// <summary>
+        /// 标注格式扩展名字典
+        /// </summary>
+        private static readonly IDictionary<AnnotationFormat, string> _AnnotationExtensions =
+            new Dictionary<AnnotationFormat, string>
+            {
+                { AnnotationFormat.PascalVoc, "(*.xml)|*.xml" },
+                { AnnotationFormat.Coco, "(*.json)|*.json" },
+                { AnnotationFormat.Yolo, "(*.txt)|*.txt" },
+            };
+
+        /// <summary>
         /// 窗体管理器
         /// </summary>
         private readonly IWindowManager _windowManager;
@@ -336,19 +347,20 @@ namespace LabelSharp.ViewModels.HomeContext
                 #endregion
 
                 this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
-                for (int index = 0; index < imagePaths.Length; index++)
+                int sort = 1;
+                foreach (string imagePath in imagePaths)
                 {
-                    string imagePath = imagePaths[index];
                     string fileExtension = Path.GetExtension(imagePath);
                     if (_AvailableImageFormats.Contains(fileExtension))
                     {
                         string imageName = Path.GetFileName(imagePath);
-                        ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, index + 1);
+                        ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, sort);
                         this.ImageAnnotations.Add(imageAnnotation);
                         if (this.SelectedImageAnnotation == null)
                         {
                             this.SelectedImageAnnotation = imageAnnotation;
                         }
+                        sort++;
                     }
                 }
 
@@ -655,11 +667,8 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (this.SelectedImageAnnotation != null)
             {
-                this.SelectedImageAnnotation.Shapes.Clear();
                 this.SelectedImageAnnotation.Shapes = new ObservableCollection<Shape>();
-                this.SelectedImageAnnotation.ShapeLs.Clear();
                 this.SelectedImageAnnotation.ShapeLs = new ObservableCollection<ShapeL>();
-                this.SelectedImageAnnotation.Annotations.Clear();
                 this.SelectedImageAnnotation.Annotations = new ObservableCollection<Annotation>();
                 this.SelectedImageAnnotation.SelectedAnnotation = null;
             }

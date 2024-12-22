@@ -6,13 +6,15 @@ using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace LabelSharp.Models
+namespace LabelSharp.Presentation.Models
 {
     /// <summary>
     /// 图像标注
     /// </summary>
     public class ImageAnnotation : PropertyChangedBase
     {
+        #region # 字段及构造器
+
         /// <summary>
         /// 无参构造器
         /// </summary>
@@ -37,54 +39,76 @@ namespace LabelSharp.Models
             this.ImageIndex = imageIndex;
         }
 
-        /// <summary>
-        /// 图像
-        /// </summary>
-        public BitmapSource Image
-        {
-            get => new BitmapImage(new Uri(this.ImagePath));
-        }
+        #endregion
 
+        #region # 属性
+
+        #region 图像路径 —— string ImagePath
         /// <summary>
         /// 图像路径
         /// </summary>
         [DependencyProperty]
         public string ImagePath { get; set; }
+        #endregion
 
+        #region 图像名称 —— string ImageName
         /// <summary>
         /// 图像名称
         /// </summary>
         [DependencyProperty]
         public string ImageName { get; set; }
+        #endregion
 
+        #region 图像索引 —— int ImageIndex
         /// <summary>
         /// 图像索引
         /// </summary>
         [DependencyProperty]
         public int ImageIndex { get; set; }
+        #endregion
 
+        #region 形状列表 —— ObservableCollection<Shape> Shapes
         /// <summary>
-        /// 形状集
+        /// 形状列表
         /// </summary>
         [DependencyProperty]
         public ObservableCollection<Shape> Shapes { get; set; }
+        #endregion
 
+        #region 形状数据列表 —— ObservableCollection<ShapeL> ShapeLs
         /// <summary>
-        /// 形状数据集
+        /// 形状数据列表
         /// </summary>
         [DependencyProperty]
         public ObservableCollection<ShapeL> ShapeLs { get; set; }
+        #endregion
 
+        #region 已选标注信息 —— Annotation SelectedAnnotation
         /// <summary>
         /// 已选标注信息
         /// </summary>
         [DependencyProperty]
         public Annotation SelectedAnnotation { get; set; }
+        #endregion
 
+        #region 标注信息列表 —— ObservableCollection<Annotation> Annotations
         /// <summary>
         /// 标注信息列表
         /// </summary>
         [DependencyProperty]
         public ObservableCollection<Annotation> Annotations { get; set; }
+        #endregion
+
+        #region 只读属性 - 图像 —— BitmapSource Image
+        /// <summary>
+        /// 只读属性 - 图像
+        /// </summary>
+        public BitmapSource Image
+        {
+            get => new BitmapImage(new Uri(this.ImagePath));
+        }
+        #endregion 
+
+        #endregion
     }
 }

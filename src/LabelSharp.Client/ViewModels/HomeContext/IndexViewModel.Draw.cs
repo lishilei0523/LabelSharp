@@ -1,4 +1,4 @@
-﻿using LabelSharp.Models;
+﻿using LabelSharp.Presentation.Models;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.CustomControls;
 using SD.Infrastructure.WPF.Enums;

@@ -32,6 +32,14 @@ namespace LabelSharp.ViewModels.AnnotationContext
         public string Label { get; set; }
         #endregion
 
+        #region 分组Id —— int? GroupId
+        /// <summary>
+        /// 分组Id
+        /// </summary>
+        [DependencyProperty]
+        public int? GroupId { get; set; }
+        #endregion
+
         #region 是否截断 —— bool Truncated
         /// <summary>
         /// 是否截断
@@ -47,6 +55,14 @@ namespace LabelSharp.ViewModels.AnnotationContext
         [DependencyProperty]
         public bool Difficult { get; set; }
         #endregion
+
+        #region 描述 —— string Description
+        /// <summary>
+        /// 描述
+        /// </summary>
+        [DependencyProperty]
+        public string Description { get; set; }
+        #endregion 
 
         #region 标签列表 —— ObservableCollection<string> Labels
         /// <summary>
@@ -65,14 +81,18 @@ namespace LabelSharp.ViewModels.AnnotationContext
         /// 加载
         /// </summary>
         /// <param name="label">标签</param>
+        /// <param name="groupId">分组Id</param>
         /// <param name="truncated">是否截断</param>
         /// <param name="difficult">是否困难</param>
+        /// <param name="description">描述</param>
         /// <param name="labels">标签列表</param>
-        public void Load(string label, bool truncated, bool difficult, ObservableCollection<string> labels)
+        public void Load(string label, int? groupId, bool truncated, bool difficult, string description, ObservableCollection<string> labels)
         {
             this.Label = label;
+            this.GroupId = groupId;
             this.Truncated = truncated;
             this.Difficult = difficult;
+            this.Description = description;
             this.Labels = labels;
         }
         #endregion

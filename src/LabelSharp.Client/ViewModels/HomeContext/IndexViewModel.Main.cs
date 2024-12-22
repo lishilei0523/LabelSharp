@@ -1,5 +1,5 @@
 ﻿using Caliburn.Micro;
-using LabelSharp.Models;
+using LabelSharp.Presentation.Models;
 using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
@@ -441,7 +441,7 @@ namespace LabelSharp.ViewModels.HomeContext
             if (annotation != null)
             {
                 LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
-                viewModel.Load(annotation.Label.Trim(), annotation.Truncated, annotation.Difficult, annotation.ShapeL);
+                viewModel.Load(annotation.Label.Trim(), annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.ShapeL, annotation.Description);
                 await this._windowManager.ShowDialogAsync(viewModel);
             }
         }
@@ -457,13 +457,15 @@ namespace LabelSharp.ViewModels.HomeContext
             if (annotation != null)
             {
                 UpdateViewModel viewModel = ResolveMediator.Resolve<UpdateViewModel>();
-                viewModel.Load(annotation.Label, annotation.Truncated, annotation.Difficult, this.Labels);
+                viewModel.Load(annotation.Label, annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.Description, this.Labels);
                 bool? result = await this._windowManager.ShowDialogAsync(viewModel);
                 if (result == true)
                 {
                     annotation.Label = viewModel.Label.Trim();
+                    annotation.GroupId = viewModel.GroupId;
                     annotation.Truncated = viewModel.Truncated;
                     annotation.Difficult = viewModel.Difficult;
+                    annotation.Description = viewModel.Description;
                     if (!this.Labels.Contains(viewModel.Label.Trim()))
                     {
                         this.Labels.Add(viewModel.Label.Trim());
@@ -546,7 +548,7 @@ namespace LabelSharp.ViewModels.HomeContext
             bool? result = await this._windowManager.ShowDialogAsync(viewModel);
             if (result == true)
             {
-                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.Truncated, viewModel.Difficult, shape);
+                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shape, viewModel.Description);
                 this.SelectedImageAnnotation.Annotations.Add(annotation);
                 if (!this.Labels.Contains(annotation.Label.Trim()))
                 {
@@ -711,7 +713,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     rectangleL.Tag = rectangle;
                     rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
 
-                    Annotation annotation = new Annotation(label, false, false, rectangle);
+                    Annotation annotation = new Annotation(label, null, false, false, rectangle, string.Empty);
 
                     this.SelectedImageAnnotation.ShapeLs.Add(rectangleL);
                     this.SelectedImageAnnotation.Shapes.Add(rectangle);
@@ -753,7 +755,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     polygonL.Tag = polygon;
                     polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
 
-                    Annotation annotation = new Annotation(label, false, false, polygon);
+                    Annotation annotation = new Annotation(label, null, false, false, polygon, string.Empty);
 
                     this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
                     this.SelectedImageAnnotation.Shapes.Add(polygon);

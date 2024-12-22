@@ -1,4 +1,4 @@
-﻿<mah:MetroWindow x:Class="LabelSharp.Views.AnnotationContext.UpdateView"
+﻿<mah:MetroWindow x:Class="LabelSharp.Views.AnnotationContext.AddView"
                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,8 +7,8 @@
                  xmlns:cm="http://www.caliburnproject.org"
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
-                 Title="修改标注信息"
-                 Width="500" Height="320" ResizeMode="NoResize"
+                 Title="新建标注信息"
+                 Width="500" Height="450" ResizeMode="NoResize"
                  FontSize="14"
                  WindowStartupLocation="CenterOwner"
                  Style="{StaticResource MetroWindow.Styles.Clean}">
@@ -16,7 +16,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <!--表单区-->
-            <RowDefinition Height="220" />
+            <RowDefinition Height="350" />
             <!--占位区-->
             <RowDefinition Height="*" />
             <!--控制区-->
@@ -30,11 +30,25 @@
                           IsEditable="True"
                           Style="{StaticResource ComboBox.Styles.Fluent}" />
             </sd:FormItem>
+            <sd:FormItem Label="分组ID：">
+                <mah:NumericUpDown Minimum="0" Maximum="100"
+                                   Padding="-45,0,0,0"
+                                   Value="{Binding GroupId, UpdateSourceTrigger=PropertyChanged}"
+                                   Style="{StaticResource NumericUpDown.Styles.Fluent}" />
+            </sd:FormItem>
             <sd:FormItem Label="是否截断：">
                 <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
             </sd:FormItem>
             <sd:FormItem Label="是否困难：">
                 <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
+            </sd:FormItem>
+            <sd:FormItem Label="描述：">
+                <TextBox Text="{Binding Description}"
+                         Height="80"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         Style="{StaticResource TextBoxRevealStyle}" />
             </sd:FormItem>
         </StackPanel>
         <!--占位区-->

@@ -18,8 +18,10 @@ namespace LabelSharp.ViewModels.AnnotationContext
         public AddViewModel()
         {
             //默认值
+            this.GroupId = null;
             this.Truncated = false;
             this.Difficult = false;
+            this.Description = string.Empty;
         }
 
         #endregion
@@ -32,6 +34,14 @@ namespace LabelSharp.ViewModels.AnnotationContext
         /// </summary>
         [DependencyProperty]
         public string Label { get; set; }
+        #endregion
+
+        #region 分组Id —— int? GroupId
+        /// <summary>
+        /// 分组Id
+        /// </summary>
+        [DependencyProperty]
+        public int? GroupId { get; set; }
         #endregion
 
         #region 是否截断 —— bool Truncated
@@ -49,6 +59,14 @@ namespace LabelSharp.ViewModels.AnnotationContext
         [DependencyProperty]
         public bool Difficult { get; set; }
         #endregion
+
+        #region 描述 —— string Description
+        /// <summary>
+        /// 描述
+        /// </summary>
+        [DependencyProperty]
+        public string Description { get; set; }
+        #endregion 
 
         #region 标签列表 —— ObservableCollection<string> Labels
         /// <summary>

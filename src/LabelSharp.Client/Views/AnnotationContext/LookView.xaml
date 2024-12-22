@@ -8,7 +8,7 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  mc:Ignorable="d"
                  Title="查看标注信息"
-                 Width="500" Height="420" ResizeMode="NoResize"
+                 Width="500" Height="550" ResizeMode="NoResize"
                  FontSize="14"
                  WindowStartupLocation="CenterOwner"
                  Style="{StaticResource MetroWindow.Styles.Clean}">
@@ -16,7 +16,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <!--表单区-->
-            <RowDefinition Height="320" />
+            <RowDefinition Height="450" />
             <!--占位区-->
             <RowDefinition Height="*" />
             <!--控制区-->
@@ -27,6 +27,9 @@
             <sd:FormItem Label="标签：">
                 <TextBox Text="{Binding Label}" IsReadOnly="True" Style="{StaticResource TextBoxRevealStyle}" />
             </sd:FormItem>
+            <sd:FormItem Label="分组ID：">
+                <TextBox Text="{Binding GroupId}" IsReadOnly="True" Style="{StaticResource TextBoxRevealStyle}" />
+            </sd:FormItem>
             <sd:FormItem Label="是否截断：">
                 <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
             </sd:FormItem>
@@ -35,6 +38,15 @@
             </sd:FormItem>
             <sd:FormItem Label="形状数据：">
                 <TextBox Text="{Binding ShapeL.Text, Mode=OneWay}"
+                         Height="80"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         VerticalScrollBarVisibility="Auto"
+                         IsReadOnly="True"
+                         Style="{StaticResource TextBoxRevealStyle}" />
+            </sd:FormItem>
+            <sd:FormItem Label="描述：">
+                <TextBox Text="{Binding Description}"
                          Height="80"
                          TextWrapping="Wrap"
                          AcceptsReturn="True"

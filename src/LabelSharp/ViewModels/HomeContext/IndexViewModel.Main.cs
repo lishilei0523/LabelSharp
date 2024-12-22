@@ -211,6 +211,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             //默认值
             this._polyAnchors = new List<PointVisual2D>();
+            this._polyAnchorLines = new List<Line>();
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
             this.BorderColor = Colors.Red;
             this.BorderThickness = 2;

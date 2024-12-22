@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -50,6 +51,11 @@ namespace LabelSharp.ViewModels.HomeContext
         /// 锚点集
         /// </summary>
         private IList<PointVisual2D> _polyAnchors;
+
+        /// <summary>
+        /// 锚线集
+        /// </summary>
+        private IList<Line> _polyAnchorLines;
 
         #endregion
 
@@ -788,8 +794,31 @@ namespace LabelSharp.ViewModels.HomeContext
                 Stroke = borderBrush,
                 RenderTransform = canvas.MatrixTransform
             };
-            canvas.Children.Add(anchor);
+
+            if (this._polyAnchors.Any())
+            {
+                PointVisual2D lastAnchor = this._polyAnchors.Last();
+                Line polyAnchorLine = new Line
+                {
+                    X1 = lastAnchor.X,
+                    Y1 = lastAnchor.Y,
+                    X2 = anchor.X,
+                    Y2 = anchor.Y,
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
+                    StrokeThickness = this.BorderThickness!.Value,
+                    RenderTransform = canvas.MatrixTransform
+                };
+                this._polyAnchorLines.Add(polyAnchorLine);
+                canvas.Children.Add(polyAnchorLine);
+            }
+            else
+            {
+                Panel.SetZIndex(anchor, int.MaxValue);
+            }
+
             this._polyAnchors.Add(anchor);
+            canvas.Children.Add(anchor);
         }
         #endregion
 
@@ -830,12 +859,17 @@ namespace LabelSharp.ViewModels.HomeContext
             this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
             this.SelectedImageAnnotation.Shapes.Add(polygon);
 
-            //清空锚点
+            //清空锚点、锚线
             foreach (PointVisual2D anchor in this._polyAnchors)
             {
                 canvas.Children.Remove(anchor);
             }
+            foreach (Line anchorLine in this._polyAnchorLines)
+            {
+                canvas.Children.Remove(anchorLine);
+            }
             this._polyAnchors.Clear();
+            this._polyAnchorLines.Clear();
 
             //事件处理
             polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
@@ -877,12 +911,17 @@ namespace LabelSharp.ViewModels.HomeContext
             this.SelectedImageAnnotation.ShapeLs.Add(polylineL);
             this.SelectedImageAnnotation.Shapes.Add(polyline);
 
-            //清空锚点
+            //清空锚点、锚线
             foreach (PointVisual2D anchor in this._polyAnchors)
             {
                 canvas.Children.Remove(anchor);
             }
+            foreach (Line anchorLine in this._polyAnchorLines)
+            {
+                canvas.Children.Remove(anchorLine);
+            }
             this._polyAnchors.Clear();
+            this._polyAnchorLines.Clear();
 
             //事件处理
             polyline.MouseLeftButtonDown += this.OnShapeMouseLeftDown;

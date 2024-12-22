@@ -9,7 +9,6 @@ using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
-using SD.Infrastructure.WPF.CustomControls;
 using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Visual2Ds;
 using SD.IOC.Core.Mediators;
@@ -612,31 +611,6 @@ namespace LabelSharp.ViewModels.HomeContext
         public void OnAnnotationUncheck(Annotation annotation)
         {
             annotation.Shape.Visibility = Visibility.Collapsed;
-        }
-        #endregion
-
-        #region 画布鼠标移动事件 —— void OnCanvasMouseMove(CanvasEx canvasEx...
-        /// <summary>
-        /// 画布鼠标移动事件
-        /// </summary>
-        public void OnCanvasMouseMove(CanvasEx canvasEx, MouseEventArgs eventArgs)
-        {
-            if (this.SelectedImageAnnotation != null)
-            {
-                Point position = eventArgs.GetPosition(canvasEx);
-                Point rectifiedPosition = canvasEx.MatrixTransform.Inverse!.Transform(position);
-                this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
-                this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
-
-                //参考线坐标调整
-                BitmapSource currentImage = this.SelectedImageAnnotation.Image;
-                this.HorizontalLineY = rectifiedPosition.Y > currentImage.Height
-                    ? currentImage.Height
-                    : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
-                this.VerticalLineX = rectifiedPosition.X > currentImage.Width
-                    ? currentImage.Width
-                    : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
-            }
         }
         #endregion
 

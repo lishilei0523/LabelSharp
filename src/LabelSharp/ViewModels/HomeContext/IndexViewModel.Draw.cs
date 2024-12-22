@@ -11,6 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
 namespace LabelSharp.ViewModels.HomeContext
@@ -46,6 +47,11 @@ namespace LabelSharp.ViewModels.HomeContext
         /// 椭圆形
         /// </summary>
         private EllipseVisual2D _ellipse;
+
+        /// <summary>
+        /// 锚线
+        /// </summary>
+        private Line _polyAnchorLine;
 
         /// <summary>
         /// 锚点集
@@ -399,6 +405,53 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.SelectedAnnotation = null;
                     this.SelectedImageAnnotation.SelectedAnnotation = annotation;
                 }
+            }
+        }
+        #endregion
+
+        #region 画布鼠标移动事件 —— void OnCanvasMouseMove(CanvasEx canvas...
+        /// <summary>
+        /// 画布鼠标移动事件
+        /// </summary>
+        public void OnCanvasMouseMove(CanvasEx canvas, MouseEventArgs eventArgs)
+        {
+            //十字参考线
+            if (this.SelectedImageAnnotation != null)
+            {
+                Point position = eventArgs.GetPosition(canvas);
+                Point rectifiedPosition = canvas.MatrixTransform.Inverse!.Transform(position);
+                this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
+                this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
+
+                //参考线坐标调整
+                BitmapSource currentImage = this.SelectedImageAnnotation.Image;
+                this.HorizontalLineY = rectifiedPosition.Y > currentImage.Height
+                    ? currentImage.Height
+                    : rectifiedPosition.Y < 0 ? 0 : rectifiedPosition.Y;
+                this.VerticalLineX = rectifiedPosition.X > currentImage.Width
+                    ? currentImage.Width
+                    : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
+            }
+            //实时锚线
+            if (this._polyAnchors.Any())
+            {
+                if (this._polyAnchorLine == null)
+                {
+                    this._polyAnchorLine = new Line
+                    {
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
+                        StrokeThickness = this.BorderThickness!.Value,
+                        RenderTransform = canvas.MatrixTransform
+                    };
+                    canvas.Children.Add(this._polyAnchorLine);
+                }
+                PointVisual2D startPoint = this._polyAnchors.Last();
+                Point endPoint = canvas.RectifiedMousePosition!.Value;
+                this._polyAnchorLine.X1 = startPoint.X;
+                this._polyAnchorLine.Y1 = startPoint.Y;
+                this._polyAnchorLine.X2 = endPoint.X;
+                this._polyAnchorLine.Y2 = endPoint.Y;
             }
         }
         #endregion
@@ -814,7 +867,7 @@ namespace LabelSharp.ViewModels.HomeContext
             }
             else
             {
-                Panel.SetZIndex(anchor, int.MaxValue);
+                Panel.SetZIndex(anchor, short.MaxValue);
             }
 
             this._polyAnchors.Add(anchor);
@@ -868,6 +921,11 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 canvas.Children.Remove(anchorLine);
             }
+            if (this._polyAnchorLine != null)
+            {
+                canvas.Children.Remove(this._polyAnchorLine);
+                this._polyAnchorLine = null;
+            }
             this._polyAnchors.Clear();
             this._polyAnchorLines.Clear();
 
@@ -919,6 +977,11 @@ namespace LabelSharp.ViewModels.HomeContext
             foreach (Line anchorLine in this._polyAnchorLines)
             {
                 canvas.Children.Remove(anchorLine);
+            }
+            if (this._polyAnchorLine != null)
+            {
+                canvas.Children.Remove(this._polyAnchorLine);
+                this._polyAnchorLine = null;
             }
             this._polyAnchors.Clear();
             this._polyAnchorLines.Clear();

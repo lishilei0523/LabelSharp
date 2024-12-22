@@ -4,16 +4,16 @@ using System.Text.Json.Serialization;
 namespace LabelSharp.Presentation.Models
 {
     /// <summary>
-    /// COCO标注
+    /// LabelMe标注
     /// </summary>
-    public class CocoAnnotation
+    public class MeAnnotation
     {
         #region # 字段及构造器
 
         /// <summary>
         /// 无参构造器
         /// </summary>
-        public CocoAnnotation()
+        public MeAnnotation()
         {
             this.Version = "2.4.4";
             this.Flags = new Dictionary<string, string>();
@@ -22,13 +22,13 @@ namespace LabelSharp.Presentation.Models
         }
 
         /// <summary>
-        /// 创建COCO标注构造器
+        /// 创建LabelMe标注构造器
         /// </summary>
         /// <param name="imagePath">图像路径</param>
         /// <param name="imageWidth">图像宽度</param>
         /// <param name="imageHeight">图像高度</param>
-        /// <param name="shapes">COCO形状列表</param>
-        public CocoAnnotation(string imagePath, int imageWidth, int imageHeight, IList<CocoShape> shapes)
+        /// <param name="shapes">LabelMe形状列表</param>
+        public MeAnnotation(string imagePath, int imageWidth, int imageHeight, IList<MeShape> shapes)
             : this()
         {
             this.ImagePath = imagePath;
@@ -57,12 +57,12 @@ namespace LabelSharp.Presentation.Models
         public IDictionary<string, string> Flags { get; set; }
         #endregion
 
-        #region 形状列表 —— IList<CocoShape> Shapes
+        #region 形状列表 —— IList<MeShape> Shapes
         /// <summary>
         /// 形状列表
         /// </summary>
         [JsonPropertyName("shapes")]
-        public IList<CocoShape> Shapes { get; set; }
+        public IList<MeShape> Shapes { get; set; }
         #endregion
 
         #region 图像路径 —— string ImagePath

@@ -16,178 +16,177 @@ namespace LabelSharp.Presentation.Maps
         {
             if (shapeL is PointL)
             {
-                return "point";
+                return Constants.MePoint;
             }
             if (shapeL is LineL)
             {
-                return "line";
+                return Constants.MeLine;
             }
             if (shapeL is RectangleL)
             {
-                return "rectangle";
-            }
-            if (shapeL is RotatedRectangleL)
-            {
-                return "rotation";
+                return Constants.MeRectangle;
             }
             if (shapeL is CircleL)
             {
-                return "circle";
+                return Constants.MeCircle;
+            }
+            if (shapeL is EllipseL)
+            {
+                return Constants.MeEllipse;
             }
             if (shapeL is PolygonL)
             {
-                return "polygon";
+                return Constants.MePolygon;
             }
             if (shapeL is PolylineL)
             {
-                return "linestrip";
+                return Constants.MePolyline;
             }
 
             return string.Empty;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this ShapeL shapeL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this ShapeL shapeL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this ShapeL shapeL)
+        public static IList<double[]> ToMePoints(this ShapeL shapeL)
         {
             if (shapeL is PointL pointL)
             {
-                return pointL.ToCocoPoints();
+                return pointL.ToMePoints();
             }
             if (shapeL is LineL lineL)
             {
-                return lineL.ToCocoPoints();
+                return lineL.ToMePoints();
             }
             if (shapeL is RectangleL rectangleL)
             {
-                return rectangleL.ToCocoPoints();
-            }
-            if (shapeL is RotatedRectangleL rotatedRectangleL)
-            {
-                return rotatedRectangleL.ToCocoPoints();
+                return rectangleL.ToMePoints();
             }
             if (shapeL is CircleL circleL)
             {
-                return circleL.ToCocoPoints();
+                return circleL.ToMePoints();
+            }
+            if (shapeL is EllipseL ellipseL)
+            {
+                return ellipseL.ToMePoints();
             }
             if (shapeL is PolygonL polygonL)
             {
-                return polygonL.ToCocoPoints();
+                return polygonL.ToMePoints();
             }
             if (shapeL is PolylineL polylineL)
             {
-                return polylineL.ToCocoPoints();
+                return polylineL.ToMePoints();
             }
 
-            return new List<float[]>();
+            return new List<double[]>();
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this PointL pointL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this PointL pointL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this PointL pointL)
+        public static IList<double[]> ToMePoints(this PointL pointL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
-            cocoPoints.Add(new[] { (float)pointL.X, (float)pointL.Y });
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)pointL.X, (double)pointL.Y });
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this LineL lineL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this LineL lineL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this LineL lineL)
+        public static IList<double[]> ToMePoints(this LineL lineL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
-            cocoPoints.Add(new[] { (float)lineL.A.X, (float)lineL.A.Y });
-            cocoPoints.Add(new[] { (float)lineL.B.X, (float)lineL.B.Y });
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)lineL.A.X, (double)lineL.A.Y });
+            mePoints.Add(new[] { (double)lineL.B.X, (double)lineL.B.Y });
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this RectangleL rectangleL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this RectangleL rectangleL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this RectangleL rectangleL)
+        public static IList<double[]> ToMePoints(this RectangleL rectangleL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
-            cocoPoints.Add(new[] { (float)rectangleL.TopLeft.X, (float)rectangleL.TopLeft.Y });
-            cocoPoints.Add(new[] { (float)rectangleL.TopRight.X, (float)rectangleL.TopRight.Y });
-            cocoPoints.Add(new[] { (float)rectangleL.BottomRight.X, (float)rectangleL.BottomRight.Y });
-            cocoPoints.Add(new[] { (float)rectangleL.BottomLeft.X, (float)rectangleL.BottomLeft.Y });
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)rectangleL.TopLeft.X, (double)rectangleL.TopLeft.Y });
+            mePoints.Add(new[] { (double)rectangleL.TopRight.X, (double)rectangleL.TopRight.Y });
+            mePoints.Add(new[] { (double)rectangleL.BottomRight.X, (double)rectangleL.BottomRight.Y });
+            mePoints.Add(new[] { (double)rectangleL.BottomLeft.X, (double)rectangleL.BottomLeft.Y });
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this RotatedRectangleL rotatedRectangleL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this CircleL circleL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this RotatedRectangleL rotatedRectangleL)
+        public static IList<double[]> ToMePoints(this CircleL circleL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
-            cocoPoints.Add(new[] { (float)rotatedRectangleL.TopLeft.X, (float)rotatedRectangleL.TopLeft.Y });
-            cocoPoints.Add(new[] { (float)rotatedRectangleL.TopRight.X, (float)rotatedRectangleL.TopRight.Y });
-            cocoPoints.Add(new[] { (float)rotatedRectangleL.BottomRight.X, (float)rotatedRectangleL.BottomRight.Y });
-            cocoPoints.Add(new[] { (float)rotatedRectangleL.BottomLeft.X, (float)rotatedRectangleL.BottomLeft.Y });
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)circleL.X, (double)circleL.Y });
+            mePoints.Add(new[] { (double)(circleL.X + (double)circleL.Radius), (double)circleL.Y });
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this CircleL circleL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this EllipseL ellipseL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this CircleL circleL)
+        public static IList<double[]> ToMePoints(this EllipseL ellipseL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
-            cocoPoints.Add(new[] { (float)circleL.X, (float)circleL.Y });
-            cocoPoints.Add(new[] { (float)(circleL.X + circleL.Radius), (float)circleL.Y });
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)ellipseL.X, (double)ellipseL.Y });
+            mePoints.Add(new[] { (double)ellipseL.X + (double)ellipseL.RadiusX, (double)ellipseL.Y });
+            mePoints.Add(new[] { (double)ellipseL.X, (double)ellipseL.Y + (double)ellipseL.RadiusY });
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this PolygonL polygonL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this PolygonL polygonL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this PolygonL polygonL)
+        public static IList<double[]> ToMePoints(this PolygonL polygonL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
+            IList<double[]> mePoints = new List<double[]>();
             foreach (PointL pointL in polygonL.Points)
             {
-                cocoPoints.Add(new[] { (float)pointL.X, (float)pointL.Y });
+                mePoints.Add(new[] { (double)pointL.X, (double)pointL.Y });
             }
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
 
-        #region # 转换COCO点集 —— static IList<float[]> ToCocoPoints(this PolylineL polylineL)
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this PolylineL polylineL)
         /// <summary>
-        /// 转换COCO点集
+        /// 映射LabelMe点集
         /// </summary>
-        public static IList<float[]> ToCocoPoints(this PolylineL polylineL)
+        public static IList<double[]> ToMePoints(this PolylineL polylineL)
         {
-            IList<float[]> cocoPoints = new List<float[]>();
+            IList<double[]> mePoints = new List<double[]>();
             foreach (PointL pointL in polylineL.Points)
             {
-                cocoPoints.Add(new[] { (float)pointL.X, (float)pointL.Y });
+                mePoints.Add(new[] { (double)pointL.X, (double)pointL.Y });
             }
 
-            return cocoPoints;
+            return mePoints;
         }
         #endregion
     }

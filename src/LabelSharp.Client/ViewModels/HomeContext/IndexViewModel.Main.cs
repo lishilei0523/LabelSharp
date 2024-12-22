@@ -5,7 +5,6 @@ using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OpenCvSharp;
-using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
@@ -41,22 +40,6 @@ namespace LabelSharp.ViewModels.HomeContext
     public partial class IndexViewModel : ScreenBase
     {
         #region # 字段及构造器
-
-        /// <summary>
-        /// 可用图像格式列表
-        /// </summary>
-        private static readonly string[] _AvailableImageFormats = { ".jpg", ".jpeg", ".png", ".bmp" };
-
-        /// <summary>
-        /// 标注格式扩展名字典
-        /// </summary>
-        private static readonly IDictionary<AnnotationFormat, string> _AnnotationExtensions =
-            new Dictionary<AnnotationFormat, string>
-            {
-                { AnnotationFormat.PascalVoc, "(*.xml)|*.xml" },
-                { AnnotationFormat.Coco, "(*.json)|*.json" },
-                { AnnotationFormat.Yolo, "(*.txt)|*.txt" },
-            };
 
         /// <summary>
         /// 窗体管理器
@@ -179,22 +162,6 @@ namespace LabelSharp.ViewModels.HomeContext
         public ObservableCollection<string> Labels { get; set; }
         #endregion
 
-        #region 已选标注格式 —— AnnotationFormat SelectedAnnotationFormat
-        /// <summary>
-        /// 已选标注格式
-        /// </summary>
-        [DependencyProperty]
-        public AnnotationFormat SelectedAnnotationFormat { get; set; }
-        #endregion
-
-        #region 标注格式字典 —— IDictionary<string, string> AnnotationFormats
-        /// <summary>
-        /// 标注格式字典
-        /// </summary>
-        [DependencyProperty]
-        public IDictionary<string, string> AnnotationFormats { get; set; }
-        #endregion
-
         #endregion
 
         #region # 方法
@@ -216,8 +183,6 @@ namespace LabelSharp.ViewModels.HomeContext
             this.ShowGuideLines = true;
             this.GuideLinesVisibility = Visibility.Visible;
             this.ScaleChecked = true;
-            this.SelectedAnnotationFormat = AnnotationFormat.Yolo;
-            this.AnnotationFormats = typeof(AnnotationFormat).GetEnumMembers();
             this.Labels = new ObservableCollection<string>();
 
             return base.OnInitializeAsync(cancellationToken);
@@ -350,7 +315,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 foreach (string imagePath in imagePaths)
                 {
                     string fileExtension = Path.GetExtension(imagePath);
-                    if (_AvailableImageFormats.Contains(fileExtension))
+                    if (Constants.AvailableImageFormats.Contains(fileExtension))
                     {
                         string imageName = Path.GetFileName(imagePath);
                         ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, sort);
@@ -403,11 +368,8 @@ namespace LabelSharp.ViewModels.HomeContext
             this.Busy();
 
             //保存YOLO格式
-            if (this.SelectedAnnotationFormat == AnnotationFormat.Yolo)
-            {
-                string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
-                await this.SaveYolo($"{this.ImageFolder}/{annotationName}.txt");
-            }
+            string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
+            await this.SaveYolo($"{this.ImageFolder}/{annotationName}.txt");
 
             //保存标签
             string labelsPath = $"{this.ImageFolder}/classes.txt";

@@ -4,16 +4,16 @@ using System.Text.Json.Serialization;
 namespace LabelSharp.Presentation.Models
 {
     /// <summary>
-    /// COCO形状
+    /// LabelMe形状
     /// </summary>
-    public class CocoShape
+    public class MeShape
     {
         #region # 字段及构造器
 
         /// <summary>
         /// 无参构造器
         /// </summary>
-        public CocoShape()
+        public MeShape()
         {
             this.Score = null;
             this.Flags = new Dictionary<string, string>();
@@ -22,19 +22,21 @@ namespace LabelSharp.Presentation.Models
         }
 
         /// <summary>
-        /// 创建COCO形状构造器
+        /// 创建LabelMe形状构造器
         /// </summary>
         /// <param name="label">标签</param>
         /// <param name="groupId">分组Id</param>
+        /// <param name="truncated">是否截断</param>
         /// <param name="difficult">是否困难</param>
         /// <param name="shapeType">形状类型</param>
         /// <param name="description">描述</param>
         /// <param name="points">点集</param>
-        public CocoShape(string label, int? groupId, bool difficult, string shapeType, string description, IList<float[]> points)
+        public MeShape(string label, int? groupId, bool truncated, bool difficult, string shapeType, string description, IList<double[]> points)
             : this()
         {
             this.Label = label;
             this.GroupId = groupId;
+            this.Truncated = truncated;
             this.Difficult = difficult;
             this.ShapeType = shapeType;
             this.Description = description;
@@ -61,12 +63,12 @@ namespace LabelSharp.Presentation.Models
         public float? Score { get; set; }
         #endregion
 
-        #region 点集 —— IList<float[]> Points
+        #region 点集 —— IList<double[]> Points
         /// <summary>
         /// 点集
         /// </summary>
         [JsonPropertyName("points")]
-        public IList<float[]> Points { get; set; }
+        public IList<double[]> Points { get; set; }
         #endregion
 
         #region 分组Id —— int? GroupId
@@ -83,6 +85,14 @@ namespace LabelSharp.Presentation.Models
         /// </summary>
         [JsonPropertyName("description")]
         public string Description { get; set; }
+        #endregion
+
+        #region 是否截断 —— bool Truncated
+        /// <summary>
+        /// 是否截断
+        /// </summary>
+        [JsonPropertyName("truncated")]
+        public bool Truncated { get; set; }
         #endregion
 
         #region 是否困难 —— bool Difficult

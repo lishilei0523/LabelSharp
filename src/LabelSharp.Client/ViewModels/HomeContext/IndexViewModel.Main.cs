@@ -192,20 +192,6 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //常用
 
-        #region 重置 —— void Reset()
-        /// <summary>
-        /// 重置
-        /// </summary>
-        public void Reset()
-        {
-            MessageBoxResult result = MessageBox.Show("确定要重置吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-            if (result == MessageBoxResult.OK)
-            {
-                this.ClearAnnotations();
-            }
-        }
-        #endregion
-
         #region 切换参考线 —— void SwitchGuideLinesVisibility()
         /// <summary>
         /// 切换参考线
@@ -213,6 +199,29 @@ namespace LabelSharp.ViewModels.HomeContext
         public void SwitchGuideLinesVisibility()
         {
             this.GuideLinesVisibility = this.ShowGuideLines ? Visibility.Visible : Visibility.Collapsed;
+        }
+        #endregion
+
+        #region 重置 —— void Reset()
+        /// <summary>
+        /// 重置
+        /// </summary>
+        public void Reset()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            MessageBoxResult result = MessageBox.Show("确定要重置吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (result == MessageBoxResult.OK)
+            {
+                this.ClearAnnotations();
+            }
         }
         #endregion
 
@@ -339,6 +348,15 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void CloseAll()
         {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
             MessageBoxResult result = MessageBox.Show("确定要关闭吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (result == MessageBoxResult.OK)
             {
@@ -399,7 +417,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void LookAnnotation()
         {
-            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
             if (annotation != null)
             {
                 LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
@@ -415,7 +433,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void UpdateAnnotation()
         {
-            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
             if (annotation != null)
             {
                 UpdateViewModel viewModel = ResolveMediator.Resolve<UpdateViewModel>();
@@ -445,7 +463,7 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public void RemoveAnnotation()
         {
-            Annotation annotation = this.SelectedImageAnnotation.SelectedAnnotation;
+            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
             if (annotation != null)
             {
                 MessageBoxResult result = MessageBox.Show("确定要删除吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);

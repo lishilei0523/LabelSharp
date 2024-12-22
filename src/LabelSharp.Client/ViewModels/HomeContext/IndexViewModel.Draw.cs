@@ -430,6 +430,9 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.VerticalLineX = rectifiedPosition.X > currentImage.Width
                     ? currentImage.Width
                     : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
+
+                //设置光标
+                Mouse.OverrideCursor = Cursors.Cross;
             }
             //实时锚线
             if ((this.PolygonChecked || this.PolylineChecked) && this._polyAnchors.Any())
@@ -452,6 +455,17 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._realAnchorLine.X2 = endPoint.X;
                 this._realAnchorLine.Y2 = endPoint.Y;
             }
+        }
+        #endregion
+
+        #region 画布鼠标离开事件 —— void OnCanvasMouseLeave(CanvasEx canvas...
+        /// <summary>
+        /// 画布鼠标离开事件
+        /// </summary>
+        public void OnCanvasMouseLeave()
+        {
+            //设置光标
+            Mouse.OverrideCursor = Cursors.Arrow;
         }
         #endregion
 

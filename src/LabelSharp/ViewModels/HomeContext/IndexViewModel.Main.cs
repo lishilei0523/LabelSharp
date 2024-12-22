@@ -28,7 +28,6 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Annotation = LabelSharp.Models.Annotation;
 using Path = System.IO.Path;
 using Point = System.Windows.Point;
 using Rect = OpenCvSharp.Rect;

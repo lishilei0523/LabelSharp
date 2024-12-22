@@ -49,9 +49,9 @@ namespace LabelSharp.ViewModels.HomeContext
         private EllipseVisual2D _ellipse;
 
         /// <summary>
-        /// 锚线
+        /// 实时锚线
         /// </summary>
-        private Line _polyAnchorLine;
+        private Line _realAnchorLine;
 
         /// <summary>
         /// 锚点集
@@ -418,8 +418,7 @@ namespace LabelSharp.ViewModels.HomeContext
             //十字参考线
             if (this.SelectedImageAnnotation != null)
             {
-                Point position = eventArgs.GetPosition(canvas);
-                Point rectifiedPosition = canvas.MatrixTransform.Inverse!.Transform(position);
+                Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
                 this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
 
@@ -433,25 +432,25 @@ namespace LabelSharp.ViewModels.HomeContext
                     : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
             }
             //实时锚线
-            if (this._polyAnchors.Any())
+            if ((this.PolygonChecked || this.PolylineChecked) && this._polyAnchors.Any())
             {
-                if (this._polyAnchorLine == null)
+                if (this._realAnchorLine == null)
                 {
-                    this._polyAnchorLine = new Line
+                    this._realAnchorLine = new Line
                     {
                         Fill = new SolidColorBrush(Colors.Transparent),
                         Stroke = new SolidColorBrush(this.BorderColor!.Value),
                         StrokeThickness = this.BorderThickness!.Value,
                         RenderTransform = canvas.MatrixTransform
                     };
-                    canvas.Children.Add(this._polyAnchorLine);
+                    canvas.Children.Add(this._realAnchorLine);
                 }
                 PointVisual2D startPoint = this._polyAnchors.Last();
                 Point endPoint = canvas.RectifiedMousePosition!.Value;
-                this._polyAnchorLine.X1 = startPoint.X;
-                this._polyAnchorLine.Y1 = startPoint.Y;
-                this._polyAnchorLine.X2 = endPoint.X;
-                this._polyAnchorLine.Y2 = endPoint.Y;
+                this._realAnchorLine.X1 = startPoint.X;
+                this._realAnchorLine.Y1 = startPoint.Y;
+                this._realAnchorLine.X2 = endPoint.X;
+                this._realAnchorLine.Y2 = endPoint.Y;
             }
         }
         #endregion
@@ -921,10 +920,10 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 canvas.Children.Remove(anchorLine);
             }
-            if (this._polyAnchorLine != null)
+            if (this._realAnchorLine != null)
             {
-                canvas.Children.Remove(this._polyAnchorLine);
-                this._polyAnchorLine = null;
+                canvas.Children.Remove(this._realAnchorLine);
+                this._realAnchorLine = null;
             }
             this._polyAnchors.Clear();
             this._polyAnchorLines.Clear();
@@ -978,10 +977,10 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 canvas.Children.Remove(anchorLine);
             }
-            if (this._polyAnchorLine != null)
+            if (this._realAnchorLine != null)
             {
-                canvas.Children.Remove(this._polyAnchorLine);
-                this._polyAnchorLine = null;
+                canvas.Children.Remove(this._realAnchorLine);
+                this._realAnchorLine = null;
             }
             this._polyAnchors.Clear();
             this._polyAnchorLines.Clear();

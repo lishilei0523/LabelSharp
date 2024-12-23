@@ -28,7 +28,7 @@ namespace LabelSharp.Presentation.Models
         public int Segmented { get; set; }
 
         [XmlElement("object", Form = XmlSchemaForm.Unqualified)]
-        public AnnotationInfo[] Annotations { get; set; }
+        public PascalAnnotationInfo[] Annotations { get; set; }
     }
 
 
@@ -58,7 +58,7 @@ namespace LabelSharp.Presentation.Models
 
     [Serializable]
     [XmlType(AnonymousType = true)]
-    public class AnnotationInfo
+    public class PascalAnnotationInfo
     {
         [XmlElement("name", Form = XmlSchemaForm.Unqualified)]
         public string Name { get; set; }

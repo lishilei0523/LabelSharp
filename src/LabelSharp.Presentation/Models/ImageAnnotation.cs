@@ -28,12 +28,14 @@ namespace LabelSharp.Presentation.Models
         /// <summary>
         /// 创建图像标注构造器
         /// </summary>
+        /// <param name="imageFolder">图像文件夹</param>
         /// <param name="imagePath">图像路径</param>
         /// <param name="imageName">图像名称</param>
         /// <param name="imageIndex">图像索引</param>
-        public ImageAnnotation(string imagePath, string imageName, int imageIndex)
+        public ImageAnnotation(string imageFolder, string imagePath, string imageName, int imageIndex)
             : this()
         {
+            this.ImageFolder = imageFolder;
             this.ImagePath = imagePath;
             this.ImageName = imageName;
             this.ImageIndex = imageIndex;
@@ -42,6 +44,14 @@ namespace LabelSharp.Presentation.Models
         #endregion
 
         #region # 属性
+
+        #region 图像文件夹 —— string ImageFolder
+        /// <summary>
+        /// 图像文件夹
+        /// </summary>
+        [DependencyProperty]
+        public string ImageFolder { get; set; }
+        #endregion
 
         #region 图像路径 —— string ImagePath
         /// <summary>

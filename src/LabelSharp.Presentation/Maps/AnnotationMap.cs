@@ -47,6 +47,94 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
+        #region # 映射PascalVOC标注 —— static PascalAnnotation ToPascalAnnotation(this ImageAnnotation...
+        /// <summary>
+        /// 映射PascalVOC标注
+        /// </summary>
+        public static PascalAnnotation ToPascalAnnotation(this ImageAnnotation imageAnnotation)
+        {
+            IList<PascalAnnotationInfo> pascalAnnotationInfos = new List<PascalAnnotationInfo>();
+            foreach (Annotation annotation in imageAnnotation.Annotations)
+            {
+                if (annotation.ShapeL is RectangleL rectangleL)
+                {
+                    PascalAnnotationInfo pascalAnnotationInfo = new PascalAnnotationInfo
+                    {
+                        Name = annotation.Label,
+                        Pose = "Unspecified",
+                        Truncated = Convert.ToInt32(annotation.Truncated),
+                        Difficult = Convert.ToInt32(annotation.Difficult),
+                        Location = new Location
+                        {
+                            XMin = rectangleL.TopLeft.X,
+                            YMin = rectangleL.TopLeft.Y,
+                            XMax = rectangleL.BottomRight.X,
+                            YMax = rectangleL.BottomRight.Y
+                        }
+                    };
+                    pascalAnnotationInfos.Add(pascalAnnotationInfo);
+                }
+            }
+
+            BitmapSource image = imageAnnotation.Image;
+            PascalAnnotation pascalAnnotation = new PascalAnnotation
+            {
+                Folder = imageAnnotation.ImageFolder,
+                Filename = imageAnnotation.ImageName,
+                Path = imageAnnotation.ImagePath,
+                Source = new AnnotationSource
+                {
+                    Database = "Unknown"
+                },
+                ImageSize = new ImageSize
+                {
+                    Width = (int)Math.Ceiling(image.Width),
+                    Height = (int)Math.Ceiling(image.Height),
+                    Depth = image.Format == PixelFormats.Gray8 ? 1 : 3
+                },
+                Segmented = 0,
+                Annotations = pascalAnnotationInfos.ToArray()
+            };
+
+            return pascalAnnotation;
+        }
+        #endregion
+
+        #region # PascalVOC标注映射标注信息 —— static IList<Annotation> FromPascalAnnotation(this PascalAnnotation...
+        /// <summary>
+        /// PascalVOC标注映射标注信息
+        /// </summary>
+        public static IList<Annotation> FromPascalAnnotation(this PascalAnnotation pascalAnnotation)
+        {
+            IList<Annotation> annotations = new List<Annotation>();
+            foreach (PascalAnnotationInfo pascalAnnotationInfo in pascalAnnotation.Annotations)
+            {
+                int x = pascalAnnotationInfo.Location.XMin;
+                int y = pascalAnnotationInfo.Location.YMin;
+                int width = pascalAnnotationInfo.Location.XMax - pascalAnnotationInfo.Location.XMin;
+                int height = pascalAnnotationInfo.Location.YMax - pascalAnnotationInfo.Location.YMin;
+                RectangleVisual2D rectangle = new RectangleVisual2D()
+                {
+                    Location = new Point(x, y),
+                    Size = new Size(width, height),
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                RectangleL rectangleL = new RectangleL(x, y, width, height);
+                rectangle.Tag = rectangleL;
+                rectangleL.Tag = rectangle;
+
+                bool truncated = Convert.ToBoolean(pascalAnnotationInfo.Truncated);
+                bool difficult = Convert.ToBoolean(pascalAnnotationInfo.Difficult);
+                Annotation annotation = new Annotation(pascalAnnotationInfo.Name, null, truncated, difficult, rectangleL, string.Empty);
+                annotations.Add(annotation);
+            }
+
+            return annotations;
+        }
+        #endregion
+
         #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation...
         /// <summary>
         /// 映射YOLO目标检测标注

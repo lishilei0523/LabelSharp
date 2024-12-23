@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
+using SD.Common;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
@@ -244,7 +245,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 string imagePath = openFileDialog.FileName;
                 string imageName = Path.GetFileName(imagePath);
-                ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, 1);
+                ImageAnnotation imageAnnotation = new ImageAnnotation(this.ImageFolder, imagePath, imageName, 1);
                 this.ImageAnnotations = new ObservableCollection<ImageAnnotation>(new[] { imageAnnotation });
                 this.SelectedImageAnnotation = imageAnnotation;
             }
@@ -291,7 +292,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     if (Constants.AvailableImageFormats.Contains(fileExtension))
                     {
                         string imageName = Path.GetFileName(imagePath);
-                        ImageAnnotation imageAnnotation = new ImageAnnotation(imagePath, imageName, sort);
+                        ImageAnnotation imageAnnotation = new ImageAnnotation(this.ImageFolder, imagePath, imageName, sort);
                         this.ImageAnnotations.Add(imageAnnotation);
                         if (this.SelectedImageAnnotation == null)
                         {
@@ -371,8 +372,33 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void SaveAsPascal()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.xml)|*.xml",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                PascalAnnotation pascalAnnotation = this.SelectedImageAnnotation.ToPascalAnnotation();
+                string pascalAnnotationXml = pascalAnnotation.ToXml();
+                await Task.Run(() => File.WriteAllText(saveFileDialog.FileName, pascalAnnotationXml));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
+            }
         }
         #endregion
 
@@ -400,8 +426,13 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (saveFileDialog.ShowDialog() == true)
             {
+                this.Busy();
+
                 string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
                 await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
             }
         }
         #endregion
@@ -430,8 +461,13 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (saveFileDialog.ShowDialog() == true)
             {
+                this.Busy();
+
                 string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
                 await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
             }
         }
         #endregion
@@ -657,8 +693,40 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void ImportPascal()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择PascalVOI标注文件",
+                Filter = "标注文件(*.xml)|*.xml",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                string pascalAnnotationXml = await Task.Run(() => File.ReadAllText(openFileDialog.FileName));
+                PascalAnnotation pascalAnnotation = pascalAnnotationXml.AsXmlTo<PascalAnnotation>();
+                IList<Annotation> annotations = pascalAnnotation.FromPascalAnnotation();
+                foreach (Annotation annotation in annotations)
+                {
+                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                }
+
+                this.Idle();
+                this.ToastSuccess("导入成功！");
+            }
         }
         #endregion
 
@@ -686,6 +754,8 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (openFileDialog.ShowDialog() == true)
             {
+                this.Busy();
+
                 BitmapSource image = this.SelectedImageAnnotation.Image;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
                 IList<Annotation> annotations = lines.FromYoloDetections(image.Width, image.Height, this.Labels);
@@ -696,6 +766,9 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
+
+                this.Idle();
+                this.ToastSuccess("导入成功！");
             }
         }
         #endregion
@@ -724,6 +797,8 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (openFileDialog.ShowDialog() == true)
             {
+                this.Busy();
+
                 BitmapSource image = this.SelectedImageAnnotation.Image;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
                 IList<Annotation> annotations = lines.FromYoloSegmentations(image.Width, image.Height, this.Labels);
@@ -734,6 +809,9 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
+
+                this.Idle();
+                this.ToastSuccess("导入成功！");
             }
         }
         #endregion

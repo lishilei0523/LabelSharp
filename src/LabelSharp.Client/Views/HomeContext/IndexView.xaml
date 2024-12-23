@@ -63,16 +63,16 @@
                         <MenuItem Header="导入YOLO-seg(_E)" cm:Message.Attach="ImportYoloSeg()" />
                     </MenuItem>
                     <MenuItem Header="格式(_O)">
-                        <MenuItem Header="PascalVOC → CSV(_A)" cm:Message.Attach="PascalToCsv()" />
-                        <MenuItem Header="PascalVOC → YOLO(_C)" cm:Message.Attach="PascalToYolo()" />
-                        <MenuItem Header="YOLO → PascalVOC" cm:Message.Attach="YoloToPascal()" />
+                        <MenuItem Header="PascalVOC → CSV(_C)" cm:Message.Attach="PascalToCsv()" />
+                        <MenuItem Header="PascalVOC → YOLO(_Y)" cm:Message.Attach="PascalToYolo()" />
+                        <MenuItem Header="YOLO → PascalVOC(_P)" cm:Message.Attach="YoloToPascal()" />
                     </MenuItem>
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />
-                        <MenuItem Header="YOLO图像分割(_S)" cm:Message.Attach="YoloSegment()" />
+                        <MenuItem Header="YOLO图像分割(_E)" cm:Message.Attach="YoloSegment()" />
                     </MenuItem>
                     <MenuItem Header="帮助(_H)">
-                        <MenuItem Header="操作手册(_O)" cm:Message.Attach="Manual()" />
+                        <MenuItem Header="操作手册(_M)" cm:Message.Attach="Manual()" />
                         <MenuItem Header="技术支持(_T)" cm:Message.Attach="Support()" />
                     </MenuItem>
                 </Menu>

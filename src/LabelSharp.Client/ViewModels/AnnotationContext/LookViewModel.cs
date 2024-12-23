@@ -1,6 +1,4 @@
-﻿using SD.Infrastructure.Shapes;
-using SD.Infrastructure.WPF.Caliburn.Aspects;
-using SD.Infrastructure.WPF.Caliburn.Base;
+﻿using SD.Infrastructure.WPF.Caliburn.Base;
 
 namespace LabelSharp.ViewModels.AnnotationContext
 {
@@ -34,7 +32,6 @@ namespace LabelSharp.ViewModels.AnnotationContext
         /// <summary>
         /// 分组Id
         /// </summary>
-        [DependencyProperty]
         public int? GroupId { get; set; }
         #endregion
 
@@ -52,18 +49,17 @@ namespace LabelSharp.ViewModels.AnnotationContext
         public bool Difficult { get; set; }
         #endregion
 
-        #region 形状数据 —— ShapeL ShapeL
+        #region 形状文本 —— string ShapeText
         /// <summary>
-        /// 形状数据
+        /// 形状文本
         /// </summary>
-        public ShapeL ShapeL { get; set; }
+        public string ShapeText { get; set; }
         #endregion
 
         #region 描述 —— string Description
         /// <summary>
         /// 描述
         /// </summary>
-        [DependencyProperty]
         public string Description { get; set; }
         #endregion 
 
@@ -71,7 +67,7 @@ namespace LabelSharp.ViewModels.AnnotationContext
 
         #region # 方法
 
-        #region 加载 —— void Load(string label, bool truncated...
+        #region 加载 —— void Load(string label, int? groupId...
         /// <summary>
         /// 加载
         /// </summary>
@@ -79,15 +75,15 @@ namespace LabelSharp.ViewModels.AnnotationContext
         /// <param name="groupId">分组Id</param>
         /// <param name="truncated">是否截断</param>
         /// <param name="difficult">是否困难</param>
-        /// <param name="shapeL">形状数据</param>
+        /// <param name="shapeText">形状文本</param>
         /// <param name="description">描述</param>
-        public void Load(string label, int? groupId, bool truncated, bool difficult, ShapeL shapeL, string description)
+        public void Load(string label, int? groupId, bool truncated, bool difficult, string shapeText, string description)
         {
             this.Label = label;
             this.GroupId = groupId;
             this.Truncated = truncated;
             this.Difficult = difficult;
-            this.ShapeL = shapeL;
+            this.ShapeText = shapeText;
             this.Description = description;
         }
         #endregion

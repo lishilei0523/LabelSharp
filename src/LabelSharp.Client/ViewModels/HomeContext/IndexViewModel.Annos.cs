@@ -76,7 +76,7 @@ namespace LabelSharp.ViewModels.HomeContext
             if (annotation != null)
             {
                 LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
-                viewModel.Load(annotation.Label.Trim(), annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.ShapeL, annotation.Description);
+                viewModel.Load(annotation.Label.Trim(), annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.ShapeL.Text, annotation.Description);
                 await this._windowManager.ShowDialogAsync(viewModel);
             }
         }

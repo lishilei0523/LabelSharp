@@ -37,7 +37,7 @@
                 <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
             </sd:FormItem>
             <sd:FormItem Label="形状数据：">
-                <TextBox Text="{Binding ShapeL.Text, Mode=OneWay}"
+                <TextBox Text="{Binding ShapeText}"
                          Height="80"
                          TextWrapping="Wrap"
                          AcceptsReturn="True"

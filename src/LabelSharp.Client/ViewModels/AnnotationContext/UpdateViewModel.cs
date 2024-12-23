@@ -76,7 +76,7 @@ namespace LabelSharp.ViewModels.AnnotationContext
 
         #region # 方法
 
-        #region 加载 —— void Load(string label, bool truncated...
+        #region 加载 —— void Load(string label, int? groupId...
         /// <summary>
         /// 加载
         /// </summary>

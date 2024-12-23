@@ -164,7 +164,7 @@ namespace LabelSharp.ViewModels.HomeContext
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
             this.BorderColor = Colors.Red;
             this.BorderThickness = 2;
-            this.GuideLineThickness = 2;
+            this.GuideLineThickness = Constants.GuideLineThickness;
             this.ShowGuideLines = true;
             this.GuideLinesVisibility = Visibility.Visible;
             this.ScaleChecked = true;

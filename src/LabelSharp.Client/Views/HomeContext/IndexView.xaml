@@ -163,6 +163,7 @@
                                          ItemsSource="{Binding Shapes}"
                                          cm:Message.Attach="
                                          [Event MouseMove] = [Action OnCanvasMouseMove($source,$eventArgs)];
+                                         [Event MouseWheel] = [Action OnCanvasMouseWheel($source)];
                                          [Event MouseLeave] = [Action OnCanvasMouseLeave()];
                                          [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];
                                          [Event ElementDrag] = [Action OnDragElement($source)];

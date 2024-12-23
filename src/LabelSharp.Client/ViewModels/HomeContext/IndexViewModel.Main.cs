@@ -214,16 +214,6 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 技术支持 —— void Support()
-        /// <summary>
-        /// 技术支持
-        /// </summary>
-        public void Support()
-        {
-            Process.Start("https://gitee.com/lishilei0523/LabelSharp");
-        }
-        #endregion
-
 
         //文件
 
@@ -377,6 +367,7 @@ namespace LabelSharp.ViewModels.HomeContext
         public async void SaveAsPascal()
         {
             //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         #endregion
 
@@ -662,6 +653,7 @@ namespace LabelSharp.ViewModels.HomeContext
         public async void ImportPascal()
         {
             //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         #endregion
 
@@ -738,6 +730,91 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
             }
+        }
+        #endregion
+
+
+        //格式
+
+        #region PascalVOC转换CSV —— async void PascalToCsv()
+        /// <summary>
+        /// PascalVOC转换CSV
+        /// </summary>
+        public async void PascalToCsv()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+        #region PascalVOC转换YOLO —— async void PascalToYolo()
+        /// <summary>
+        /// PascalVOC转换YOLO
+        /// </summary>
+        public async void PascalToYolo()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+        #region YOLO转换PascalVOC —— async void YoloToPascal()
+        /// <summary>
+        /// YOLO转换PascalVOC
+        /// </summary>
+        public async void YoloToPascal()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+
+        //工具
+
+        #region YOLO目标检测 —— async void YoloDetect()
+        /// <summary>
+        /// YOLO目标检测
+        /// </summary>
+        public async void YoloDetect()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+        #region YOLO图像分割 —— async void YoloSegment()
+        /// <summary>
+        /// YOLO图像分割
+        /// </summary>
+        public async void YoloSegment()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+
+        //帮助
+
+        #region 操作手册 —— async void Manual()
+        /// <summary>
+        /// 操作手册
+        /// </summary>
+        public async void Manual()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        #endregion
+
+        #region 技术支持 —— void Support()
+        /// <summary>
+        /// 技术支持
+        /// </summary>
+        public void Support()
+        {
+            Process.Start("https://gitee.com/lishilei0523/LabelSharp");
         }
         #endregion
 

@@ -5,6 +5,7 @@ using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OpenCvSharp;
+using OpenCvSharp.WpfExtensions;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
@@ -448,7 +449,131 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void CutImage()
         {
-            //TODO 实现
+            CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
+            {
+                Title = "请选择目标文件夹",
+                IsFolderPicker = true
+            };
+            if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                this.Busy();
+
+                using Mat image = this.SelectedImageAnnotation.Image.ToMat();
+                IList<Mat> results = new List<Mat>();
+                foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
+                {
+                    const int thickness = -1;
+                    if (shapeL is RectangleL rectangleL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        OpenCvSharp.Rect rect = new OpenCvSharp.Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height);
+                        await Task.Run(() => mask.Rectangle(rect, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        Mat result = canvas[rect];
+                        results.Add(result);
+                    }
+                    if (shapeL is CircleL circleL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        await Task.Run(() => mask.Circle(circleL.X, circleL.Y, circleL.Radius, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        int x = circleL.X - circleL.Radius;
+                        int y = circleL.Y - circleL.Radius;
+                        int sideSize = circleL.Radius * 2;
+                        OpenCvSharp.Rect boundingRect = new OpenCvSharp.Rect(x, y, sideSize, sideSize);
+                        Mat result = canvas[boundingRect];
+                        results.Add(result);
+                    }
+                    if (shapeL is EllipseL ellipseL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        Point2f center = new Point2f(ellipseL.X, ellipseL.Y);
+                        Size2f size = new Size2f(ellipseL.RadiusX * 2, ellipseL.RadiusY * 2);
+                        RotatedRect rect = new RotatedRect(center, size, 0);
+                        await Task.Run(() => mask.Ellipse(rect, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        int x = ellipseL.X - ellipseL.RadiusX;
+                        int y = ellipseL.Y - ellipseL.RadiusY;
+                        int width = ellipseL.RadiusX * 2;
+                        int height = ellipseL.RadiusY * 2;
+                        OpenCvSharp.Rect boundingRect = new OpenCvSharp.Rect(x, y, width, height);
+                        Mat result = canvas[boundingRect];
+                        results.Add(result);
+                    }
+                    if (shapeL is PolygonL polygonL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polygonL.Points.Count];
+                        for (int index = 0; index < polygonL.Points.Count; index++)
+                        {
+                            PointL pointL = polygonL.Points.ElementAt(index);
+                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
+                        }
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
+                        Mat result = canvas[boundingRect];
+                        results.Add(result);
+                    }
+                    if (shapeL is PolylineL polylineL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polylineL.Points.Count];
+                        for (int index = 0; index < polylineL.Points.Count; index++)
+                        {
+                            PointL pointL = polylineL.Points.ElementAt(index);
+                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
+                        }
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
+                        Mat result = canvas[boundingRect];
+                        results.Add(result);
+                    }
+                }
+
+                string imageName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
+                string imageExtension = Path.GetExtension(this.SelectedImageAnnotation.ImagePath);
+                for (int index = 0; index < results.Count; index++)
+                {
+                    using Mat imagePart = results[index];
+                    string imagePartPath = $@"{folderDialog.FileName}\{imageName}-Part{index}{imageExtension}";
+                    await Task.Run(() => imagePart.SaveImage(imagePartPath));
+                }
+
+                this.Idle();
+                this.ToastSuccess("已保存！");
+            }
         }
         #endregion
 

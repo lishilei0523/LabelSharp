@@ -175,7 +175,7 @@
                                 </sd:CanvasEx.BackgroundImage>
                                 <!--水平参考线-->
                                 <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
-                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
+                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLineThickness}"
                                       X1="0"
                                       Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
                                       X2="{Binding Image.Width}"
@@ -188,7 +188,7 @@
                                 </Line>
                                 <!--垂直参考线-->
                                 <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
-                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
+                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLineThickness}"
                                       X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
                                       Y1="0"
                                       X2="{Binding RelativeSource={RelativeSource Self}, Path=X1}"

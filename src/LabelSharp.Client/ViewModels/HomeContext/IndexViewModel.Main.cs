@@ -74,20 +74,28 @@ namespace LabelSharp.ViewModels.HomeContext
         public SolidColorBrush BackgroundColor { get; set; }
         #endregion
 
-        #region 边框颜色 —— Color? BorderColor
+        #region 边框颜色 —— Color BorderColor
         /// <summary>
         /// 边框颜色
         /// </summary>
         [DependencyProperty]
-        public Color? BorderColor { get; set; }
+        public Color BorderColor { get; set; }
         #endregion
 
-        #region 边框粗细 —— int? BorderThickness
+        #region 边框粗细 —— int BorderThickness
         /// <summary>
         /// 边框粗细
         /// </summary>
         [DependencyProperty]
-        public int? BorderThickness { get; set; }
+        public int BorderThickness { get; set; }
+        #endregion
+
+        #region 参考线粗细 —— double GuideLineThickness
+        /// <summary>
+        /// 参考线粗细
+        /// </summary>
+        [DependencyProperty]
+        public double GuideLineThickness { get; set; }
         #endregion
 
         #region 水平参考线Y坐标 —— double HorizontalLineY
@@ -156,6 +164,7 @@ namespace LabelSharp.ViewModels.HomeContext
             this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
             this.BorderColor = Colors.Red;
             this.BorderThickness = 2;
+            this.GuideLineThickness = 2;
             this.ShowGuideLines = true;
             this.GuideLinesVisibility = Visibility.Visible;
             this.ScaleChecked = true;
@@ -929,44 +938,49 @@ namespace LabelSharp.ViewModels.HomeContext
 
             this.Busy();
 
-            //初始化模型
-            const string modelPath = "Content/Models/yolo11n.onnx";
-            using YoloDetector yoloDetector = await Task.Run(() => new YoloDetector(modelPath));
-            await Task.Run(() => yoloDetector.StartSession());
-
-            //执行检测
-            using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
-            using Mat image = originalImage.Channels() == 4
-                ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
-                : originalImage.Channels() == 1
-                    ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
-                    : originalImage;
-            Detection[] detections = await Task.Run(() => yoloDetector.Infer(image));
-
-            //增加标注
-            foreach (Detection detection in detections)
+            ThresholdViewModel viewModel = ResolveMediator.Resolve<ThresholdViewModel>();
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
             {
-                RectangleVisual2D rectangle = new RectangleVisual2D()
-                {
-                    Location = new Point(detection.Box.X, detection.Box.Y),
-                    Size = new Size(detection.Box.Width, detection.Box.Height),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value
-                };
-                rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
-                RectangleL rectangleL = new RectangleL(detection.Box.X, detection.Box.Y, detection.Box.Width, detection.Box.Height);
-                rectangle.Tag = rectangleL;
-                rectangleL.Tag = rectangle;
+                //初始化模型
+                const string modelPath = "Content/Models/yolo11n.onnx";
+                using YoloDetector yoloDetector = await Task.Run(() => new YoloDetector(modelPath));
+                await Task.Run(() => yoloDetector.StartSession());
 
-                Annotation annotation = new Annotation(detection.Label, null, false, false, rectangleL, string.Empty);
+                //执行检测
+                using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
+                using Mat image = originalImage.Channels() == 4
+                    ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
+                    : originalImage.Channels() == 1
+                        ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
+                        : originalImage;
+                Detection[] detections = await Task.Run(() => yoloDetector.Infer(image, (float)viewModel.Threshold));
 
-                this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
-                this.SelectedImageAnnotation.Annotations.Add(annotation);
-                if (!this.Labels.Contains(detection.Label))
+                //增加标注
+                foreach (Detection detection in detections)
                 {
-                    this.Labels.Add(detection.Label);
+                    RectangleVisual2D rectangle = new RectangleVisual2D()
+                    {
+                        Location = new Point(detection.Box.X, detection.Box.Y),
+                        Size = new Size(detection.Box.Width, detection.Box.Height),
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = new SolidColorBrush(this.BorderColor),
+                        StrokeThickness = this.BorderThickness
+                    };
+                    rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    RectangleL rectangleL = new RectangleL(detection.Box.X, detection.Box.Y, detection.Box.Width, detection.Box.Height);
+                    rectangle.Tag = rectangleL;
+                    rectangleL.Tag = rectangle;
+
+                    Annotation annotation = new Annotation(detection.Label, null, false, false, rectangleL, string.Empty);
+
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(detection.Label))
+                    {
+                        this.Labels.Add(detection.Label);
+                    }
                 }
             }
 
@@ -992,54 +1006,59 @@ namespace LabelSharp.ViewModels.HomeContext
 
             this.Busy();
 
-            //初始化模型
-            const string modelPath = "Content/Models/yolo11n-seg.onnx";
-            using YoloSegmenter yoloSegmenter = await Task.Run(() => new YoloSegmenter(modelPath));
-            await Task.Run(() => yoloSegmenter.StartSession());
-
-            //执行分割
-            using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
-            using Mat image = originalImage.Channels() == 4
-                ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
-                : originalImage.Channels() == 1
-                    ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
-                    : originalImage;
-            Segmentation[] segmentations = await Task.Run(() => yoloSegmenter.Infer(image));
-
-            //增加标注
-            foreach (Segmentation segmentation in segmentations)
+            ThresholdViewModel viewModel = ResolveMediator.Resolve<ThresholdViewModel>();
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
             {
-                IList<Point> points = new List<Point>();
-                IList<PointL> pointLs = new List<PointL>();
-                for (int index = 0; index < segmentation.Contour.Length; index += 2)
-                {
-                    OpenCvSharp.Point point2F = segmentation.Contour[index];
-                    Point point = new Point(point2F.X, point2F.Y);
-                    PointL pointL = new PointL((int)Math.Ceiling(point.X), (int)Math.Ceiling(point.Y));
-                    points.Add(point);
-                    pointLs.Add(pointL);
-                }
+                //初始化模型
+                const string modelPath = "Content/Models/yolo11n-seg.onnx";
+                using YoloSegmenter yoloSegmenter = await Task.Run(() => new YoloSegmenter(modelPath));
+                await Task.Run(() => yoloSegmenter.StartSession());
 
-                Polygon polygon = new Polygon
-                {
-                    Points = new PointCollection(points),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
-                };
-                polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
-                PolygonL polygonL = new PolygonL(pointLs);
-                polygon.Tag = polygonL;
-                polygonL.Tag = polygon;
+                //执行分割
+                using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
+                using Mat image = originalImage.Channels() == 4
+                    ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
+                    : originalImage.Channels() == 1
+                        ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
+                        : originalImage;
+                Segmentation[] segmentations = await Task.Run(() => yoloSegmenter.Infer(image, (float)viewModel.Threshold));
 
-                Annotation annotation = new Annotation(segmentation.Label, null, false, false, polygonL, string.Empty);
-
-                this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
-                this.SelectedImageAnnotation.Annotations.Add(annotation);
-                if (!this.Labels.Contains(segmentation.Label))
+                //增加标注
+                foreach (Segmentation segmentation in segmentations)
                 {
-                    this.Labels.Add(segmentation.Label);
+                    IList<Point> points = new List<Point>();
+                    IList<PointL> pointLs = new List<PointL>();
+                    for (int index = 0; index < segmentation.Contour.Length; index += 2)
+                    {
+                        OpenCvSharp.Point point2F = segmentation.Contour[index];
+                        Point point = new Point(point2F.X, point2F.Y);
+                        PointL pointL = new PointL((int)Math.Ceiling(point.X), (int)Math.Ceiling(point.Y));
+                        points.Add(point);
+                        pointLs.Add(pointL);
+                    }
+
+                    Polygon polygon = new Polygon
+                    {
+                        Points = new PointCollection(points),
+                        Fill = new SolidColorBrush(Colors.Transparent),
+                        Stroke = new SolidColorBrush(Colors.Red),
+                        StrokeThickness = 2
+                    };
+                    polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    PolygonL polygonL = new PolygonL(pointLs);
+                    polygon.Tag = polygonL;
+                    polygonL.Tag = polygon;
+
+                    Annotation annotation = new Annotation(segmentation.Label, null, false, false, polygonL, string.Empty);
+
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(segmentation.Label))
+                    {
+                        this.Labels.Add(segmentation.Label);
+                    }
                 }
             }
 

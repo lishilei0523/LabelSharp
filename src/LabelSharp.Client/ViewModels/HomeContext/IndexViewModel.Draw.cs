@@ -422,7 +422,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
 
-                //参考线坐标调整
+                //参考线调整
                 BitmapSource currentImage = this.SelectedImageAnnotation.Image;
                 this.HorizontalLineY = rectifiedPosition.Y > currentImage.Height
                     ? currentImage.Height
@@ -430,6 +430,10 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.VerticalLineX = rectifiedPosition.X > currentImage.Width
                     ? currentImage.Width
                     : rectifiedPosition.X < 0 ? 0 : rectifiedPosition.X;
+                if (!canvas.ScaledRatio.Equals(0))
+                {
+                    this.GuideLineThickness = 2 / canvas.ScaledRatio;
+                }
 
                 //设置光标
                 Mouse.OverrideCursor = Cursors.Cross;
@@ -442,8 +446,8 @@ namespace LabelSharp.ViewModels.HomeContext
                     this._realAnchorLine = new Line
                     {
                         Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                        StrokeThickness = this.BorderThickness!.Value,
+                        Stroke = new SolidColorBrush(this.BorderColor),
+                        StrokeThickness = this.BorderThickness,
                         RenderTransform = canvas.MatrixTransform
                     };
                     canvas.Children.Add(this._realAnchorLine);
@@ -702,7 +706,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 X = rectifiedVertex.X,
                 Y = rectifiedVertex.Y,
                 Fill = new SolidColorBrush(Colors.Black),
-                Stroke = new SolidColorBrush(this.BorderColor!.Value),
+                Stroke = new SolidColorBrush(this.BorderColor),
                 RenderTransform = canvas.MatrixTransform,
                 Tag = pointL
             };
@@ -727,8 +731,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._line = new Line
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 canvas.Children.Add(this._line);
@@ -755,8 +759,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._brush = new Polyline
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 canvas.Children.Add(this._brush);
@@ -780,8 +784,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._rectangle = new RectangleVisual2D()
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 canvas.Children.Add(this._rectangle);
@@ -809,8 +813,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._circle = new CircleVisual2D
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 canvas.Children.Add(this._circle);
@@ -837,8 +841,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._ellipse = new EllipseVisual2D()
                 {
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 canvas.Children.Add(this._ellipse);
@@ -863,7 +867,7 @@ namespace LabelSharp.ViewModels.HomeContext
             Point rectifiedPoint = canvas.RectifiedStartPosition!.Value;
             Brush fillBrush = new SolidColorBrush(Colors.Black);
             Brush borderBrush = this._polyAnchors.Any()
-                ? new SolidColorBrush(this.BorderColor!.Value)
+                ? new SolidColorBrush(this.BorderColor)
                 : new SolidColorBrush(Colors.Yellow);
             PointVisual2D anchor = new PointVisual2D
             {
@@ -884,8 +888,8 @@ namespace LabelSharp.ViewModels.HomeContext
                     X2 = anchor.X,
                     Y2 = anchor.Y,
                     Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                    StrokeThickness = this.BorderThickness!.Value,
+                    Stroke = new SolidColorBrush(this.BorderColor),
+                    StrokeThickness = this.BorderThickness,
                     RenderTransform = canvas.MatrixTransform
                 };
                 this._polyAnchorLines.Add(polyAnchorLine);
@@ -927,8 +931,8 @@ namespace LabelSharp.ViewModels.HomeContext
             Polygon polygon = new Polygon
             {
                 Fill = new SolidColorBrush(Colors.Transparent),
-                Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                StrokeThickness = this.BorderThickness!.Value,
+                Stroke = new SolidColorBrush(this.BorderColor),
+                StrokeThickness = this.BorderThickness,
                 Points = points,
                 RenderTransform = canvas.MatrixTransform,
                 Tag = polygonL
@@ -984,8 +988,8 @@ namespace LabelSharp.ViewModels.HomeContext
             Polyline polyline = new Polyline
             {
                 Fill = new SolidColorBrush(Colors.Transparent),
-                Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                StrokeThickness = this.BorderThickness!.Value,
+                Stroke = new SolidColorBrush(this.BorderColor),
+                StrokeThickness = this.BorderThickness,
                 Points = points,
                 RenderTransform = canvas.MatrixTransform,
                 Tag = polylineL

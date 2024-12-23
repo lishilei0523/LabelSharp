@@ -274,9 +274,9 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (this.SelectedImageAnnotation != null)
             {
-                this.SelectedImageAnnotation.Shapes = new ObservableCollection<Shape>();
-                this.SelectedImageAnnotation.ShapeLs = new ObservableCollection<ShapeL>();
-                this.SelectedImageAnnotation.Annotations = new ObservableCollection<Annotation>();
+                this.SelectedImageAnnotation.Shapes.Clear();
+                this.SelectedImageAnnotation.ShapeLs.Clear();
+                this.SelectedImageAnnotation.Annotations.Clear();
                 this.SelectedImageAnnotation.SelectedAnnotation = null;
             }
         }

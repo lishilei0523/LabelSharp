@@ -1,11 +1,13 @@
 ﻿using Autofac;
 using Caliburn.Micro;
 using LabelSharp.ViewModels.HomeContext;
+using SD.Common;
 using SD.Infrastructure.WPF.Caliburn.Extensions;
 using SD.IOC.Core.Extensions;
 using SD.IOC.Core.Mediators;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -52,7 +54,7 @@ namespace LabelSharp
         /// </summary>
         protected override void OnUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs eventArgs)
         {
-            Exception exception = GetInnerException(eventArgs.Exception);
+            Exception exception = eventArgs.Exception;
             eventArgs.Handled = true;
 
             //释放遮罩
@@ -60,6 +62,9 @@ namespace LabelSharp
 
             //提示消息
             MessageBox.Show(exception.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+
+            //记录日志
+            WriteLog(exception);
         }
         #endregion
 
@@ -120,20 +125,25 @@ namespace LabelSharp
         }
         #endregion
 
-        #region 获取内部异常 —— static Exception GetInnerException(Exception exception)
+        #region 记录日志 —— static void WriteLog(Exception exception)
         /// <summary>
-        /// 获取内部异常
+        /// 记录日志
         /// </summary>
         /// <param name="exception">异常</param>
-        /// <returns>内部异常</returns>
-        private static Exception GetInnerException(Exception exception)
+        private static void WriteLog(Exception exception)
         {
-            if (exception.InnerException != null)
+            string exceptionLogPath = $"{AppDomain.CurrentDomain.BaseDirectory}\\ExceptionLogs\\{{0:yyyy-MM-dd}}.txt";
+            Task.Run(() =>
             {
-                return GetInnerException(exception.InnerException);
-            }
-
-            return exception;
+                FileExtension.WriteFile(string.Format(exceptionLogPath, DateTime.Today),
+                    "===================================WPF运行异常, 详细信息如下==================================="
+                    + Environment.NewLine + "［异常时间］" + DateTime.Now
+                    + Environment.NewLine + "［异常消息］" + exception.Message
+                    + Environment.NewLine + "［异常明细］" + exception
+                    + Environment.NewLine + "［内部异常］" + exception.InnerException
+                    + Environment.NewLine + "［堆栈信息］" + exception.StackTrace
+                    + Environment.NewLine + Environment.NewLine, true);
+            });
         }
         #endregion
 

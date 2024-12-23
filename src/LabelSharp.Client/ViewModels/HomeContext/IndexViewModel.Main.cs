@@ -722,6 +722,10 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(annotation.Label))
+                    {
+                        this.Labels.Add(annotation.Label);
+                    }
                 }
 
                 this.Idle();
@@ -765,6 +769,10 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(annotation.Label))
+                    {
+                        this.Labels.Add(annotation.Label);
+                    }
                 }
 
                 this.Idle();
@@ -808,6 +816,10 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(annotation.Label))
+                    {
+                        this.Labels.Add(annotation.Label);
+                    }
                 }
 
                 this.Idle();

@@ -240,9 +240,9 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 标注信息取消勾选事件 —— void OnAnnotationUncheck(Annotation annotation)
+        #region 标注信息取勾事件 —— void OnAnnotationUncheck(Annotation annotation)
         /// <summary>
-        /// 标注信息取消勾选事件
+        /// 标注信息取勾事件
         /// </summary>
         public void OnAnnotationUncheck(Annotation annotation)
         {
@@ -266,25 +266,9 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //Private
 
-        #region 清空标注信息 —— void ClearAnnotations()
+        #region 加载标注信息 —— async Task LoadAnnotations()
         /// <summary>
-        /// 清空标注信息
-        /// </summary>
-        private void ClearAnnotations()
-        {
-            if (this.SelectedImageAnnotation != null)
-            {
-                this.SelectedImageAnnotation.Shapes.Clear();
-                this.SelectedImageAnnotation.ShapeLs.Clear();
-                this.SelectedImageAnnotation.Annotations.Clear();
-                this.SelectedImageAnnotation.SelectedAnnotation = null;
-            }
-        }
-        #endregion
-
-        #region 加载标注 —— async Task LoadAnnotations()
-        /// <summary>
-        /// 加载标注
+        /// 加载标注信息
         /// </summary>
         private async Task LoadAnnotations()
         {
@@ -309,6 +293,22 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                 this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                 this.SelectedImageAnnotation.Annotations.Add(annotation);
+            }
+        }
+        #endregion
+
+        #region 清空标注信息 —— void ClearAnnotations()
+        /// <summary>
+        /// 清空标注信息
+        /// </summary>
+        private void ClearAnnotations()
+        {
+            if (this.SelectedImageAnnotation != null)
+            {
+                this.SelectedImageAnnotation.Shapes.Clear();
+                this.SelectedImageAnnotation.ShapeLs.Clear();
+                this.SelectedImageAnnotation.Annotations.Clear();
+                this.SelectedImageAnnotation.SelectedAnnotation = null;
             }
         }
         #endregion

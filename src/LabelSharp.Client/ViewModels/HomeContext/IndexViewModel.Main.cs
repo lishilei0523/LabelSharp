@@ -528,7 +528,7 @@ namespace LabelSharp.ViewModels.HomeContext
             bool? result = await this._windowManager.ShowDialogAsync(viewModel);
             if (result == true)
             {
-                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shape, viewModel.Description);
+                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shapeL, viewModel.Description);
                 this.SelectedImageAnnotation.Annotations.Add(annotation);
                 if (!this.Labels.Contains(annotation.Label.Trim()))
                 {
@@ -693,7 +693,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     rectangleL.Tag = rectangle;
                     rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
 
-                    Annotation annotation = new Annotation(label, null, false, false, rectangle, string.Empty);
+                    Annotation annotation = new Annotation(label, null, false, false, rectangleL, string.Empty);
 
                     this.SelectedImageAnnotation.ShapeLs.Add(rectangleL);
                     this.SelectedImageAnnotation.Shapes.Add(rectangle);
@@ -735,7 +735,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     polygonL.Tag = polygon;
                     polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
 
-                    Annotation annotation = new Annotation(label, null, false, false, polygon, string.Empty);
+                    Annotation annotation = new Annotation(label, null, false, false, polygonL, string.Empty);
 
                     this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
                     this.SelectedImageAnnotation.Shapes.Add(polygon);

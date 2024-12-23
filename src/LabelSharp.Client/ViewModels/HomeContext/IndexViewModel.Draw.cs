@@ -111,7 +111,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
                 if (annotation != null)
                 {
-                    annotation.Shape = shape;
+                    annotation.ShapeL = (ShapeL)shape.Tag;
                 }
             }
         }
@@ -223,7 +223,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
                 if (annotation != null)
                 {
-                    annotation.Shape = shape;
+                    annotation.ShapeL = (ShapeL)shape.Tag;
                 }
             }
         }
@@ -544,7 +544,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 int x = (int)Math.Ceiling(rectangle.Location.X + leftMargin);
                 int y = (int)Math.Ceiling(rectangle.Location.Y + topMargin);
                 int width = (int)Math.Ceiling(rectangle.Size.Width);
-                int height = (int)Math.Ceiling(rectangle.Size.Width);
+                int height = (int)Math.Ceiling(rectangle.Size.Height);
                 RectangleL newRectangleL = new RectangleL(x, y, width, height);
 
                 rectangle.Tag = newRectangleL;

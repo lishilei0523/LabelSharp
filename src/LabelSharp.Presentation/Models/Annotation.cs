@@ -27,16 +27,16 @@ namespace LabelSharp.Presentation.Models
         /// <param name="groupId">分组Id</param>
         /// <param name="truncated">是否截断</param>
         /// <param name="difficult">是否困难</param>
-        /// <param name="shape">形状</param>
+        /// <param name="shapeL">形状数据</param>
         /// <param name="description">描述</param>
-        public Annotation(string label, int? groupId, bool truncated, bool difficult, Shape shape, string description)
+        public Annotation(string label, int? groupId, bool truncated, bool difficult, ShapeL shapeL, string description)
             : this()
         {
             this.Label = label;
             this.GroupId = groupId;
             this.Truncated = truncated;
             this.Difficult = difficult;
-            this.Shape = shape;
+            this.ShapeL = shapeL;
             this.Description = description;
         }
 
@@ -76,22 +76,22 @@ namespace LabelSharp.Presentation.Models
         public bool Difficult { get; set; }
         #endregion
 
-        #region 形状 —— Shape Shape
+        #region 形状数据 —— ShapeL ShapeL
         /// <summary>
-        /// 形状
+        /// 形状数据
         /// </summary>
-        private Shape _shape;
+        private ShapeL _shapeL;
 
         /// <summary>
-        /// 形状
+        /// 形状数据
         /// </summary>
-        public Shape Shape
+        public ShapeL ShapeL
         {
-            get => this._shape;
+            get => this._shapeL;
             set
             {
-                this.Set(ref this._shape, value);
-                this.ShapeText = this.ShapeL.Text;
+                this.Set(ref this._shapeL, value);
+                this.ShapeText = value.Text;
             }
         }
         #endregion
@@ -112,13 +112,13 @@ namespace LabelSharp.Presentation.Models
         public string Description { get; set; }
         #endregion 
 
-        #region 只读属性 - 形状数据 —— ShapeL ShapeL
+        #region 只读属性 - 形状 —— Shape Shape
         /// <summary>
-        /// 只读属性 - 形状数据
+        /// 只读属性 - 形状
         /// </summary>
-        public ShapeL ShapeL
+        public Shape Shape
         {
-            get => (ShapeL)this.Shape.Tag;
+            get => (Shape)this.ShapeL.Tag;
         }
         #endregion 
 

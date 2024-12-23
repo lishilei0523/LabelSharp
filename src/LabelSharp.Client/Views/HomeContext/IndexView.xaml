@@ -174,7 +174,7 @@
                                     <Image Source="{Binding ImagePath}" />
                                 </sd:CanvasEx.BackgroundImage>
                                 <!--水平参考线-->
-                                <Line Stroke="#C8000000" Panel.ZIndex="100" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
+                                <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                       X1="0"
                                       Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
@@ -187,7 +187,7 @@
                                     </Line.Effect>
                                 </Line>
                                 <!--垂直参考线-->
-                                <Line Stroke="#C8000000" Panel.ZIndex="100" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
+                                <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
                                       StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                       X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
                                       Y1="0"

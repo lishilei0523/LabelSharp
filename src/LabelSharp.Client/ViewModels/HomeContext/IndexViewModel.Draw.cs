@@ -477,7 +477,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if ((this.CanvasMode == CanvasMode.Drag || this.CanvasMode == CanvasMode.Resize))
             {
-                this.Save();
+                this.SaveAnnotations();
             }
         }
         #endregion

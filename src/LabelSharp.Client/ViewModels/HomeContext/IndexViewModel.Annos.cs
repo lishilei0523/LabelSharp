@@ -106,7 +106,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         this.Labels.Add(viewModel.Label.Trim());
                     }
 
-                    this.Save();
+                    this.SaveAnnotations();
                 }
             }
         }
@@ -127,7 +127,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Shapes.Remove(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Remove(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Remove(annotation);
-                    this.Save();
+                    this.SaveAnnotations();
                 }
             }
         }
@@ -146,7 +146,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 if (!this.Labels.Contains(viewModel.Label.Trim()))
                 {
                     this.Labels.Add(viewModel.Label.Trim());
-                    this.Save();
+                    this.SaveAnnotations();
                 }
                 else
                 {
@@ -189,7 +189,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 {
                     this.Labels.Add(annotation.Label.Trim());
                 }
-                this.Save();
+                this.SaveAnnotations();
             }
             else
             {
@@ -258,7 +258,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.S))
             {
-                this.Save();
+                this.SaveAnnotations();
             }
         }
         #endregion
@@ -288,15 +288,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         private async Task LoadAnnotations()
         {
-            #region # 验证
-
-            if (this.SelectedImageAnnotation == null)
-            {
-                return;
-            }
-
-            #endregion
-
             string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
             string annotationPath = $"{this.ImageFolder}/{annotationName}.json";
 
@@ -343,6 +334,17 @@ namespace LabelSharp.ViewModels.HomeContext
                     }
                 }
             }
+        }
+        #endregion
+
+        #region 保存标签 —— async Task SaveLabels()
+        /// <summary>
+        /// 保存标签
+        /// </summary>
+        private async Task SaveLabels()
+        {
+            string labelsPath = $"{this.ImageFolder}/classes.txt";
+            await Task.Run(() => File.WriteAllLines(labelsPath, this.Labels));
         }
         #endregion
 

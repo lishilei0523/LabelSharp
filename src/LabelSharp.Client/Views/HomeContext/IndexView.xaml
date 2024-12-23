@@ -51,29 +51,29 @@
                         <MenuItem Header="打开文件夹(_A)" cm:Message.Attach="OpenImageFolder()" />
                         <MenuItem Header="关闭全部(_C)" cm:Message.Attach="CloseAll()" />
                         <MenuItem Header="保存(_S)" cm:Message.Attach="SaveAnnotations()" />
-                        <MenuItem Header="另存为PascalVOC(_P)" cm:Message.Attach="SaveAsPascal()" />
-                        <MenuItem Header="另存为YOLO-det(_D)" cm:Message.Attach="SaveAsYoloDet()" />
-                        <MenuItem Header="另存为YOLO-seg(_E)" cm:Message.Attach="SaveAsYoloSeg()" />
+                        <MenuItem Header="另存为(_L)" cm:Message.Attach="SaveAsAnnotations()" />
                     </MenuItem>
                     <MenuItem Header="编辑(_E)">
                         <MenuItem Header="切割图像(_C)" cm:Message.Attach="CutImage()" />
                         <MenuItem Header="保存掩膜(_M)" cm:Message.Attach="SaveMask()" />
-                        <MenuItem Header="导入PascalVOC(_P)" cm:Message.Attach="ImportPascal()" />
-                        <MenuItem Header="导入YOLO-det(_D)" cm:Message.Attach="ImportYoloDet()" />
-                        <MenuItem Header="导入YOLO-seg(_E)" cm:Message.Attach="ImportYoloSeg()" />
-                    </MenuItem>
-                    <MenuItem Header="格式(_O)">
-                        <MenuItem Header="PascalVOC → CSV(_C)" cm:Message.Attach="PascalToCsv()" />
-                        <MenuItem Header="PascalVOC → YOLO(_Y)" cm:Message.Attach="PascalToYolo()" />
-                        <MenuItem Header="YOLO → PascalVOC(_P)" cm:Message.Attach="YoloToPascal()" />
+                        <MenuItem Header="导入标签(_L)" cm:Message.Attach="ImportLabels()" />
+                        <MenuItem Header="导入PascalVOC(_V)" cm:Message.Attach="ImportPascal()" />
+                        <MenuItem Header="导入YOLO-det(_T)" cm:Message.Attach="ImportYoloDet()" />
+                        <MenuItem Header="导入YOLO-seg(_G)" cm:Message.Attach="ImportYoloSeg()" />
+                        <MenuItem Header="导出PascalVOC(_P)" cm:Message.Attach="ExportPascal()" />
+                        <MenuItem Header="导出YOLO-det(_D)" cm:Message.Attach="ExportYoloDet()" />
+                        <MenuItem Header="导出YOLO-seg(_S)" cm:Message.Attach="ExportYoloSeg()" />
                     </MenuItem>
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />
                         <MenuItem Header="YOLO图像分割(_E)" cm:Message.Attach="YoloSegment()" />
+                        <MenuItem Header="PascalVOC → CSV(_C)" cm:Message.Attach="PascalToCsv()" />
+                        <MenuItem Header="PascalVOC → YOLO(_Y)" cm:Message.Attach="PascalToYolo()" />
                     </MenuItem>
                     <MenuItem Header="帮助(_H)">
                         <MenuItem Header="操作手册(_M)" cm:Message.Attach="Manual()" />
                         <MenuItem Header="技术支持(_T)" cm:Message.Attach="Support()" />
+                        <MenuItem Header="关于 LabelSharp(_A)" cm:Message.Attach="About()" />
                     </MenuItem>
                 </Menu>
                 <!--ToolBar-->

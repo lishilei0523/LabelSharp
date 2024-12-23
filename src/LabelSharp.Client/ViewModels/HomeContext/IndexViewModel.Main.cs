@@ -21,6 +21,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -187,6 +188,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -317,6 +319,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -332,11 +335,11 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 保存 —— async void Save()
+        #region 保存 —— async void SaveAnnotations()
         /// <summary>
         /// 保存
         /// </summary>
-        public async void Save()
+        public async void SaveAnnotations()
         {
             #region # 验证
 
@@ -358,24 +361,24 @@ namespace LabelSharp.ViewModels.HomeContext
             await Task.Run(() => File.WriteAllText(annotationPath, meAnnotationJson));
 
             //保存标签
-            string labelsPath = $"{this.ImageFolder}/classes.txt";
-            await Task.Run(() => File.WriteAllLines(labelsPath, this.Labels));
+            await this.SaveLabels();
 
             this.Idle();
             this.ToastSuccess("已保存！");
         }
         #endregion
 
-        #region 另存为PascalVOC —— async void SaveAsPascal()
+        #region 另存为 —— async void SaveAsAnnotations()
         /// <summary>
-        /// 另存为PascalVOC
+        /// 另存为
         /// </summary>
-        public async void SaveAsPascal()
+        public async void SaveAsAnnotations()
         {
             #region # 验证
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -383,7 +386,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                Filter = "(*.xml)|*.xml",
+                Filter = "(*.json)|*.json",
                 FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
                 AddExtension = true,
                 RestoreDirectory = true
@@ -392,82 +395,13 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                PascalAnnotation pascalAnnotation = this.SelectedImageAnnotation.ToPascalAnnotation();
-                string pascalAnnotationXml = pascalAnnotation.ToXml();
-                await Task.Run(() => File.WriteAllText(saveFileDialog.FileName, pascalAnnotationXml));
+                //保存JSON
+                MeAnnotation meAnnotation = this.SelectedImageAnnotation.ToMeAnnotation();
+                string meAnnotationJson = meAnnotation.ToJson();
+                await Task.Run(() => File.WriteAllText(saveFileDialog.FileName, meAnnotationJson));
 
                 this.Idle();
-                this.ToastSuccess("已保存");
-            }
-        }
-        #endregion
-
-        #region 另存为YOLO-det —— async void SaveAsYoloDet()
-        /// <summary>
-        /// 另存为YOLO-det
-        /// </summary>
-        public async void SaveAsYoloDet()
-        {
-            #region # 验证
-
-            if (this.SelectedImageAnnotation == null)
-            {
-                return;
-            }
-
-            #endregion
-
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "(*.txt)|*.txt",
-                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
-                AddExtension = true,
-                RestoreDirectory = true
-            };
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                this.Busy();
-
-                string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
-                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
-
-                this.Idle();
-                this.ToastSuccess("已保存");
-            }
-        }
-        #endregion
-
-        #region 另存为YOLO-seg —— async void SaveAsYoloSeg()
-        /// <summary>
-        /// 另存为YOLO-seg
-        /// </summary>
-        public async void SaveAsYoloSeg()
-        {
-            #region # 验证
-
-            if (this.SelectedImageAnnotation == null)
-            {
-                return;
-            }
-
-            #endregion
-
-            SaveFileDialog saveFileDialog = new SaveFileDialog
-            {
-                Filter = "(*.txt)|*.txt",
-                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
-                AddExtension = true,
-                RestoreDirectory = true
-            };
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                this.Busy();
-
-                string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
-                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
-
-                this.Idle();
-                this.ToastSuccess("已保存");
+                this.ToastSuccess("已保存！");
             }
         }
         #endregion
@@ -619,6 +553,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -687,6 +622,39 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region 导入标签 —— async void ImportLabels()
+        /// <summary>
+        /// 导入标签
+        /// </summary>
+        public async void ImportLabels()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择标签文件",
+                Filter = "标注文件(*.txt)|*.txt",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                string[] labels = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
+                foreach (string label in labels)
+                {
+                    if (!this.Labels.Contains(label))
+                    {
+                        this.Labels.Add(label);
+                    }
+                }
+                await this.SaveLabels();
+
+                this.Idle();
+                this.ToastSuccess("已保存！");
+            }
+        }
+        #endregion
+
         #region 导入PascalVOC —— async void ImportPascal()
         /// <summary>
         /// 导入PascalVOC
@@ -697,6 +665,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -744,6 +713,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -791,6 +761,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -828,39 +799,112 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-
-        //格式
-
-        #region PascalVOC转换CSV —— async void PascalToCsv()
+        #region 导出PascalVOC —— async void ExportPascal()
         /// <summary>
-        /// PascalVOC转换CSV
+        /// 导出PascalVOC
         /// </summary>
-        public async void PascalToCsv()
+        public async void ExportPascal()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.xml)|*.xml",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                PascalAnnotation pascalAnnotation = this.SelectedImageAnnotation.ToPascalAnnotation();
+                string pascalAnnotationXml = pascalAnnotation.ToXml();
+                await Task.Run(() => File.WriteAllText(saveFileDialog.FileName, pascalAnnotationXml));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
+            }
         }
         #endregion
 
-        #region PascalVOC转换YOLO —— async void PascalToYolo()
+        #region 导出YOLO-det —— async void ExportYoloDet()
         /// <summary>
-        /// PascalVOC转换YOLO
+        /// 导出YOLO-det
         /// </summary>
-        public async void PascalToYolo()
+        public async void ExportYoloDet()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.txt)|*.txt",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
+            }
         }
         #endregion
 
-        #region YOLO转换PascalVOC —— async void YoloToPascal()
+        #region 导出YOLO-seg —— async void ExportYoloSeg()
         /// <summary>
-        /// YOLO转换PascalVOC
+        /// 导出YOLO-seg
         /// </summary>
-        public async void YoloToPascal()
+        public async void ExportYoloSeg()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.txt)|*.txt",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
+            }
         }
         #endregion
 
@@ -877,6 +921,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -939,6 +984,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
             if (this.SelectedImageAnnotation == null)
             {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -1001,6 +1047,107 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region PascalVOC转换CSV —— async void PascalToCsv()
+        /// <summary>
+        /// PascalVOC转换CSV
+        /// </summary>
+        public async void PascalToCsv()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择PascalVOC标注文件",
+                Filter = "标注文件(*.xml)|*.xml",
+                Multiselect = true,
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Filter = "(*.csv)|*.csv",
+                    AddExtension = true,
+                    RestoreDirectory = true
+                };
+                if (saveFileDialog.ShowDialog() == true)
+                {
+                    this.Busy();
+
+                    IList<string> csvLines = new List<string>();
+                    csvLines.Add("image_id,width,height,class,x,y,w,h,source");
+                    foreach (string fileName in openFileDialog.FileNames)
+                    {
+                        string pascalAnnotationXml = await Task.Run(() => File.ReadAllText(fileName));
+                        PascalAnnotation pascalAnnotation = pascalAnnotationXml.AsXmlTo<PascalAnnotation>();
+                        foreach (PascalAnnotationInfo pascalAnnotationInfo in pascalAnnotation.Annotations)
+                        {
+                            StringBuilder csvBuilder = new StringBuilder();
+                            csvBuilder.Append($"{pascalAnnotation.Filename},");
+                            csvBuilder.Append($"{pascalAnnotation.ImageSize.Width},");
+                            csvBuilder.Append($"{pascalAnnotation.ImageSize.Height},");
+                            csvBuilder.Append($"{pascalAnnotationInfo.Name},");
+                            csvBuilder.Append($"{pascalAnnotationInfo.Location.XMin},");
+                            csvBuilder.Append($"{pascalAnnotationInfo.Location.YMin},");
+                            csvBuilder.Append($"{pascalAnnotationInfo.Location.XMax - pascalAnnotationInfo.Location.XMin},");
+                            csvBuilder.Append($"{pascalAnnotationInfo.Location.YMax - pascalAnnotationInfo.Location.YMin},");
+                            csvBuilder.Append($"{pascalAnnotation.Source.Database}");
+                            csvLines.Add(csvBuilder.ToString());
+                        }
+                    }
+
+                    await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, csvLines));
+
+                    this.Idle();
+                    this.ToastSuccess("已保存！");
+                }
+            }
+        }
+        #endregion
+
+        #region PascalVOC转换YOLO —— async void PascalToYolo()
+        /// <summary>
+        /// PascalVOC转换YOLO
+        /// </summary>
+        public async void PascalToYolo()
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择PascalVOC标注文件",
+                Filter = "标注文件(*.xml)|*.xml",
+                Multiselect = true,
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                CommonOpenFileDialog folderDialog = new CommonOpenFileDialog
+                {
+                    Title = "请选择目标文件夹",
+                    IsFolderPicker = true
+                };
+                if (folderDialog.ShowDialog() == CommonFileDialogResult.Ok)
+                {
+                    this.Busy();
+
+                    foreach (string fileName in openFileDialog.FileNames)
+                    {
+                        string pascalAnnotationXml = await Task.Run(() => File.ReadAllText(fileName));
+                        PascalAnnotation pascalAnnotation = pascalAnnotationXml.AsXmlTo<PascalAnnotation>();
+                        IList<Annotation> annotations = pascalAnnotation.FromPascalAnnotation();
+                        string[] yoloAnnotations = annotations.ToYoloDetenctions(pascalAnnotation.ImageSize.Width, pascalAnnotation.ImageSize.Height, this.Labels);
+
+                        string yoloFileName = Path.GetFileNameWithoutExtension(fileName);
+                        string yoloFilePath = $@"{folderDialog.FileName}\{yoloFileName}.txt";
+                        await Task.Run(() => File.WriteAllLines(yoloFilePath, yoloAnnotations));
+                    }
+
+                    this.Idle();
+                    this.ToastSuccess("已保存！");
+                }
+            }
+        }
+        #endregion
+
 
         //帮助
 
@@ -1022,6 +1169,17 @@ namespace LabelSharp.ViewModels.HomeContext
         public void Support()
         {
             Process.Start("https://gitee.com/lishilei0523/LabelSharp");
+        }
+        #endregion
+
+        #region 关于LabelSharp —— async void About()
+        /// <summary>
+        /// 关于LabelSharp
+        /// </summary>
+        public async void About()
+        {
+            //TODO 实现
+            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         #endregion
 

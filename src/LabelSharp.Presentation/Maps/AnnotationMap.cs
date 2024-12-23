@@ -142,19 +142,31 @@ namespace LabelSharp.Presentation.Maps
         public static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
             BitmapSource currentImage = imageAnnotation.Image;
-            string[] lines = new string[imageAnnotation.Annotations.Count];
+            string[] lines = imageAnnotation.Annotations.ToYoloDetenctions(currentImage.Width, currentImage.Height, labels);
+
+            return lines;
+        }
+        #endregion
+
+        #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetenctions(this IList<Annotation> annotations...
+        /// <summary>
+        /// 映射YOLO目标检测标注
+        /// </summary>
+        public static string[] ToYoloDetenctions(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
+        {
+            string[] lines = new string[annotations.Count];
             for (int index = 0; index < lines.Length; index++)
             {
                 StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = imageAnnotation.Annotations[index];
+                Annotation annotation = annotations[index];
                 int labelIndex = labels.IndexOf(annotation.Label);
                 lineBuilder.Append($"{labelIndex} ");
                 if (annotation.ShapeL is RectangleL rectangleL)
                 {
-                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)currentImage.Width;
-                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)currentImage.Height;
-                    float scaledWidth = rectangleL.Width / (float)currentImage.Width;
-                    float scaledHeight = rectangleL.Height / (float)currentImage.Height;
+                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)imageWidth;
+                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)imageHeight;
+                    float scaledWidth = rectangleL.Width / (float)imageWidth;
+                    float scaledHeight = rectangleL.Height / (float)imageHeight;
                     lineBuilder.Append($"{scaledCenterX} ");
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
@@ -175,28 +187,40 @@ namespace LabelSharp.Presentation.Maps
         public static string[] ToYoloSegmentations(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
             BitmapSource currentImage = imageAnnotation.Image;
-            string[] lines = new string[imageAnnotation.Annotations.Count];
+            string[] lines = imageAnnotation.Annotations.ToYoloSegmentations(currentImage.Width, currentImage.Height, labels);
+
+            return lines;
+        }
+        #endregion
+
+        #region # 映射YOLO图像分割标注 —— static string[] ToYoloSegmentations(this IList<Annotation> annotations...
+        /// <summary>
+        /// 映射YOLO图像分割标注
+        /// </summary>
+        public static string[] ToYoloSegmentations(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
+        {
+            string[] lines = new string[annotations.Count];
             for (int index = 0; index < lines.Length; index++)
             {
                 StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = imageAnnotation.Annotations[index];
+                Annotation annotation = annotations[index];
                 int labelIndex = labels.IndexOf(annotation.Label);
                 lineBuilder.Append($"{labelIndex} ");
                 if (annotation.ShapeL is PolygonL polygonL)
                 {
                     Rect boundingBox = annotation.Shape.RenderedGeometry.Bounds;
-                    float scaledCenterX = (float)(boundingBox.X + boundingBox.Width / 2.0f) / (float)currentImage.Width;
-                    float scaledCenterY = (float)(boundingBox.Y + boundingBox.Height / 2.0f) / (float)currentImage.Height;
-                    float scaledWidth = (float)boundingBox.Width / (float)currentImage.Width;
-                    float scaledHeight = (float)boundingBox.Height / (float)currentImage.Height;
+                    float scaledCenterX = (float)(boundingBox.X + boundingBox.Width / 2.0f) / (float)imageWidth;
+                    float scaledCenterY = (float)(boundingBox.Y + boundingBox.Height / 2.0f) / (float)imageHeight;
+                    float scaledWidth = (float)boundingBox.Width / (float)imageWidth;
+                    float scaledHeight = (float)boundingBox.Height / (float)imageHeight;
                     lineBuilder.Append($"{scaledCenterX} ");
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
                     foreach (PointL pointL in polygonL.Points)
                     {
-                        float scaledX = pointL.X / (float)currentImage.Width;
-                        float scaledY = pointL.Y / (float)currentImage.Height;
+                        float scaledX = pointL.X / (float)imageWidth;
+                        float scaledY = pointL.Y / (float)imageHeight;
                         lineBuilder.Append($"{scaledX} ");
                         lineBuilder.Append($"{scaledY} ");
                     }

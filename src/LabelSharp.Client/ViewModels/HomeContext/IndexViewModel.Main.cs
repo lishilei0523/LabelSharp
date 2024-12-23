@@ -4,6 +4,8 @@ using LabelSharp.Presentation.Models;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
+using OpenCvSharp;
+using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
 using SD.Infrastructure.WPF.Visual2Ds;
@@ -456,7 +458,75 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         public async void SaveMask()
         {
-            //TODO 实现
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.jpg)|*.jpg|(*.png)|*.png|(*.bmp)|*.bmp",
+                FileName = $"{Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath)}_Mask",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                BitmapSource image = this.SelectedImageAnnotation.Image;
+                OpenCvSharp.Size maskSize = new OpenCvSharp.Size(image.Width, image.Height);
+                using Mat mask = Mat.Zeros(maskSize, MatType.CV_8UC1);
+                foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
+                {
+                    const int thickness = -1;
+                    if (shapeL is RectangleL rectangleL)
+                    {
+                        OpenCvSharp.Rect rect = new OpenCvSharp.Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height);
+                        await Task.Run(() => mask.Rectangle(rect, Scalar.White, thickness));
+                    }
+                    if (shapeL is CircleL circleL)
+                    {
+                        await Task.Run(() => mask.Circle(circleL.X, circleL.Y, circleL.Radius, Scalar.White, thickness));
+                    }
+                    if (shapeL is EllipseL ellipseL)
+                    {
+                        Point2f center = new Point2f(ellipseL.X, ellipseL.Y);
+                        Size2f size = new Size2f(ellipseL.RadiusX * 2, ellipseL.RadiusY * 2);
+                        RotatedRect rect = new RotatedRect(center, size, 0);
+                        await Task.Run(() => mask.Ellipse(rect, Scalar.White, thickness));
+                    }
+                    if (shapeL is PolygonL polygonL)
+                    {
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polygonL.Points.Count];
+                        for (int index = 0; index < polygonL.Points.Count; index++)
+                        {
+                            PointL pointL = polygonL.Points.ElementAt(index);
+                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
+                        }
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+                    }
+                    if (shapeL is PolylineL polylineL)
+                    {
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polylineL.Points.Count];
+                        for (int index = 0; index < polylineL.Points.Count; index++)
+                        {
+                            PointL pointL = polylineL.Points.ElementAt(index);
+                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
+                        }
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+                    }
+                }
+
+                await Task.Run(() => mask.SaveImage(saveFileDialog.FileName));
+
+                this.Idle();
+                this.ToastSuccess("已保存！");
+            }
         }
         #endregion
 

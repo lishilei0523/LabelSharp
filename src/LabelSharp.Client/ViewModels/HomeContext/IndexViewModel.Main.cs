@@ -1,36 +1,26 @@
 ﻿using Caliburn.Micro;
+using LabelSharp.Presentation.Maps;
 using LabelSharp.Presentation.Models;
-using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using OpenCvSharp;
-using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.Caliburn.Base;
-using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Visual2Ds;
 using SD.IOC.Core.Mediators;
-using SourceChord.FluentWPF.Animations;
-using System;
+using SD.Toolkits.Json;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
-using Point = System.Windows.Point;
-using Rect = OpenCvSharp.Rect;
-using Size = System.Windows.Size;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -136,30 +126,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public int? MousePositionY { get; set; }
-        #endregion
-
-        #region 已选图像标注 —— ImageAnnotation SelectedImageAnnotation
-        /// <summary>
-        /// 已选图像标注
-        /// </summary>
-        [DependencyProperty]
-        public ImageAnnotation SelectedImageAnnotation { get; set; }
-        #endregion
-
-        #region 图像标注列表 —— ObservableCollection<ImageAnnotation> ImageAnnotations
-        /// <summary>
-        /// 图像标注列表
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<ImageAnnotation> ImageAnnotations { get; set; }
-        #endregion
-
-        #region 标签列表 —— ObservableCollection<string> Labels
-        /// <summary>
-        /// 标签列表
-        /// </summary>
-        [DependencyProperty]
-        public ObservableCollection<string> Labels { get; set; }
         #endregion
 
         #endregion
@@ -385,257 +351,37 @@ namespace LabelSharp.ViewModels.HomeContext
 
             this.Busy();
 
-            //保存YOLO格式
+            //保存JSON
             string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
-            await this.SaveYolo($"{this.ImageFolder}/{annotationName}.txt");
+            string annotationPath = $"{this.ImageFolder}/{annotationName}.json";
+            MeAnnotation meAnnotation = this.SelectedImageAnnotation.ToMeAnnotation();
+            string meAnnotationJson = meAnnotation.ToJson();
+            await Task.Run(() => File.WriteAllText(annotationPath, meAnnotationJson));
 
             //保存标签
             string labelsPath = $"{this.ImageFolder}/classes.txt";
-            await this.SaveLabels(labelsPath);
+            await Task.Run(() => File.WriteAllLines(labelsPath, this.Labels));
 
             this.Idle();
             this.ToastSuccess("已保存！");
         }
         #endregion
 
-        #region 另存为 —— async void SaveAs()
+        #region 另存为PascalVOC —— async void SaveAsPascal()
         /// <summary>
-        /// 另存为
+        /// 另存为PascalVOC
         /// </summary>
-        public async void SaveAs()
+        public async void SaveAsPascal()
         {
             //TODO 实现
         }
         #endregion
 
-
-        //Actions
-
-        #region 查看标注信息 —— async void LookAnnotation()
+        #region 另存为YOLO-det —— async void SaveAsYoloDet()
         /// <summary>
-        /// 查看标注信息
+        /// 另存为YOLO-det
         /// </summary>
-        public async void LookAnnotation()
-        {
-            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            if (annotation != null)
-            {
-                LookViewModel viewModel = ResolveMediator.Resolve<LookViewModel>();
-                viewModel.Load(annotation.Label.Trim(), annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.ShapeL, annotation.Description);
-                await this._windowManager.ShowDialogAsync(viewModel);
-            }
-        }
-        #endregion
-
-        #region 修改标注信息 —— async void UpdateAnnotation()
-        /// <summary>
-        /// 修改标注信息
-        /// </summary>
-        public async void UpdateAnnotation()
-        {
-            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            if (annotation != null)
-            {
-                UpdateViewModel viewModel = ResolveMediator.Resolve<UpdateViewModel>();
-                viewModel.Load(annotation.Label, annotation.GroupId, annotation.Truncated, annotation.Difficult, annotation.Description, this.Labels);
-                bool? result = await this._windowManager.ShowDialogAsync(viewModel);
-                if (result == true)
-                {
-                    annotation.Label = viewModel.Label.Trim();
-                    annotation.GroupId = viewModel.GroupId;
-                    annotation.Truncated = viewModel.Truncated;
-                    annotation.Difficult = viewModel.Difficult;
-                    annotation.Description = viewModel.Description;
-                    if (!this.Labels.Contains(viewModel.Label.Trim()))
-                    {
-                        this.Labels.Add(viewModel.Label.Trim());
-                    }
-
-                    this.Save();
-                }
-            }
-        }
-        #endregion
-
-        #region 删除标注信息 —— void RemoveAnnotation()
-        /// <summary>
-        /// 删除标注信息
-        /// </summary>
-        public void RemoveAnnotation()
-        {
-            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            if (annotation != null)
-            {
-                MessageBoxResult result = MessageBox.Show("确定要删除吗？", "警告", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
-                if (result == MessageBoxResult.OK)
-                {
-                    this.SelectedImageAnnotation.Shapes.Remove(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Remove(annotation.ShapeL);
-                    this.SelectedImageAnnotation.Annotations.Remove(annotation);
-                    this.Save();
-                }
-            }
-        }
-        #endregion
-
-        #region 创建标签 —— async void CreateLabel()
-        /// <summary>
-        /// 创建标签
-        /// </summary>
-        public async void CreateLabel()
-        {
-            LabelViewModel viewModel = ResolveMediator.Resolve<LabelViewModel>();
-            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
-            if (result == true)
-            {
-                if (!this.Labels.Contains(viewModel.Label.Trim()))
-                {
-                    this.Labels.Add(viewModel.Label.Trim());
-                    this.Save();
-                }
-                else
-                {
-                    this.ToastError("标签已存在！");
-                }
-            }
-        }
-        #endregion
-
-
-        //Events
-
-        #region 图像选中事件 —— async void OnImageSelect()
-        /// <summary>
-        /// 图像选中事件
-        /// </summary>
-        public async void OnImageSelect()
-        {
-            this.ClearAnnotations();
-            await this.LoadYolo();
-        }
-        #endregion
-
-        #region 绘制完成事件 —— async void OnDrawCompleted(Shape shape, ShapeL shapeL)
-        /// <summary>
-        /// 绘制完成事件
-        /// </summary>
-        /// <param name="shape">形状</param>
-        /// <param name="shapeL">形状数据</param>
-        public async void OnDrawCompleted(Shape shape, ShapeL shapeL)
-        {
-            AddViewModel viewModel = ResolveMediator.Resolve<AddViewModel>();
-            viewModel.Load(this.Labels);
-            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
-            if (result == true)
-            {
-                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shapeL, viewModel.Description);
-                this.SelectedImageAnnotation.Annotations.Add(annotation);
-                if (!this.Labels.Contains(annotation.Label.Trim()))
-                {
-                    this.Labels.Add(annotation.Label.Trim());
-                }
-                this.Save();
-            }
-            else
-            {
-                this.SelectedImageAnnotation.Shapes.Remove(shape);
-                this.SelectedImageAnnotation.ShapeLs.Remove(shapeL);
-            }
-
-            //设置光标
-            Mouse.OverrideCursor = Cursors.Arrow;
-        }
-        #endregion
-
-        #region 标注信息选中事件 —— void OnAnnotationSelect()
-        /// <summary>
-        /// 标注信息选中事件
-        /// </summary>
-        public void OnAnnotationSelect()
-        {
-            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            if (annotation != null)
-            {
-                Shape shape = annotation.Shape;
-                if (shape.Stroke is SolidColorBrush brush)
-                {
-                    BrushAnimation brushAnimation = new BrushAnimation
-                    {
-                        From = new SolidColorBrush(brush.Color.Invert()),
-                        To = shape.Stroke,
-                        Duration = new Duration(TimeSpan.FromSeconds(2))
-                    };
-                    Storyboard storyboard = new Storyboard();
-                    Storyboard.SetTarget(brushAnimation, shape);
-                    Storyboard.SetTargetProperty(brushAnimation, new PropertyPath(Shape.StrokeProperty));
-                    storyboard.Children.Add(brushAnimation);
-                    storyboard.Begin();
-                }
-            }
-        }
-        #endregion
-
-        #region 标注信息勾选事件 —— void OnAnnotationCheck(Annotation annotation)
-        /// <summary>
-        /// 标注信息勾选事件
-        /// </summary>
-        public void OnAnnotationCheck(Annotation annotation)
-        {
-            annotation.Shape.Visibility = Visibility.Visible;
-        }
-        #endregion
-
-        #region 标注信息取消勾选事件 —— void OnAnnotationUncheck(Annotation annotation)
-        /// <summary>
-        /// 标注信息取消勾选事件
-        /// </summary>
-        public void OnAnnotationUncheck(Annotation annotation)
-        {
-            annotation.Shape.Visibility = Visibility.Collapsed;
-        }
-        #endregion
-
-        #region 键盘按下事件 —— void OnKeyDown()
-        /// <summary>
-        /// 键盘按下事件
-        /// </summary>
-        public void OnKeyDown()
-        {
-            if (Keyboard.IsKeyDown(Key.F5))
-            {
-                this.Reset();
-            }
-            if (Keyboard.IsKeyDown(Key.LeftCtrl) && Keyboard.IsKeyDown(Key.S))
-            {
-                this.Save();
-            }
-        }
-        #endregion
-
-
-        //Private
-
-        #region 清空标注信息 —— void ClearAnnotations()
-        /// <summary>
-        /// 清空标注信息
-        /// </summary>
-        private void ClearAnnotations()
-        {
-            if (this.SelectedImageAnnotation != null)
-            {
-                this.SelectedImageAnnotation.Shapes = new ObservableCollection<Shape>();
-                this.SelectedImageAnnotation.ShapeLs = new ObservableCollection<ShapeL>();
-                this.SelectedImageAnnotation.Annotations = new ObservableCollection<Annotation>();
-                this.SelectedImageAnnotation.SelectedAnnotation = null;
-            }
-        }
-        #endregion
-
-        #region 加载YOLO格式 —— async Task LoadYolo()
-        /// <summary>
-        /// 加载YOLO格式
-        /// </summary>
-        public async Task LoadYolo()
+        public async void SaveAsYoloDet()
         {
             #region # 验证
 
@@ -646,197 +392,157 @@ namespace LabelSharp.ViewModels.HomeContext
 
             #endregion
 
-            string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
-            string annotationPath = $"{this.ImageFolder}/{annotationName}.txt";
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.txt)|*.txt",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+            }
+        }
+        #endregion
 
+        #region 另存为YOLO-seg —— async void SaveAsYoloSeg()
+        /// <summary>
+        /// 另存为YOLO-seg
+        /// </summary>
+        public async void SaveAsYoloSeg()
+        {
             #region # 验证
 
-            if (!File.Exists(annotationPath))
+            if (this.SelectedImageAnnotation == null)
             {
                 return;
             }
 
             #endregion
 
-            BitmapSource currentImage = this.SelectedImageAnnotation.Image;
-            string[] lines = await Task.Run(() => File.ReadAllLines(annotationPath));
-            foreach (string line in lines)
+            SaveFileDialog saveFileDialog = new SaveFileDialog
             {
-                string[] words = line.Split(' ');
+                Filter = "(*.txt)|*.txt",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+            }
+        }
+        #endregion
 
-                //标签索引
-                int labelIndex = int.Parse(words[0]);
-                string label = this.Labels.Count > labelIndex ? this.Labels[labelIndex] : labelIndex.ToString();
 
-                //矩形
-                if (words.Length == 5)
+        //编辑
+
+        #region 切割图像 —— async void CutImage()
+        /// <summary>
+        /// 切割图像
+        /// </summary>
+        public async void CutImage()
+        {
+            //TODO 实现
+        }
+        #endregion
+
+        #region 保存掩膜 —— async void SaveMask()
+        /// <summary>
+        /// 保存掩膜
+        /// </summary>
+        public async void SaveMask()
+        {
+            //TODO 实现
+        }
+        #endregion
+
+        #region 导入PascalVOC —— async void ImportPascal()
+        /// <summary>
+        /// 导入PascalVOC
+        /// </summary>
+        public async void ImportPascal()
+        {
+            //TODO 实现
+        }
+        #endregion
+
+        #region 导入YOLO-det —— async void ImportYoloDet()
+        /// <summary>
+        /// 导入YOLO-det
+        /// </summary>
+        public async void ImportYoloDet()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择YOLO目标检测标注",
+                Filter = "标注文件(*.txt)|*.txt",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                BitmapSource image = this.SelectedImageAnnotation.Image;
+                string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
+                IList<Annotation> annotations = lines.FromYoloDetections(image.Width, image.Height, this.Labels);
+                foreach (Annotation annotation in annotations)
                 {
-                    float scaledCenterX = float.Parse(words[1]);
-                    float scaledCenterY = float.Parse(words[2]);
-                    float scaledWidth = float.Parse(words[3]);
-                    float scaledHeight = float.Parse(words[4]);
-                    int boxWidth = (int)Math.Ceiling(scaledWidth * currentImage.Width);
-                    int boxHeight = (int)Math.Ceiling(scaledHeight * currentImage.Height);
-                    int x = (int)Math.Ceiling(scaledCenterX * currentImage.Width - boxWidth / 2.0f);
-                    int y = (int)Math.Ceiling(scaledCenterY * currentImage.Height - boxHeight / 2.0f);
-
-                    RectangleVisual2D rectangle = new RectangleVisual2D()
-                    {
-                        Location = new Point(x, y),
-                        Size = new Size(boxWidth, boxHeight),
-                        Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                        StrokeThickness = this.BorderThickness!.Value
-                    };
-                    RectangleL rectangleL = new RectangleL(x, y, boxWidth, boxHeight);
-                    rectangle.Tag = rectangleL;
-                    rectangleL.Tag = rectangle;
-                    rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
-
-                    Annotation annotation = new Annotation(label, null, false, false, rectangleL, string.Empty);
-
-                    this.SelectedImageAnnotation.ShapeLs.Add(rectangleL);
-                    this.SelectedImageAnnotation.Shapes.Add(rectangle);
+                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
-                //多边形
-                if (words.Length > 5)
+            }
+        }
+        #endregion
+
+        #region 导入YOLO-seg —— async void ImportYoloSeg()
+        /// <summary>
+        /// 导入YOLO-seg
+        /// </summary>
+        public async void ImportYoloSeg()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择YOLO图像分割标注",
+                Filter = "标注文件(*.txt)|*.txt",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                BitmapSource image = this.SelectedImageAnnotation.Image;
+                string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
+                IList<Annotation> annotations = lines.FromYoloSegmentations(image.Width, image.Height, this.Labels);
+                foreach (Annotation annotation in annotations)
                 {
-                    string[] polygonTextArray = new string[words.Length - 5];
-                    IList<Point> points = new List<Point>();
-                    Array.Copy(words, 5, polygonTextArray, 0, words.Length - 5);
-                    IEnumerable<float> polygonArray = polygonTextArray.Select(float.Parse);
-
-                    using Mat mat = Mat.FromArray(polygonArray);
-                    using Mat reshapedMat = mat.Reshape(1, polygonTextArray.Length / 2);
-                    for (int rowIndex = 0; rowIndex < reshapedMat.Rows; rowIndex++)
-                    {
-                        float scaledPointX = reshapedMat.At<float>(rowIndex, 0);
-                        float scaledPointY = reshapedMat.At<float>(rowIndex, 1);
-                        double pointX = scaledPointX * currentImage.Width;
-                        double pointY = scaledPointY * currentImage.Height;
-                        points.Add(new Point(pointX, pointY));
-                    }
-
-                    IEnumerable<PointL> pointIs =
-                        from point in points
-                        let pointX = (int)Math.Ceiling(point.X)
-                        let pointY = (int)Math.Ceiling(point.Y)
-                        select new PointL(pointX, pointY);
-                    PolygonL polygonL = new PolygonL(pointIs);
-                    Polygon polygon = new Polygon
-                    {
-                        Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(this.BorderColor!.Value),
-                        StrokeThickness = this.BorderThickness!.Value,
-                        Points = new PointCollection(points),
-                        Tag = polygonL
-                    };
-                    polygonL.Tag = polygon;
-                    polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
-
-                    Annotation annotation = new Annotation(label, null, false, false, polygonL, string.Empty);
-
-                    this.SelectedImageAnnotation.ShapeLs.Add(polygonL);
-                    this.SelectedImageAnnotation.Shapes.Add(polygon);
+                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                 }
             }
-        }
-        #endregion
-
-        #region 保存YOLO格式 —— async Task SaveYolo(string fileName)
-        /// <summary>
-        /// 保存YOLO格式
-        /// </summary>
-        /// <param name="filePath">文件路径</param>
-        private async Task SaveYolo(string filePath)
-        {
-            BitmapSource currentImage = this.SelectedImageAnnotation.Image;
-            string[] lines = new string[this.SelectedImageAnnotation.Annotations.Count];
-            for (int index = 0; index < lines.Length; index++)
-            {
-                StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = this.SelectedImageAnnotation.Annotations[index];
-                int labelIndex = this.Labels.IndexOf(annotation.Label);
-                lineBuilder.Append($"{labelIndex} ");
-                if (annotation.ShapeL is RectangleL rectangleL)
-                {
-                    float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)currentImage.Width;
-                    float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)currentImage.Height;
-                    float scaledWidth = rectangleL.Width / (float)currentImage.Width;
-                    float scaledHeight = rectangleL.Height / (float)currentImage.Height;
-                    lineBuilder.Append($"{scaledCenterX} ");
-                    lineBuilder.Append($"{scaledCenterY} ");
-                    lineBuilder.Append($"{scaledWidth} ");
-                    lineBuilder.Append($"{scaledHeight} ");
-                }
-                if (annotation.ShapeL is PolygonL polygonL)
-                {
-                    IEnumerable<Point2f> point2Fs = polygonL.Points.Select(point => new Point2f(point.X, point.Y));
-                    Rect boundingBox = Cv2.BoundingRect(point2Fs);
-                    float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)currentImage.Width;
-                    float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)currentImage.Height;
-                    float scaledWidth = boundingBox.Width / (float)currentImage.Width;
-                    float scaledHeight = boundingBox.Height / (float)currentImage.Height;
-                    lineBuilder.Append($"{scaledCenterX} ");
-                    lineBuilder.Append($"{scaledCenterY} ");
-                    lineBuilder.Append($"{scaledWidth} ");
-                    lineBuilder.Append($"{scaledHeight} ");
-                    foreach (PointL pointL in polygonL.Points)
-                    {
-                        float scaledX = pointL.X / (float)currentImage.Width;
-                        float scaledY = pointL.Y / (float)currentImage.Height;
-                        lineBuilder.Append($"{scaledX} ");
-                        lineBuilder.Append($"{scaledY} ");
-                    }
-                }
-
-                lines[index] = lineBuilder.ToString().Trim();
-            }
-
-            await Task.Run(() => File.WriteAllLines(filePath, lines));
-        }
-        #endregion
-
-        #region 加载标签 —— async Task LoadLabels()
-        /// <summary>
-        /// 加载标签
-        /// </summary>
-        public async Task LoadLabels()
-        {
-            if (!string.IsNullOrWhiteSpace(this.ImageFolder))
-            {
-                string labelsPath = $"{this.ImageFolder}/classes.txt";
-                if (File.Exists(labelsPath))
-                {
-                    string[] lines = await Task.Run(() => File.ReadAllLines(labelsPath));
-                    foreach (string line in lines)
-                    {
-                        if (!this.Labels.Contains(line))
-                        {
-                            this.Labels.Add(line);
-                        }
-                    }
-                }
-            }
-        }
-        #endregion
-
-        #region 保存标签 —— async Task SaveLabels(string filePath)
-        /// <summary>
-        /// 保存标签
-        /// </summary>
-        /// <param name="filePath">文件路径</param>
-        public async Task SaveLabels(string filePath)
-        {
-            string[] lines = new string[this.Labels.Count];
-            for (int index = 0; index < lines.Length; index++)
-            {
-                lines[index] = this.Labels[index];
-            }
-
-            await Task.Run(() => File.WriteAllLines(filePath, lines));
         }
         #endregion
 

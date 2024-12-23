@@ -165,6 +165,7 @@
                                          cm:Message.Attach="
                                          [Event MouseMove] = [Action OnCanvasMouseMove($source,$eventArgs)];
                                          [Event MouseLeave] = [Action OnCanvasMouseLeave()];
+                                         [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
                                          [Event Draw] = [Action OnDraw($source)];

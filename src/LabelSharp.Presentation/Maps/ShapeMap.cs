@@ -1,8 +1,12 @@
 ﻿using LabelSharp.Presentation.Models;
 using SD.Infrastructure.Shapes;
+using SD.Infrastructure.WPF.Visual2Ds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace LabelSharp.Presentation.Maps
 {
@@ -193,9 +197,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射点 —— static PointL ToPointL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射点 —— static PointL ToPointL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射点
+        /// LabelMe点集映射点
         /// </summary>
         public static PointL ToPointL(this IList<double[]> mePoints)
         {
@@ -207,9 +211,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射线 —— static LineL ToLineL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射线 —— static LineL ToLineL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射线
+        /// LabelMe点集映射线
         /// </summary>
         public static LineL ToLineL(this IList<double[]> mePoints)
         {
@@ -225,9 +229,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射矩形 —— static RectangleL ToRectangleL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射矩形 —— static RectangleL ToRectangleL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射矩形
+        /// LabelMe点集映射矩形
         /// </summary>
         public static RectangleL ToRectangleL(this IList<double[]> mePoints)
         {
@@ -241,9 +245,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射圆形 —— static CircleL ToCircleL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射圆形 —— static CircleL ToCircleL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射圆形
+        /// LabelMe点集映射圆形
         /// </summary>
         public static CircleL ToCircleL(this IList<double[]> mePoints)
         {
@@ -256,9 +260,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射椭圆形 —— static EllipseL ToEllipseL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射椭圆形 —— static EllipseL ToEllipseL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射椭圆形
+        /// LabelMe点集映射椭圆形
         /// </summary>
         public static EllipseL ToEllipseL(this IList<double[]> mePoints)
         {
@@ -272,9 +276,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射多边形 —— static PolygonL ToPolygonL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射多边形 —— static PolygonL ToPolygonL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射多边形
+        /// LabelMe点集映射多边形
         /// </summary>
         public static PolygonL ToPolygonL(this IList<double[]> mePoints)
         {
@@ -289,9 +293,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射多边形 —— static PolylineL ToPolylineL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射多边形 —— static PolylineL ToPolylineL(this IList<double[]> mePoints)
         /// <summary>
-        /// 映射多边形
+        /// LabelMe点集映射多边形
         /// </summary>
         public static PolylineL ToPolylineL(this IList<double[]> mePoints)
         {
@@ -306,27 +310,129 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-
+        #region # LabelMe点集映射标注信息 —— static Annotation ToAnnotation(this MeShape meShape)
+        /// <summary>
+        /// LabelMe点集映射标注信息
+        /// </summary>
         public static Annotation ToAnnotation(this MeShape meShape)
         {
-            //Shape shape;
-            //if (meShape.ShapeType==Constants.MePoint)
-            //{
-            //    PointL pointL = meShape.Points.ToPointL();
-            //    shape = new PointVisual2D
-            //    {
-            //        X = pointL.X,
-            //        Y = pointL.Y,
-            //        Fill = new SolidColorBrush(Colors.Black),
-            //        Stroke = new SolidColorBrush(this.BorderColor!.Value),
-            //        RenderTransform = canvas.MatrixTransform,
-            //        Tag = pointL
-            //    };
-            //}
+            ShapeL shapeL;
+            if (meShape.ShapeType == Constants.MePoint)
+            {
+                PointL pointL = meShape.Points.ToPointL();
+                PointVisual2D shape = new PointVisual2D
+                {
+                    X = pointL.X,
+                    Y = pointL.Y,
+                    Fill = new SolidColorBrush(Colors.Black),
+                    Stroke = new SolidColorBrush(Colors.Red)
+                };
+                shape.Tag = pointL;
+                pointL.Tag = shape;
+                shapeL = pointL;
+            }
+            else if (meShape.ShapeType == Constants.MeLine)
+            {
+                LineL lineL = meShape.Points.ToLineL();
+                Line shape = new Line
+                {
+                    X1 = lineL.A.X,
+                    Y1 = lineL.A.Y,
+                    X2 = lineL.B.X,
+                    Y2 = lineL.B.Y,
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = lineL;
+                lineL.Tag = shape;
+                shapeL = lineL;
+            }
+            else if (meShape.ShapeType == Constants.MeRectangle)
+            {
+                RectangleL rectangleL = meShape.Points.ToRectangleL();
+                RectangleVisual2D shape = new RectangleVisual2D
+                {
+                    Location = new Point(rectangleL.X, rectangleL.Y),
+                    Size = new Size(rectangleL.Width, rectangleL.Height),
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = rectangleL;
+                rectangleL.Tag = shape;
+                shapeL = rectangleL;
+            }
+            else if (meShape.ShapeType == Constants.MeCircle)
+            {
+                CircleL circleL = meShape.Points.ToCircleL();
+                CircleVisual2D shape = new CircleVisual2D
+                {
+                    Center = new Point(circleL.X, circleL.Y),
+                    Radius = circleL.Radius,
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = circleL;
+                circleL.Tag = shape;
+                shapeL = circleL;
+            }
+            else if (meShape.ShapeType == Constants.MeEllipse)
+            {
+                EllipseL ellipseL = meShape.Points.ToEllipseL();
+                EllipseVisual2D shape = new EllipseVisual2D
+                {
+                    Center = new Point(ellipseL.X, ellipseL.Y),
+                    RadiusX = ellipseL.RadiusX,
+                    RadiusY = ellipseL.RadiusY,
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = ellipseL;
+                ellipseL.Tag = shape;
+                shapeL = ellipseL;
+            }
+            else if (meShape.ShapeType == Constants.MePolygon)
+            {
+                PolygonL polygonL = meShape.Points.ToPolygonL();
+                IEnumerable<Point> points = polygonL.Points.Select(pointL => new Point(pointL.X, pointL.Y));
+                Polygon shape = new Polygon
+                {
+                    Points = new PointCollection(points),
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = polygonL;
+                polygonL.Tag = shape;
+                shapeL = polygonL;
+            }
+            else if (meShape.ShapeType == Constants.MePolyline)
+            {
+                PolylineL polylineL = meShape.Points.ToPolylineL();
+                IEnumerable<Point> points = polylineL.Points.Select(pointL => new Point(pointL.X, pointL.Y));
+                Polyline shape = new Polyline
+                {
+                    Points = new PointCollection(points),
+                    Fill = new SolidColorBrush(Colors.Transparent),
+                    Stroke = new SolidColorBrush(Colors.Red),
+                    StrokeThickness = 2
+                };
+                shape.Tag = polylineL;
+                polylineL.Tag = shape;
+                shapeL = polylineL;
+            }
+            else
+            {
+                throw new NotSupportedException("不支持的形状！");
+            }
 
-            Annotation annotation = new Annotation(meShape.Label, meShape.GroupId, meShape.Truncated, meShape.Difficult, null, meShape.Description);
+            Annotation annotation = new Annotation(meShape.Label, meShape.GroupId, meShape.Truncated, meShape.Difficult, shapeL, meShape.Description);
 
             return annotation;
         }
+        #endregion
     }
 }

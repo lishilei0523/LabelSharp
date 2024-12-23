@@ -458,7 +458,7 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 画布鼠标离开事件 —— void OnCanvasMouseLeave(CanvasEx canvas...
+        #region 画布鼠标离开事件 —— void OnCanvasMouseLeave()
         /// <summary>
         /// 画布鼠标离开事件
         /// </summary>
@@ -466,6 +466,19 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             //设置光标
             Mouse.OverrideCursor = Cursors.Arrow;
+        }
+        #endregion
+
+        #region 画布鼠标左键松开事件 —— void OnCanvasMouseLeftUp()
+        /// <summary>
+        /// 画布鼠标左键松开事件
+        /// </summary>
+        public void OnCanvasMouseLeftUp()
+        {
+            if ((this.CanvasMode == CanvasMode.Drag || this.CanvasMode == CanvasMode.Resize))
+            {
+                this.Save();
+            }
         }
         #endregion
 

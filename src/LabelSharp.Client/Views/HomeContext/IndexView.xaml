@@ -73,7 +73,6 @@
                     <MenuItem Header="帮助(_H)">
                         <MenuItem Header="操作手册(_M)" cm:Message.Attach="Manual()" />
                         <MenuItem Header="技术支持(_T)" cm:Message.Attach="Support()" />
-                        <MenuItem Header="关于 LabelSharp(_A)" cm:Message.Attach="About()" />
                     </MenuItem>
                 </Menu>
                 <!--ToolBar-->

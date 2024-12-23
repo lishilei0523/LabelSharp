@@ -1151,14 +1151,20 @@ namespace LabelSharp.ViewModels.HomeContext
 
         //帮助
 
-        #region 操作手册 —— async void Manual()
+        #region 操作手册 —— void Manual()
         /// <summary>
         /// 操作手册
         /// </summary>
-        public async void Manual()
+        public void Manual()
         {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
+            StringBuilder docBuilder = new StringBuilder();
+            docBuilder.AppendLine("Ctrl + S: 保存");
+            docBuilder.AppendLine("←/→: 切换图像");
+            docBuilder.AppendLine("鼠标滚轮滚动: 缩放视口");
+            docBuilder.AppendLine("鼠标滚轮按下拖动: 移动视口");
+            docBuilder.AppendLine("列表功能: 鼠标右键");
+
+            MessageBox.Show(docBuilder.ToString(), "提示", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         #endregion
 
@@ -1169,17 +1175,6 @@ namespace LabelSharp.ViewModels.HomeContext
         public void Support()
         {
             Process.Start("https://gitee.com/lishilei0523/LabelSharp");
-        }
-        #endregion
-
-        #region 关于LabelSharp —— async void About()
-        /// <summary>
-        /// 关于LabelSharp
-        /// </summary>
-        public async void About()
-        {
-            //TODO 实现
-            MessageBox.Show("未实现！", "警告", MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         #endregion
 

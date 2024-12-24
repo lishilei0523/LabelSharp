@@ -258,8 +258,7 @@
                         </ListBox>
                     </TabItem>
                     <TabItem Header="图像列表">
-                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}"
-                                 cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
+                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Image Width="180" Height="150" Margin="2,4" Stretch="Uniform" Source="{Binding ImagePath}" />
@@ -268,8 +267,7 @@
                         </ListBox>
                     </TabItem>
                     <TabItem Header="文件列表">
-                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}"
-                                 cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
+                        <ListBox ItemsSource="{Binding ImageAnnotations}" SelectedItem="{Binding SelectedImageAnnotation}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Margin="5,10" Text="{Binding ImageName}" />

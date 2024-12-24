@@ -272,6 +272,15 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         private async Task LoadAnnotations()
         {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                return;
+            }
+
+            #endregion
+
             string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
             string annotationPath = $"{this.ImageFolder}/{annotationName}.json";
 

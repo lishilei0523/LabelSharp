@@ -667,15 +667,15 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.SelectedImageAnnotation.ShapeLs.Remove(polygonL);
 
-                IList<PointL> pointIs = new List<PointL>();
+                IList<PointL> pointLs = new List<PointL>();
                 foreach (Point point in polygon.Points)
                 {
                     int x = (int)Math.Ceiling(point.X + leftMargin);
                     int y = (int)Math.Ceiling(point.Y + topMargin);
-                    PointL pointI = new PointL(x, y);
-                    pointIs.Add(pointI);
+                    PointL pointL = new PointL(x, y);
+                    pointLs.Add(pointL);
                 }
-                PolygonL newPolygonL = new PolygonL(pointIs);
+                PolygonL newPolygonL = new PolygonL(pointLs);
 
                 polygon.Tag = newPolygonL;
                 newPolygonL.Tag = polygon;
@@ -699,15 +699,15 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.SelectedImageAnnotation.ShapeLs.Remove(polylineL);
 
-                IList<PointL> pointIs = new List<PointL>();
+                IList<PointL> pointLs = new List<PointL>();
                 foreach (Point point in polyline.Points)
                 {
                     int x = (int)Math.Ceiling(point.X + leftMargin);
                     int y = (int)Math.Ceiling(point.Y + topMargin);
-                    PointL pointI = new PointL(x, y);
-                    pointIs.Add(pointI);
+                    PointL pointL = new PointL(x, y);
+                    pointLs.Add(pointL);
                 }
-                PolylineL newPolylineL = new PolylineL(pointIs);
+                PolylineL newPolylineL = new PolylineL(pointLs);
 
                 polyline.Tag = newPolylineL;
                 newPolylineL.Tag = polyline;
@@ -738,11 +738,12 @@ namespace LabelSharp.ViewModels.HomeContext
                 RenderTransform = canvas.MatrixTransform,
                 Tag = pointL
             };
-            canvas.Children.Add(point);
 
             pointL.Tag = point;
             this.SelectedImageAnnotation.ShapeLs.Add(pointL);
             this.SelectedImageAnnotation.Shapes.Add(point);
+
+            //事件处理
             point.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
             this.OnDrawCompleted(point, pointL);
         }
@@ -763,16 +764,17 @@ namespace LabelSharp.ViewModels.HomeContext
                     StrokeThickness = this.BorderThickness / canvas.ScaledRatio,
                     RenderTransform = canvas.MatrixTransform
                 };
+                this._line.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                 canvas.Children.Add(this._line);
             }
 
             Point rectifiedVertex = canvas.RectifiedStartPosition!.Value;
             Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
+
             this._line.X1 = rectifiedVertex.X;
             this._line.Y1 = rectifiedVertex.Y;
             this._line.X2 = rectifiedPosition.X;
             this._line.Y2 = rectifiedPosition.Y;
-            this._line.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
 
@@ -822,9 +824,25 @@ namespace LabelSharp.ViewModels.HomeContext
             Point rectifiedVertex = canvas.RectifiedStartPosition!.Value;
             Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
 
-            int width = (int)Math.Round(Math.Abs(rectifiedPosition.X - rectifiedVertex.X));
-            int height = (int)Math.Round(Math.Abs(rectifiedPosition.Y - rectifiedVertex.Y));
-            this._rectangle.Location = rectifiedVertex;
+            if (rectifiedPosition.X > rectifiedVertex.X && rectifiedPosition.Y > rectifiedVertex.Y)
+            {
+                this._rectangle.Location = rectifiedVertex;
+            }
+            if (rectifiedPosition.X > rectifiedVertex.X && rectifiedPosition.Y < rectifiedVertex.Y)
+            {
+                this._rectangle.Location = new Point(rectifiedVertex.X, rectifiedPosition.Y);
+            }
+            if (rectifiedPosition.X < rectifiedVertex.X && rectifiedPosition.Y > rectifiedVertex.Y)
+            {
+                this._rectangle.Location = new Point(rectifiedPosition.X, rectifiedVertex.Y);
+            }
+            if (rectifiedPosition.X < rectifiedVertex.X && rectifiedPosition.Y < rectifiedVertex.Y)
+            {
+                this._rectangle.Location = rectifiedPosition;
+            }
+
+            double width = Math.Abs(rectifiedPosition.X - rectifiedVertex.X);
+            double height = Math.Abs(rectifiedPosition.Y - rectifiedVertex.Y);
             this._rectangle.Size = new Size(width, height);
         }
         #endregion
@@ -907,6 +925,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 RenderTransform = canvas.MatrixTransform
             };
 
+            //绘制锚线
             if (this._polyAnchors.Any())
             {
                 PointVisual2D lastAnchor = this._polyAnchors.Last();
@@ -924,6 +943,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 this._polyAnchorLines.Add(polyAnchorLine);
                 canvas.Children.Add(polyAnchorLine);
             }
+            //设置起始点在最上层
             else
             {
                 Panel.SetZIndex(anchor, short.MaxValue);
@@ -950,13 +970,13 @@ namespace LabelSharp.ViewModels.HomeContext
             points = points.Sequentialize();
 
             //构建点集
-            IEnumerable<PointL> pointIs =
+            IEnumerable<PointL> pointLs =
                 from point in points
                 let x = (int)Math.Ceiling(point.X)
                 let y = (int)Math.Ceiling(point.Y)
                 select new PointL(x, y);
 
-            PolygonL polygonL = new PolygonL(pointIs);
+            PolygonL polygonL = new PolygonL(pointLs);
             Polygon polygon = new Polygon
             {
                 Fill = new SolidColorBrush(Colors.Transparent),
@@ -1007,13 +1027,13 @@ namespace LabelSharp.ViewModels.HomeContext
                 let topMargin = canvas.GetRectifiedTop(anchor)
                 select new Point(anchor.X + leftMargin, anchor.Y + topMargin);
             PointCollection points = new PointCollection(point2ds);
-            IEnumerable<PointL> pointIs =
+            IEnumerable<PointL> pointLs =
                 from point in points
                 let x = (int)Math.Ceiling(point.X)
                 let y = (int)Math.Ceiling(point.Y)
                 select new PointL(x, y);
 
-            PolylineL polylineL = new PolylineL(pointIs);
+            PolylineL polylineL = new PolylineL(pointLs);
             Polyline polyline = new Polyline
             {
                 Fill = new SolidColorBrush(Colors.Transparent),

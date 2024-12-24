@@ -64,6 +64,11 @@
                         <MenuItem Header="导出YOLO-det(_D)" cm:Message.Attach="ExportYoloDet()" />
                         <MenuItem Header="导出YOLO-seg(_S)" cm:Message.Attach="ExportYoloSeg()" />
                     </MenuItem>
+                    <MenuItem Header="格式(_O)">
+                        <MenuItem Header="附带PascalVOC(_P)" IsCheckable="True" IsChecked="{Binding WithPascal}" />
+                        <MenuItem Header="附带YOLO-det(_D)" IsCheckable="True" IsChecked="{Binding WithYoloDet}" />
+                        <MenuItem Header="附带YOLO-seg(_S)" IsCheckable="True" IsChecked="{Binding WithYoloSeg}" />
+                    </MenuItem>
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />
                         <MenuItem Header="YOLO图像分割(_E)" cm:Message.Attach="YoloSegment()" />
@@ -215,11 +220,12 @@
                                 <DataTemplate>
                                     <Grid Margin="5,10">
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="15" />
+                                            <ColumnDefinition Width="18" />
                                             <ColumnDefinition Width="80"/>
                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <CheckBox Grid.Column="0" IsChecked="True"
+                                                  Style="{StaticResource MahApps.Styles.CheckBox}"
                                                   cm:Message.Attach="
                                                   [Event Checked] = [Action OnAnnotationCheck($dataContext)];
                                                   [Event Unchecked] = [Action OnAnnotationUncheck($dataContext)]" />

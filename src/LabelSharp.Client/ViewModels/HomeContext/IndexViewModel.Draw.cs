@@ -791,13 +791,12 @@ namespace LabelSharp.ViewModels.HomeContext
                     StrokeThickness = this.BorderThickness / canvas.ScaledRatio,
                     RenderTransform = canvas.MatrixTransform
                 };
+                this._brush.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                 canvas.Children.Add(this._brush);
             }
 
             Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
             this._brush.Points.Add(rectifiedPosition);
-            this._brush.RenderTransform = canvas.MatrixTransform;
-            this._brush.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
 
@@ -816,6 +815,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     StrokeThickness = this.BorderThickness / canvas.ScaledRatio,
                     RenderTransform = canvas.MatrixTransform
                 };
+                this._rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                 canvas.Children.Add(this._rectangle);
             }
 
@@ -826,7 +826,6 @@ namespace LabelSharp.ViewModels.HomeContext
             int height = (int)Math.Round(Math.Abs(rectifiedPosition.Y - rectifiedVertex.Y));
             this._rectangle.Location = rectifiedVertex;
             this._rectangle.Size = new Size(width, height);
-            this._rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
 
@@ -845,6 +844,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     StrokeThickness = this.BorderThickness / canvas.ScaledRatio,
                     RenderTransform = canvas.MatrixTransform
                 };
+                this._circle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                 canvas.Children.Add(this._circle);
             }
 
@@ -854,7 +854,6 @@ namespace LabelSharp.ViewModels.HomeContext
 
             this._circle.Center = rectifiedCenter;
             this._circle.Radius = vector.Length;
-            this._circle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
 
@@ -873,6 +872,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     StrokeThickness = this.BorderThickness / canvas.ScaledRatio,
                     RenderTransform = canvas.MatrixTransform
                 };
+                this._ellipse.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                 canvas.Children.Add(this._ellipse);
             }
 
@@ -882,7 +882,6 @@ namespace LabelSharp.ViewModels.HomeContext
             this._ellipse.Center = rectifiedCenter;
             this._ellipse.RadiusX = Math.Abs(rectifiedPosition.X - rectifiedCenter.X);
             this._ellipse.RadiusY = Math.Abs(rectifiedPosition.Y - rectifiedCenter.Y);
-            this._ellipse.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
         }
         #endregion
 

@@ -146,6 +146,30 @@ namespace LabelSharp.ViewModels.HomeContext
         public int? MousePositionY { get; set; }
         #endregion
 
+        #region 附带PascalVOC —— bool WithPascal
+        /// <summary>
+        /// 附带PascalVOC
+        /// </summary>
+        [DependencyProperty]
+        public bool WithPascal { get; set; }
+        #endregion
+
+        #region 附带YOLO-det —— bool WithYoloDet
+        /// <summary>
+        /// 附带YOLO-det
+        /// </summary>
+        [DependencyProperty]
+        public bool WithYoloDet { get; set; }
+        #endregion
+
+        #region 附带YOLO-seg —— bool WithYoloSeg
+        /// <summary>
+        /// 附带YOLO-seg
+        /// </summary>
+        [DependencyProperty]
+        public bool WithYoloSeg { get; set; }
+        #endregion
+
         #endregion
 
         #region # 方法
@@ -167,6 +191,9 @@ namespace LabelSharp.ViewModels.HomeContext
             this.GuideLineThickness = Constants.GuideLineThickness;
             this.ShowGuideLines = true;
             this.GuideLinesVisibility = Visibility.Visible;
+            this.WithPascal = true;
+            this.WithYoloDet = true;
+            this.WithYoloSeg = false;
             this.ScaleChecked = true;
             this.Labels = new ObservableCollection<string>();
 
@@ -360,8 +387,6 @@ namespace LabelSharp.ViewModels.HomeContext
 
             #endregion
 
-            this.Busy();
-
             //保存JSON
             string annotationName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
             string annotationPath = $"{this.ImageFolder}/{annotationName}.json";
@@ -372,7 +397,35 @@ namespace LabelSharp.ViewModels.HomeContext
             //保存标签
             await this.SaveLabels();
 
-            this.Idle();
+            //附带标注
+            Task.Run(() =>
+            {
+                //附带PascalVOC
+                if (this.WithPascal)
+                {
+                    PascalAnnotation pascalAnnotation = this.SelectedImageAnnotation.ToPascalAnnotation();
+                    string pascalAnnotationXml = pascalAnnotation.ToXml();
+                    string pascalAnnotationPath = $"{this.ImageFolder}/{annotationName}.xml";
+                    File.WriteAllText(pascalAnnotationPath, pascalAnnotationXml);
+                }
+
+                //附带YOLO-det
+                if (this.WithYoloDet)
+                {
+                    string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
+                    string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}.txt";
+                    File.WriteAllLines(yoloAnnotationPath, lines);
+                }
+
+                //附带YOLO-seg
+                if (this.WithYoloSeg)
+                {
+                    string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
+                    string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}-seg.txt";
+                    File.WriteAllLines(yoloAnnotationPath, lines);
+                }
+            });
+
             this.ToastSuccess("已保存！");
         }
         #endregion

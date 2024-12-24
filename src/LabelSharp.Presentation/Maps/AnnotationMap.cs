@@ -1,14 +1,16 @@
 ﻿using LabelSharp.Presentation.Models;
+using OpenCvSharp;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Visual2Ds;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Point = System.Windows.Point;
+using Size = System.Windows.Size;
 
 namespace LabelSharp.Presentation.Maps
 {
@@ -154,15 +156,15 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloDetenctions(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
         {
-            string[] lines = new string[annotations.Count];
-            for (int index = 0; index < lines.Length; index++)
+            IList<string> lines = new List<string>();
+            foreach (Annotation annotation in annotations)
             {
-                StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = annotations[index];
-                int labelIndex = labels.IndexOf(annotation.Label);
-                lineBuilder.Append($"{labelIndex} ");
                 if (annotation.ShapeL is RectangleL rectangleL)
                 {
+                    StringBuilder lineBuilder = new StringBuilder();
+                    int labelIndex = labels.IndexOf(annotation.Label);
+                    lineBuilder.Append($"{labelIndex} ");
+
                     float scaledCenterX = (rectangleL.X + rectangleL.Width / 2.0f) / (float)imageWidth;
                     float scaledCenterY = (rectangleL.Y + rectangleL.Height / 2.0f) / (float)imageHeight;
                     float scaledWidth = rectangleL.Width / (float)imageWidth;
@@ -171,12 +173,12 @@ namespace LabelSharp.Presentation.Maps
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
-                }
 
-                lines[index] = lineBuilder.ToString().Trim();
+                    lines.Add(lineBuilder.ToString().Trim());
+                }
             }
 
-            return lines;
+            return lines.ToArray();
         }
         #endregion
 
@@ -199,37 +201,45 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloSegmentations(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
         {
-            string[] lines = new string[annotations.Count];
-            for (int index = 0; index < lines.Length; index++)
+            IList<string> lines = new List<string>();
+            foreach (Annotation annotation in annotations)
             {
-                StringBuilder lineBuilder = new StringBuilder();
-                Annotation annotation = annotations[index];
-                int labelIndex = labels.IndexOf(annotation.Label);
-                lineBuilder.Append($"{labelIndex} ");
-                if (annotation.ShapeL is PolygonL polygonL)
+                if (annotation.ShapeL is PolygonL || annotation.ShapeL is PolylineL)
                 {
-                    Rect boundingBox = annotation.Shape.RenderedGeometry.Bounds;
-                    float scaledCenterX = (float)(boundingBox.X + boundingBox.Width / 2.0f) / (float)imageWidth;
-                    float scaledCenterY = (float)(boundingBox.Y + boundingBox.Height / 2.0f) / (float)imageHeight;
-                    float scaledWidth = (float)boundingBox.Width / (float)imageWidth;
-                    float scaledHeight = (float)boundingBox.Height / (float)imageHeight;
+                    StringBuilder lineBuilder = new StringBuilder();
+                    int labelIndex = labels.IndexOf(annotation.Label);
+                    lineBuilder.Append($"{labelIndex} ");
+
+                    ICollection<PointL> pointLs = annotation.ShapeL switch
+                    {
+                        PolygonL polygonL => polygonL.Points,
+                        PolylineL polylineL => polylineL.Points,
+                        _ => throw new NotSupportedException()
+                    };
+                    IEnumerable<Point2f> contour = pointLs.Select(pointL => new Point2f(pointL.X, pointL.Y));
+                    Rect boundingBox = Cv2.BoundingRect(contour);
+
+                    float scaledCenterX = (boundingBox.X + boundingBox.Width / 2.0f) / (float)imageWidth;
+                    float scaledCenterY = (boundingBox.Y + boundingBox.Height / 2.0f) / (float)imageHeight;
+                    float scaledWidth = boundingBox.Width / (float)imageWidth;
+                    float scaledHeight = boundingBox.Height / (float)imageHeight;
                     lineBuilder.Append($"{scaledCenterX} ");
                     lineBuilder.Append($"{scaledCenterY} ");
                     lineBuilder.Append($"{scaledWidth} ");
                     lineBuilder.Append($"{scaledHeight} ");
-                    foreach (PointL pointL in polygonL.Points)
+                    foreach (PointL pointL in pointLs)
                     {
                         float scaledX = pointL.X / (float)imageWidth;
                         float scaledY = pointL.Y / (float)imageHeight;
                         lineBuilder.Append($"{scaledX} ");
                         lineBuilder.Append($"{scaledY} ");
                     }
-                }
 
-                lines[index] = lineBuilder.ToString().Trim();
+                    lines.Add(lineBuilder.ToString().Trim());
+                }
             }
 
-            return lines;
+            return lines.ToArray();
         }
         #endregion
 

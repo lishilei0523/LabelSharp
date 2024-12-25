@@ -3,6 +3,7 @@ using OpenCvSharp;
 using OpenCvSharp.WpfExtensions;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
@@ -21,6 +22,7 @@ namespace LabelSharp.Presentation.Models
         /// </summary>
         public ImageAnnotation()
         {
+            this.Image = new Lazy<BitmapSource>(this.GetImage);
             this.Shapes = new ObservableCollection<Shape>();
             this.ShapeLs = new ObservableCollection<ShapeL>();
             this.Annotations = new ObservableCollection<Annotation>();
@@ -50,7 +52,6 @@ namespace LabelSharp.Presentation.Models
         /// <summary>
         /// 图像文件夹
         /// </summary>
-        [DependencyProperty]
         public string ImageFolder { get; set; }
         #endregion
 
@@ -58,7 +59,6 @@ namespace LabelSharp.Presentation.Models
         /// <summary>
         /// 图像路径
         /// </summary>
-        [DependencyProperty]
         public string ImagePath { get; set; }
         #endregion
 
@@ -66,7 +66,6 @@ namespace LabelSharp.Presentation.Models
         /// <summary>
         /// 图像名称
         /// </summary>
-        [DependencyProperty]
         public string ImageName { get; set; }
         #endregion
 
@@ -74,8 +73,14 @@ namespace LabelSharp.Presentation.Models
         /// <summary>
         /// 图像索引
         /// </summary>
-        [DependencyProperty]
         public int ImageIndex { get; set; }
+        #endregion
+
+        #region 图像 —— BitmapSource Image
+        /// <summary>
+        /// 图像
+        /// </summary>
+        public Lazy<BitmapSource> Image { get; set; }
         #endregion
 
         #region 形状列表 —— ObservableCollection<Shape> Shapes
@@ -110,21 +115,23 @@ namespace LabelSharp.Presentation.Models
         public ObservableCollection<Annotation> Annotations { get; set; }
         #endregion
 
-        #region 只读属性 - 图像 —— BitmapSource Image
-        /// <summary>
-        /// 只读属性 - 图像
-        /// </summary>
-        public BitmapSource Image
-        {
-            get
-            {
-                using Mat matrix = Cv2.ImRead(this.ImagePath);
-                BitmapSource bitmapSource = matrix.ToBitmapSource();
+        #endregion
 
-                return bitmapSource;
-            }
+        #region # 方法
+
+        #region 获取图像 —— BitmapSource GetImage()
+        /// <summary>
+        /// 获取图像
+        /// </summary>
+        /// <returns>图像</returns>
+        private BitmapSource GetImage()
+        {
+            using Mat matrix = Cv2.ImRead(this.ImagePath);
+            BitmapSource bitmapSource = matrix.ToBitmapSource();
+
+            return bitmapSource;
         }
-        #endregion 
+        #endregion
 
         #endregion
     }

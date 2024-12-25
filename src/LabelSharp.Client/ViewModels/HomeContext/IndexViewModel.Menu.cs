@@ -420,7 +420,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                using Mat image = this.SelectedImageAnnotation.Image.ToMat();
+                using Mat image = this.SelectedImageAnnotation.Image.Value.ToMat();
                 IList<Mat> results = new List<Mat>();
                 foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
                 {
@@ -566,7 +566,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image;
+                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
                 OpenCvSharp.Size maskSize = new OpenCvSharp.Size(image.Width, image.Height);
                 using Mat mask = Mat.Zeros(maskSize, MatType.CV_8UC1);
                 foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
@@ -728,7 +728,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image;
+                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
                 IList<Annotation> annotations = lines.FromYoloDetections(image.Width, image.Height, this.Labels);
                 foreach (Annotation annotation in annotations)
@@ -778,7 +778,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image;
+                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
                 IList<Annotation> annotations = lines.FromYoloSegmentations(image.Width, image.Height, this.Labels);
                 foreach (Annotation annotation in annotations)
@@ -941,7 +941,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 await Task.Run(() => yoloDetector.StartSession());
 
                 //执行检测
-                using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
+                using Mat originalImage = this.SelectedImageAnnotation.Image.Value.ToMat();
                 using Mat image = originalImage.Channels() == 4
                     ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
                     : originalImage.Channels() == 1
@@ -1007,7 +1007,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 await Task.Run(() => yoloSegmenter.StartSession());
 
                 //执行分割
-                using Mat originalImage = this.SelectedImageAnnotation.Image.ToMat();
+                using Mat originalImage = this.SelectedImageAnnotation.Image.Value.ToMat();
                 using Mat image = originalImage.Channels() == 4
                     ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
                     : originalImage.Channels() == 1

@@ -39,7 +39,7 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static MeAnnotation ToMeAnnotation(this ImageAnnotation imageAnnotation)
         {
-            BitmapSource image = imageAnnotation.Image;
+            BitmapSource image = imageAnnotation.Image.Value;
             int imageWidth = (int)Math.Ceiling(image.Width);
             int imageHeight = (int)Math.Ceiling(image.Height);
             IList<MeShape> meShapes = imageAnnotation.Annotations.Select(x => x.ToMeShpe()).ToList();
@@ -78,7 +78,7 @@ namespace LabelSharp.Presentation.Maps
                 }
             }
 
-            BitmapSource image = imageAnnotation.Image;
+            BitmapSource image = imageAnnotation.Image.Value;
             PascalAnnotation pascalAnnotation = new PascalAnnotation
             {
                 Folder = imageAnnotation.ImageFolder,
@@ -140,7 +140,7 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
-            BitmapSource currentImage = imageAnnotation.Image;
+            BitmapSource currentImage = imageAnnotation.Image.Value;
             string[] lines = imageAnnotation.Annotations.ToYoloDetenctions(currentImage.Width, currentImage.Height, labels);
 
             return lines;
@@ -185,7 +185,7 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloSegmentations(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
-            BitmapSource currentImage = imageAnnotation.Image;
+            BitmapSource currentImage = imageAnnotation.Image.Value;
             string[] lines = imageAnnotation.Annotations.ToYoloSegmentations(currentImage.Width, currentImage.Height, labels);
 
             return lines;

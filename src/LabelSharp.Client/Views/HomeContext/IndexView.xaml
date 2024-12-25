@@ -178,7 +178,7 @@
                                          [Event MouseMove] = [Action OnCanvasMouseMove($source)];
                                          [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];">
                                 <sd:CanvasEx.BackgroundImage>
-                                    <Image Source="{Binding Image}" />
+                                    <Image Source="{Binding Image.Value}" />
                                 </sd:CanvasEx.BackgroundImage>
                             </sd:DrawableCanvasEx>
                         </DataTemplate>
@@ -278,13 +278,13 @@
                     <TextBlock Text=")" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Pixel format: " FontSize="12" />
-                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Format}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Format}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Width: " FontSize="12" />
-                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Width}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Width}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Height: " FontSize="12" />
-                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Height}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Height}" FontSize="12" />
                 </WrapPanel>
             </Grid>
         </Border>

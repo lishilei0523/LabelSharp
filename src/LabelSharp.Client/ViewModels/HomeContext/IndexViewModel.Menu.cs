@@ -207,7 +207,8 @@ namespace LabelSharp.ViewModels.HomeContext
             };
             if (openFileDialog.ShowDialog() == true)
             {
-                this.ImageFolder = openFileDialog.FileName.Replace(Path.GetFileName(openFileDialog.FileName), string.Empty);
+                this.ImageFolder = Path.GetDirectoryName(openFileDialog.FileName);
+                this.DisplayName = $"{Constants.WindowTitle} - {this.ImageFolder}";
 
                 //加载标签
                 await this.LoadLabels();
@@ -253,6 +254,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 #endregion
 
+                this.DisplayName = $"{Constants.WindowTitle} - {this.ImageFolder}";
                 this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
                 int sort = 1;
                 foreach (string imagePath in imagePaths)
@@ -297,6 +299,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.ImageFolder = null;
                 this.SelectedImageAnnotation = null;
+                this.DisplayName = Constants.WindowTitle;
                 this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
             }
         }

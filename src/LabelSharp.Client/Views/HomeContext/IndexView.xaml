@@ -9,7 +9,7 @@
                  xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
                  xmlns:sd="https://github.com/lishilei0523/SD.Framework"
                  mc:Ignorable="d"
-                 Title="LabelSharp" 
+                 Title="{Binding DisplayName}" 
                  Icon="/favicon.ico"
                  Width="1440" Height="900" FontSize="14"
                  WindowStartupLocation="CenterScreen"

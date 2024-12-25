@@ -7,6 +7,11 @@ namespace LabelSharp
     public static class Constants
     {
         /// <summary>
+        /// 窗口标题
+        /// </summary>
+        public const string WindowTitle = "LabelSharp";
+
+        /// <summary>
         /// LabelMe点
         /// </summary>
         public const string MePoint = "point";

@@ -101,6 +101,7 @@ namespace LabelSharp.ViewModels.HomeContext
         protected override Task OnInitializeAsync(CancellationToken cancellationToken)
         {
             //默认值
+            this.DisplayName = Constants.WindowTitle;
             this.BackgroundBrush = new SolidColorBrush(Colors.LightGray);
             this.BorderBrush = new SolidColorBrush(Colors.Red);
             this.BorderThickness = 2;

@@ -10,17 +10,17 @@
 
     2、方便标注人员快速标注；
 
-#### 主要涉及技术：
+#### 主要技术：
     UI部分：WPF、Canvas、MahApps.Metro、Caliburn.Micro、FluentWPF等；
 
     算法部分：OpenCV、OnnxRuntime等；
 
-#### 主要功能模块：
+#### 主要功能：
     标注部分：
         点、线段、画刷、矩形、圆形、椭圆形、多边形、折线段标注；
 
     格式部分：
-        导入/导出PascalVOC、YOLO目标检测、YOLO图像分割格式；        
+        导入/导出PascalVOC、YOLO目标检测、YOLO图像分割格式；
         批量PascalVOC格式转换csv格式；
         批量PascalVOC格式转换YOLO目标检测格式；
 

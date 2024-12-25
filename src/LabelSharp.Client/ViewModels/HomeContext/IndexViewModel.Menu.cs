@@ -1015,20 +1015,19 @@ namespace LabelSharp.ViewModels.HomeContext
                 //增加标注
                 foreach (Segmentation segmentation in segmentations)
                 {
-                    IList<Point> points = new List<Point>();
+                    PointCollection points = new PointCollection();
                     IList<PointL> pointLs = new List<PointL>();
-                    for (int index = 0; index < segmentation.Contour.Length; index += 2)
+                    foreach (OpenCvSharp.Point point2F in segmentation.Contour)
                     {
-                        OpenCvSharp.Point point2F = segmentation.Contour[index];
                         Point point = new Point(point2F.X, point2F.Y);
-                        PointL pointL = new PointL((int)Math.Ceiling(point.X), (int)Math.Ceiling(point.Y));
+                        PointL pointL = new PointL(point2F.X, point2F.Y);
                         points.Add(point);
                         pointLs.Add(pointL);
                     }
 
                     Polygon polygon = new Polygon
                     {
-                        Points = new PointCollection(points),
+                        Points = points,
                         Fill = new SolidColorBrush(Colors.Transparent),
                         Stroke = this.BorderBrush,
                         StrokeThickness = this.BorderThickness

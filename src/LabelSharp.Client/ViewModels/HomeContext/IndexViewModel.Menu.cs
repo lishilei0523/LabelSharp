@@ -22,7 +22,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -35,7 +34,7 @@ using Size = System.Windows.Size;
 namespace LabelSharp.ViewModels.HomeContext
 {
     /// <summary>
-    /// 首页视图模型 - 主体部分
+    /// 首页视图模型 - 菜单部分
     /// </summary>
     public partial class IndexViewModel : ScreenBase
     {
@@ -66,20 +65,20 @@ namespace LabelSharp.ViewModels.HomeContext
         public string ImageFolder { get; set; }
         #endregion
 
-        #region 背景颜色 —— SolidColorBrush BackgroundColor
+        #region 背景颜色 —— SolidColorBrush BackgroundBrush
         /// <summary>
         /// 背景颜色
         /// </summary>
         [DependencyProperty]
-        public SolidColorBrush BackgroundColor { get; set; }
+        public SolidColorBrush BackgroundBrush { get; set; }
         #endregion
 
-        #region 边框颜色 —— Color BorderColor
+        #region 边框颜色 —— SolidColorBrush BorderBrush
         /// <summary>
         /// 边框颜色
         /// </summary>
         [DependencyProperty]
-        public Color BorderColor { get; set; }
+        public SolidColorBrush BorderBrush { get; set; }
         #endregion
 
         #region 边框粗细 —— int BorderThickness
@@ -88,30 +87,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public int BorderThickness { get; set; }
-        #endregion
-
-        #region 参考线粗细 —— double GuideLineThickness
-        /// <summary>
-        /// 参考线粗细
-        /// </summary>
-        [DependencyProperty]
-        public double GuideLineThickness { get; set; }
-        #endregion
-
-        #region 水平参考线Y坐标 —— double HorizontalLineY
-        /// <summary>
-        /// 水平参考线Y坐标
-        /// </summary>
-        [DependencyProperty]
-        public double HorizontalLineY { get; set; }
-        #endregion
-
-        #region 垂直参考线X坐标 —— double VerticalLineX
-        /// <summary>
-        /// 垂直参考线X坐标
-        /// </summary>
-        [DependencyProperty]
-        public double VerticalLineX { get; set; }
         #endregion
 
         #region 显示参考线 —— bool ShowGuideLines
@@ -128,22 +103,6 @@ namespace LabelSharp.ViewModels.HomeContext
         /// </summary>
         [DependencyProperty]
         public Visibility GuideLinesVisibility { get; set; }
-        #endregion
-
-        #region 鼠标X坐标 —— int? MousePositionX
-        /// <summary>
-        /// 鼠标X坐标
-        /// </summary>
-        [DependencyProperty]
-        public int? MousePositionX { get; set; }
-        #endregion
-
-        #region 鼠标Y坐标 —— int? MousePositionY
-        /// <summary>
-        /// 鼠标Y坐标
-        /// </summary>
-        [DependencyProperty]
-        public int? MousePositionY { get; set; }
         #endregion
 
         #region 附带PascalVOC —— bool WithPascal
@@ -173,34 +132,6 @@ namespace LabelSharp.ViewModels.HomeContext
         #endregion
 
         #region # 方法
-
-        //Initializations
-
-        #region 初始化 —— Task OnInitializeAsync(CancellationToken cancellationToken)
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        protected override Task OnInitializeAsync(CancellationToken cancellationToken)
-        {
-            //默认值
-            this._polyAnchors = new List<PointVisual2D>();
-            this._polyAnchorLines = new List<Line>();
-            this.BackgroundColor = new SolidColorBrush(Colors.LightGray);
-            this.BorderColor = Colors.Red;
-            this.BorderThickness = 2;
-            this.GuideLineThickness = Constants.GuideLineThickness;
-            this.ShowGuideLines = true;
-            this.GuideLinesVisibility = Visibility.Visible;
-            this.WithPascal = true;
-            this.WithYoloDet = true;
-            this.WithYoloSeg = false;
-            this.ScaleChecked = true;
-            this.Labels = new ObservableCollection<string>();
-
-            return base.OnInitializeAsync(cancellationToken);
-        }
-        #endregion
-
 
         //常用
 
@@ -245,14 +176,14 @@ namespace LabelSharp.ViewModels.HomeContext
         public async void SetStyle()
         {
             StyleViewModel viewModel = ResolveMediator.Resolve<StyleViewModel>();
-            viewModel.BackgroundColor = this.BackgroundColor.Color;
-            viewModel.BorderColor = this.BorderColor;
+            viewModel.BackgroundColor = this.BackgroundBrush.Color;
+            viewModel.BorderColor = this.BorderBrush.Color;
             viewModel.BorderThickness = this.BorderThickness;
             bool? result = await this._windowManager.ShowDialogAsync(viewModel);
             if (result == true)
             {
-                this.BackgroundColor.Color = viewModel.BackgroundColor!.Value;
-                this.BorderColor = viewModel.BorderColor!.Value;
+                this.BackgroundBrush = new SolidColorBrush(viewModel.BackgroundColor!.Value);
+                this.BorderBrush = new SolidColorBrush(viewModel.BorderColor!.Value);
                 this.BorderThickness = viewModel.BorderThickness!.Value;
             }
         }
@@ -749,7 +680,9 @@ namespace LabelSharp.ViewModels.HomeContext
                 IList<Annotation> annotations = pascalAnnotation.FromPascalAnnotation();
                 foreach (Annotation annotation in annotations)
                 {
-                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    annotation.Shape.Stroke = this.BorderBrush;
+                    annotation.Shape.StrokeThickness = this.BorderThickness;
+
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
@@ -797,7 +730,9 @@ namespace LabelSharp.ViewModels.HomeContext
                 IList<Annotation> annotations = lines.FromYoloDetections(image.Width, image.Height, this.Labels);
                 foreach (Annotation annotation in annotations)
                 {
-                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    annotation.Shape.Stroke = this.BorderBrush;
+                    annotation.Shape.StrokeThickness = this.BorderThickness;
+
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
@@ -845,7 +780,9 @@ namespace LabelSharp.ViewModels.HomeContext
                 IList<Annotation> annotations = lines.FromYoloSegmentations(image.Width, image.Height, this.Labels);
                 foreach (Annotation annotation in annotations)
                 {
-                    annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                    annotation.Shape.Stroke = this.BorderBrush;
+                    annotation.Shape.StrokeThickness = this.BorderThickness;
+
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                     this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
@@ -1016,11 +953,9 @@ namespace LabelSharp.ViewModels.HomeContext
                     {
                         Location = new Point(detection.Box.X, detection.Box.Y),
                         Size = new Size(detection.Box.Width, detection.Box.Height),
-                        Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(this.BorderColor),
+                        Stroke = this.BorderBrush,
                         StrokeThickness = this.BorderThickness
                     };
-                    rectangle.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                     RectangleL rectangleL = new RectangleL(detection.Box.X, detection.Box.Y, detection.Box.Width, detection.Box.Height);
                     rectangle.Tag = rectangleL;
                     rectangleL.Tag = rectangle;
@@ -1095,10 +1030,9 @@ namespace LabelSharp.ViewModels.HomeContext
                     {
                         Points = new PointCollection(points),
                         Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(Colors.Red),
-                        StrokeThickness = 2
+                        Stroke = this.BorderBrush,
+                        StrokeThickness = this.BorderThickness
                     };
-                    polygon.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
                     PolygonL polygonL = new PolygonL(pointLs);
                     polygon.Tag = polygonL;
                     polygonL.Tag = polygon;

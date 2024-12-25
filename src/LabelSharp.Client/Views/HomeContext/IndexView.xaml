@@ -82,63 +82,52 @@
                 </Menu>
                 <!--ToolBar-->
                 <WrapPanel Grid.Column="1" Margin="0,0,4,0" VerticalAlignment="Center">
-                    <ToggleButton ToolTip="缩放" IsChecked="{Binding ScaleChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnScaleClick()">
+                    <ToggleButton ToolTip="缩放" x:Name="ScaleChecked" IsChecked="True"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="ZoomIn" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="拖拽" IsChecked="{Binding DragChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnDragClick()">
+                    <ToggleButton ToolTip="拖拽" x:Name="DragChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="Navigation" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="编辑" IsChecked="{Binding ResizeChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnResizeClick()">
+                    <ToggleButton ToolTip="编辑" x:Name="ResizeChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="UnfoldMore" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="点" IsChecked="{Binding PointChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnPointClick()">
+                    <ToggleButton ToolTip="点" x:Name="PointChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="BubbleChart" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="线段" IsChecked="{Binding LineChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnLineClick()">
+                    <ToggleButton ToolTip="线段" x:Name="LineChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="Remove" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="画刷" IsChecked="{Binding BrushChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnBrushClick()">
+                    <ToggleButton ToolTip="画刷" x:Name="BrushChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="Brush" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="矩形" IsChecked="{Binding RectangleChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnRectangleClick()">
+                    <ToggleButton ToolTip="矩形" x:Name="RectangleChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="CropLandscape" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="圆形" IsChecked="{Binding CircleChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnCircleClick()">
+                    <ToggleButton ToolTip="圆形" x:Name="CircleChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="PanoramaFishEye" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="椭圆形" IsChecked="{Binding EllipseChecked}"
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnEllipseClick()">
+                    <ToggleButton ToolTip="椭圆形" x:Name="EllipseChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="PanoramaFishEye">
                             <iconPacks:PackIconMaterialDesign.RenderTransform>
                                 <ScaleTransform ScaleX="1.3" CenterX="8" />
                             </iconPacks:PackIconMaterialDesign.RenderTransform>
                         </iconPacks:PackIconMaterialDesign>
                     </ToggleButton>
-                    <ToggleButton ToolTip="多边形" IsChecked="{Binding PolygonChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnPolygonClick()">
+                    <ToggleButton ToolTip="多边形" x:Name="PolygonChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="StarBorder" />
                     </ToggleButton>
-                    <ToggleButton ToolTip="折线段" IsChecked="{Binding PolylineChecked}" 
-                                  Style="{StaticResource ToggleButton.Styles.ToolBar}"
-                                  cm:Message.Attach="OnPolylineClick()">
+                    <ToggleButton ToolTip="折线段" x:Name="PolylineChecked"
+                                  Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="Timeline" />
                     </ToggleButton>
                 </WrapPanel>
@@ -160,52 +149,38 @@
                               RightTransition="Normal"
                               ItemsSource="{Binding ImageAnnotations}"
                               SelectedItem="{Binding SelectedImageAnnotation}"
-                              Background="{Binding BackgroundColor}"
+                              Background="{Binding BackgroundBrush}"
                               cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                     <mah:FlipView.ItemTemplate>
                         <DataTemplate>
-                            <sd:CanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode}"
-                                         ItemsSource="{Binding Shapes}"
-                                         cm:Message.Attach="
-                                         [Event MouseMove] = [Action OnCanvasMouseMove($source,$eventArgs)];
-                                         [Event MouseWheel] = [Action OnCanvasMouseWheel($source)];
-                                         [Event MouseLeave] = [Action OnCanvasMouseLeave()];
-                                         [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];
+                            <sd:DrawableCanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode, Mode=TwoWay}"
+                                                 BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderBrush}"
+                                                 BorderThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
+                                                 GuideLinesVisibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}"
+                                                 ScaleChecked="{Binding ElementName=ScaleChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 DragChecked="{Binding ElementName=DragChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 ResizeChecked="{Binding ElementName=ResizeChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 PointChecked="{Binding ElementName=PointChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 LineChecked="{Binding ElementName=LineChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 BrushChecked="{Binding ElementName=BrushChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 RectangleChecked="{Binding ElementName=RectangleChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 CircleChecked="{Binding ElementName=CircleChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 EllipseChecked="{Binding ElementName=EllipseChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 PolygonChecked="{Binding ElementName=PolygonChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 PolylineChecked="{Binding ElementName=PolylineChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 ItemsSource="{Binding Shapes}"
+                                                 DatasSource="{Binding ShapeLs}"
+                                                 cm:Message.Attach="                                                 
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
-                                         [Event Draw] = [Action OnDraw($source)];
-                                         [Event Drawing] = [Action OnDrawing($source)];
-                                         [Event Drawn] = [Action OnDrawn($source)];">
+                                         [Event ShapeClick] = [Action OnShapeMouseLeftDown($eventArgs)];
+                                         [Event ShapeDrawn] = [Action OnShapeDrawn($eventArgs)];
+                                         [Event MouseMove] = [Action OnCanvasMouseMove($source)];
+                                         [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];">
                                 <sd:CanvasEx.BackgroundImage>
                                     <Image Source="{Binding ImagePath}" />
                                 </sd:CanvasEx.BackgroundImage>
-                                <!--水平参考线-->
-                                <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
-                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLineThickness}"
-                                      X1="0"
-                                      Y1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.HorizontalLineY}"
-                                      X2="{Binding Image.Width}"
-                                      Y2="{Binding RelativeSource={RelativeSource Self}, Path=Y1}"
-                                      RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
-                                      Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}">
-                                    <Line.Effect>
-                                        <DropShadowEffect BlurRadius="0" ShadowDepth="0" Color="Transparent"/>
-                                    </Line.Effect>
-                                </Line>
-                                <!--垂直参考线-->
-                                <Line Stroke="#C8000000" Panel.ZIndex="-1" sd:CanvasEx.Draggable="False" sd:CanvasEx.Resizable="False"
-                                      StrokeThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLineThickness}"
-                                      X1="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.VerticalLineX}"
-                                      Y1="0"
-                                      X2="{Binding RelativeSource={RelativeSource Self}, Path=X1}"
-                                      Y2="{Binding Image.Height}"
-                                      RenderTransform="{Binding RelativeSource={RelativeSource AncestorType=sd:CanvasEx}, Path=MatrixTransform}"
-                                      Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}">
-                                    <Line.Effect>
-                                        <DropShadowEffect BlurRadius="0" ShadowDepth="0" Color="Transparent" />
-                                    </Line.Effect>
-                                </Line>
-                            </sd:CanvasEx>
+                            </sd:DrawableCanvasEx>
                         </DataTemplate>
                     </mah:FlipView.ItemTemplate>
                 </mah:FlipView>

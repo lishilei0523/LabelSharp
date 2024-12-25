@@ -118,10 +118,7 @@ namespace LabelSharp.Presentation.Maps
                 RectangleVisual2D rectangle = new RectangleVisual2D()
                 {
                     Location = new Point(x, y),
-                    Size = new Size(width, height),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Size = new Size(width, height)
                 };
                 RectangleL rectangleL = new RectangleL(x, y, width, height);
                 rectangle.Tag = rectangleL;
@@ -273,10 +270,7 @@ namespace LabelSharp.Presentation.Maps
                     RectangleVisual2D rectangle = new RectangleVisual2D()
                     {
                         Location = new Point(x, y),
-                        Size = new Size(boxWidth, boxHeight),
-                        Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(Colors.Red),
-                        StrokeThickness = 2
+                        Size = new Size(boxWidth, boxHeight)
                     };
                     RectangleL rectangleL = new RectangleL(x, y, boxWidth, boxHeight);
                     rectangle.Tag = rectangleL;
@@ -313,7 +307,7 @@ namespace LabelSharp.Presentation.Maps
                     Array.Copy(words, 5, polygonTextArray, 0, words.Length - 5);
                     double[] polygonArray = polygonTextArray.Select(double.Parse).ToArray();
 
-                    IList<Point> points = new List<Point>();
+                    PointCollection points = new PointCollection();
                     IList<PointL> pointLs = new List<PointL>();
                     for (int index = 0; index < polygonArray.Length; index += 2)
                     {
@@ -325,10 +319,8 @@ namespace LabelSharp.Presentation.Maps
 
                     Polygon polygon = new Polygon
                     {
-                        Points = new PointCollection(points),
-                        Fill = new SolidColorBrush(Colors.Transparent),
-                        Stroke = new SolidColorBrush(Colors.Red),
-                        StrokeThickness = 2
+                        Points = points,
+                        Fill = new SolidColorBrush(Colors.Transparent)
                     };
                     PolygonL polygonL = new PolygonL(pointLs);
                     polygon.Tag = polygonL;

@@ -4,7 +4,10 @@ using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
+using SD.Infrastructure.WPF.CustomControls;
+using SD.Infrastructure.WPF.Enums;
 using SD.Infrastructure.WPF.Extensions;
+using SD.Infrastructure.WPF.Models;
 using SD.IOC.Core.Mediators;
 using SD.Toolkits.Json;
 using SourceChord.FluentWPF.Animations;
@@ -13,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -24,7 +28,7 @@ using Path = System.IO.Path;
 namespace LabelSharp.ViewModels.HomeContext
 {
     /// <summary>
-    /// 首页视图模型 - 标注部分
+    /// 首页视图模型 - Action部分
     /// </summary>
     public partial class IndexViewModel
     {
@@ -35,6 +39,30 @@ namespace LabelSharp.ViewModels.HomeContext
         #endregion
 
         #region # 属性
+
+        #region 操作模式 —— CanvasMode CanvasMode
+        /// <summary>
+        /// 操作模式
+        /// </summary>
+        [DependencyProperty]
+        public CanvasMode CanvasMode { get; set; }
+        #endregion
+
+        #region 鼠标X坐标 —— int? MousePositionX
+        /// <summary>
+        /// 鼠标X坐标
+        /// </summary>
+        [DependencyProperty]
+        public int? MousePositionX { get; set; }
+        #endregion
+
+        #region 鼠标Y坐标 —— int? MousePositionY
+        /// <summary>
+        /// 鼠标Y坐标
+        /// </summary>
+        [DependencyProperty]
+        public int? MousePositionY { get; set; }
+        #endregion
 
         #region 已选图像标注 —— ImageAnnotation SelectedImageAnnotation
         /// <summary>
@@ -63,6 +91,30 @@ namespace LabelSharp.ViewModels.HomeContext
         #endregion
 
         #region # 方法
+
+        //Initializations
+
+        #region 初始化 —— Task OnInitializeAsync(CancellationToken cancellationToken)
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        protected override Task OnInitializeAsync(CancellationToken cancellationToken)
+        {
+            //默认值
+            this.BackgroundBrush = new SolidColorBrush(Colors.LightGray);
+            this.BorderBrush = new SolidColorBrush(Colors.Red);
+            this.BorderThickness = 2;
+            this.ShowGuideLines = true;
+            this.GuideLinesVisibility = Visibility.Visible;
+            this.WithPascal = true;
+            this.WithYoloDet = true;
+            this.WithYoloSeg = false;
+            this.Labels = new ObservableCollection<string>();
+
+            return base.OnInitializeAsync(cancellationToken);
+        }
+        #endregion
+
 
         //Actions
 
@@ -170,38 +222,6 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 绘制完成事件 —— async void OnDrawCompleted(Shape shape, ShapeL shapeL)
-        /// <summary>
-        /// 绘制完成事件
-        /// </summary>
-        /// <param name="shape">形状</param>
-        /// <param name="shapeL">形状数据</param>
-        public async void OnDrawCompleted(Shape shape, ShapeL shapeL)
-        {
-            AddViewModel viewModel = ResolveMediator.Resolve<AddViewModel>();
-            viewModel.Load(this.Labels);
-            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
-            if (result == true)
-            {
-                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shapeL, viewModel.Description);
-                this.SelectedImageAnnotation.Annotations.Add(annotation);
-                if (!this.Labels.Contains(annotation.Label.Trim()))
-                {
-                    this.Labels.Add(annotation.Label.Trim());
-                }
-                this.SaveAnnotations();
-            }
-            else
-            {
-                this.SelectedImageAnnotation.Shapes.Remove(shape);
-                this.SelectedImageAnnotation.ShapeLs.Remove(shapeL);
-            }
-
-            //设置光标
-            Mouse.OverrideCursor = Cursors.Arrow;
-        }
-        #endregion
-
         #region 标注信息选中事件 —— void OnAnnotationSelect()
         /// <summary>
         /// 标注信息选中事件
@@ -247,6 +267,119 @@ namespace LabelSharp.ViewModels.HomeContext
         public void OnAnnotationUncheck(Annotation annotation)
         {
             annotation.Shape.Visibility = Visibility.Collapsed;
+        }
+        #endregion
+
+        #region 拖拽元素事件 —— void OnDragElement(CanvasEx canvas)
+        /// <summary>
+        /// 拖拽元素事件
+        /// </summary>
+        public void OnDragElement(CanvasEx canvas)
+        {
+            if (canvas.SelectedVisual is Shape shape)
+            {
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
+                if (annotation != null)
+                {
+                    annotation.ShapeL = (ShapeL)shape.Tag;
+                }
+            }
+        }
+        #endregion
+
+        #region 改变元素尺寸事件 —— void OnResizeElement(CanvasEx canvas)
+        /// <summary>
+        /// 改变元素尺寸事件
+        /// </summary>
+        public void OnResizeElement(CanvasEx canvas)
+        {
+            if (canvas.SelectedVisual is Shape shape)
+            {
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == shape);
+                if (annotation != null)
+                {
+                    annotation.ShapeL = (ShapeL)shape.Tag;
+                }
+            }
+        }
+        #endregion
+
+        #region 形状鼠标左击事件 —— void OnShapeMouseLeftDown(ShapeEventArgs eventArgs)
+        /// <summary>
+        /// 形状鼠标左击事件
+        /// </summary>
+        public void OnShapeMouseLeftDown(ShapeEventArgs eventArgs)
+        {
+            if (this.CanvasMode != CanvasMode.Draw)
+            {
+                Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == eventArgs.Shape);
+                if (annotation != null)
+                {
+                    this.SelectedImageAnnotation.SelectedAnnotation = null;
+                    this.SelectedImageAnnotation.SelectedAnnotation = annotation;
+                }
+            }
+        }
+        #endregion
+
+        #region 形状绘制完成事件 —— async void OnShapeDrawn(ShapeEventArgs eventArgs)
+        /// <summary>
+        /// 形状绘制完成事件
+        /// </summary>
+        public async void OnShapeDrawn(ShapeEventArgs eventArgs)
+        {
+            Shape shape = eventArgs.Shape;
+            ShapeL shapeL = eventArgs.ShapeL;
+
+            AddViewModel viewModel = ResolveMediator.Resolve<AddViewModel>();
+            viewModel.Load(this.Labels);
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
+            {
+                Annotation annotation = new Annotation(viewModel.Label.Trim(), viewModel.GroupId, viewModel.Truncated, viewModel.Difficult, shapeL, viewModel.Description);
+                this.SelectedImageAnnotation.Annotations.Add(annotation);
+                if (!this.Labels.Contains(annotation.Label.Trim()))
+                {
+                    this.Labels.Add(annotation.Label.Trim());
+                }
+                this.SaveAnnotations();
+            }
+            else
+            {
+                this.SelectedImageAnnotation.Shapes.Remove(shape);
+                this.SelectedImageAnnotation.ShapeLs.Remove(shapeL);
+            }
+
+            //设置光标
+            Mouse.OverrideCursor = Cursors.Arrow;
+        }
+        #endregion
+
+        #region 画布鼠标移动事件 —— void OnCanvasMouseMove(CanvasEx canvas)
+        /// <summary>
+        /// 画布鼠标移动事件
+        /// </summary>
+        public void OnCanvasMouseMove(CanvasEx canvas)
+        {
+            if (this.SelectedImageAnnotation != null)
+            {
+                Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
+                this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
+                this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
+            }
+        }
+        #endregion
+
+        #region 画布鼠标左键松开事件 —— void OnCanvasMouseLeftUp()
+        /// <summary>
+        /// 画布鼠标左键松开事件
+        /// </summary>
+        public void OnCanvasMouseLeftUp()
+        {
+            if ((this.CanvasMode == CanvasMode.Drag || this.CanvasMode == CanvasMode.Resize))
+            {
+                this.SaveAnnotations();
+            }
         }
         #endregion
 
@@ -298,7 +431,9 @@ namespace LabelSharp.ViewModels.HomeContext
             IEnumerable<Annotation> annotations = meAnnotation.Shapes.Select(x => x.ToAnnotation());
             foreach (Annotation annotation in annotations)
             {
-                annotation.Shape.MouseLeftButtonDown += this.OnShapeMouseLeftDown;
+                annotation.Shape.Stroke = this.BorderBrush;
+                annotation.Shape.StrokeThickness = this.BorderThickness;
+
                 this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
                 this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                 this.SelectedImageAnnotation.Annotations.Add(annotation);

@@ -42,16 +42,6 @@ namespace LabelSharp
         public const string MePolyline = "linestrip";
 
         /// <summary>
-        /// 参考线粗细
-        /// </summary>
-        public const int GuideLineThickness = 2;
-
-        /// <summary>
-        /// 点厚度
-        /// </summary>
-        public const int PointThickness = 6;
-
-        /// <summary>
         /// 可用图像格式列表
         /// </summary>
         public static readonly string[] AvailableImageFormats = { ".jpg", ".jpeg", ".png", ".bmp" };

@@ -323,9 +323,7 @@ namespace LabelSharp.Presentation.Maps
                 PointVisual2D shape = new PointVisual2D
                 {
                     X = pointL.X,
-                    Y = pointL.Y,
-                    Fill = new SolidColorBrush(Colors.Black),
-                    Stroke = new SolidColorBrush(Colors.Red)
+                    Y = pointL.Y
                 };
                 shape.Tag = pointL;
                 pointL.Tag = shape;
@@ -339,10 +337,7 @@ namespace LabelSharp.Presentation.Maps
                     X1 = lineL.A.X,
                     Y1 = lineL.A.Y,
                     X2 = lineL.B.X,
-                    Y2 = lineL.B.Y,
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Y2 = lineL.B.Y
                 };
                 shape.Tag = lineL;
                 lineL.Tag = shape;
@@ -354,10 +349,7 @@ namespace LabelSharp.Presentation.Maps
                 RectangleVisual2D shape = new RectangleVisual2D
                 {
                     Location = new Point(rectangleL.X, rectangleL.Y),
-                    Size = new Size(rectangleL.Width, rectangleL.Height),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Size = new Size(rectangleL.Width, rectangleL.Height)
                 };
                 shape.Tag = rectangleL;
                 rectangleL.Tag = shape;
@@ -369,10 +361,7 @@ namespace LabelSharp.Presentation.Maps
                 CircleVisual2D shape = new CircleVisual2D
                 {
                     Center = new Point(circleL.X, circleL.Y),
-                    Radius = circleL.Radius,
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Radius = circleL.Radius
                 };
                 shape.Tag = circleL;
                 circleL.Tag = shape;
@@ -385,10 +374,7 @@ namespace LabelSharp.Presentation.Maps
                 {
                     Center = new Point(ellipseL.X, ellipseL.Y),
                     RadiusX = ellipseL.RadiusX,
-                    RadiusY = ellipseL.RadiusY,
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    RadiusY = ellipseL.RadiusY
                 };
                 shape.Tag = ellipseL;
                 ellipseL.Tag = shape;
@@ -401,9 +387,7 @@ namespace LabelSharp.Presentation.Maps
                 Polygon shape = new Polygon
                 {
                     Points = new PointCollection(points),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Fill = new SolidColorBrush(Colors.Transparent)
                 };
                 shape.Tag = polygonL;
                 polygonL.Tag = shape;
@@ -416,9 +400,7 @@ namespace LabelSharp.Presentation.Maps
                 Polyline shape = new Polyline
                 {
                     Points = new PointCollection(points),
-                    Fill = new SolidColorBrush(Colors.Transparent),
-                    Stroke = new SolidColorBrush(Colors.Red),
-                    StrokeThickness = 2
+                    Fill = new SolidColorBrush(Colors.Transparent)
                 };
                 shape.Tag = polylineL;
                 polylineL.Tag = shape;

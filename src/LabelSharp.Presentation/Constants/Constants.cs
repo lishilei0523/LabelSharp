@@ -12,6 +12,16 @@ namespace LabelSharp
         public const string WindowTitle = "LabelSharp";
 
         /// <summary>
+        /// WPF默认水平DPI
+        /// </summary>
+        public const double DpiX = 96.0;
+
+        /// <summary>
+        /// WPF默认垂直DPI
+        /// </summary>
+        public const double DpiY = 96.0;
+
+        /// <summary>
         /// LabelMe点
         /// </summary>
         public const string MePoint = "point";

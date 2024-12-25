@@ -3,6 +3,7 @@ using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using System;
 using System.Collections.ObjectModel;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
@@ -115,7 +116,22 @@ namespace LabelSharp.Presentation.Models
         /// </summary>
         public BitmapSource Image
         {
-            get => new BitmapImage(new Uri(this.ImagePath));
+            get
+            {
+                //创建图像帧
+                Uri imageUri = new Uri(this.ImagePath);
+                BitmapFrame bitmapFrame = BitmapFrame.Create(imageUri, BitmapCreateOptions.None, BitmapCacheOption.OnLoad);
+
+                //创建缩放变换
+                double scaleX = bitmapFrame.DpiX / Constants.DpiX;
+                double scaleY = bitmapFrame.DpiY / Constants.DpiY;
+                ScaleTransform scaleTransform = new ScaleTransform(scaleX, scaleY);
+
+                //创建图像
+                BitmapSource bitmapSource = new TransformedBitmap(bitmapFrame, scaleTransform);
+
+                return bitmapSource;
+            }
         }
         #endregion 
 

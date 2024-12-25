@@ -178,7 +178,7 @@
                                          [Event MouseMove] = [Action OnCanvasMouseMove($source)];
                                          [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];">
                                 <sd:CanvasEx.BackgroundImage>
-                                    <Image Source="{Binding ImagePath}" />
+                                    <Image Source="{Binding Image}" />
                                 </sd:CanvasEx.BackgroundImage>
                             </sd:DrawableCanvasEx>
                         </DataTemplate>

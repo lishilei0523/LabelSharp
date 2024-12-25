@@ -31,10 +31,10 @@
 ## 推荐
 
 > 关联项目，OpenCV工作室：
-> [PointCloud Studio](https://gitee.com/lishilei0523/PointCloud-Studio)
+> [OpenCV Studio](https://gitee.com/lishilei0523/OpenCV-Studio)
 
 > 关联项目，点云工作室：
-> [OpenCV Studio](https://gitee.com/lishilei0523/OpenCV-Studio)
+> [PointCloud Studio](https://gitee.com/lishilei0523/PointCloud-Studio)
 
 ## 首页预览
 ![Index](assets/Index.png)

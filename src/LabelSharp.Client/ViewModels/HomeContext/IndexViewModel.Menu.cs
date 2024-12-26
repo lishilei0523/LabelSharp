@@ -127,6 +127,14 @@ namespace LabelSharp.ViewModels.HomeContext
         public bool WithYoloSeg { get; set; }
         #endregion
 
+        #region 附带YOLO-obb —— bool WithYoloObb
+        /// <summary>
+        /// 附带YOLO-obb
+        /// </summary>
+        [DependencyProperty]
+        public bool WithYoloObb { get; set; }
+        #endregion
+
         #endregion
 
         #region # 方法
@@ -354,6 +362,14 @@ namespace LabelSharp.ViewModels.HomeContext
                 {
                     string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
                     string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}-seg.txt";
+                    File.WriteAllLines(yoloAnnotationPath, lines);
+                }
+
+                //附带YOLO-obb
+                if (this.WithYoloObb)
+                {
+                    string[] lines = this.SelectedImageAnnotation.ToYoloObbDetenctions(this.Labels);
+                    string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}-obb.txt";
                     File.WriteAllLines(yoloAnnotationPath, lines);
                 }
             });
@@ -826,6 +842,56 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region 导入YOLO-obb —— async void ImportYoloObb()
+        /// <summary>
+        /// 导入YOLO-obb
+        /// </summary>
+        public async void ImportYoloObb()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            OpenFileDialog openFileDialog = new OpenFileDialog
+            {
+                Title = "请选择YOLO定向目标检测标注",
+                Filter = "标注文件(*.txt)|*.txt",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (openFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                int imageWidth = this.SelectedImageAnnotation.ImageWidth;
+                int imageHeight = this.SelectedImageAnnotation.ImageHeight;
+                string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
+                IList<Annotation> annotations = lines.FromYoloObbDetections(imageWidth, imageHeight, this.Labels);
+                foreach (Annotation annotation in annotations)
+                {
+                    annotation.Shape.Stroke = this.BorderBrush;
+                    annotation.Shape.StrokeThickness = this.BorderThickness;
+
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(annotation.Label))
+                    {
+                        this.Labels.Add(annotation.Label);
+                    }
+                }
+
+                this.Idle();
+                this.ToastSuccess("导入成功！");
+            }
+        }
+        #endregion
+
         #region 导出PascalVOC —— async void ExportPascal()
         /// <summary>
         /// 导出PascalVOC
@@ -927,6 +993,42 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.Busy();
 
                 string[] lines = this.SelectedImageAnnotation.ToYoloSegmentations(this.Labels);
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
+
+                this.Idle();
+                this.ToastSuccess("已保存");
+            }
+        }
+        #endregion
+
+        #region 导出YOLO-obb —— async void ExportYoloObb()
+        /// <summary>
+        /// 导出YOLO-obb
+        /// </summary>
+        public async void ExportYoloObb()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.txt)|*.txt",
+                FileName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath),
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                string[] lines = this.SelectedImageAnnotation.ToYoloObbDetenctions(this.Labels);
                 await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
 
                 this.Idle();

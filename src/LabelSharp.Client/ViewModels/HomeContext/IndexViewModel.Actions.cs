@@ -100,6 +100,7 @@ namespace LabelSharp.ViewModels.HomeContext
             this.WithPascal = true;
             this.WithYoloDet = true;
             this.WithYoloSeg = false;
+            this.WithYoloObb = false;
             this.Labels = new ObservableCollection<string>();
 
             return base.OnInitializeAsync(cancellationToken);

@@ -60,14 +60,17 @@
                         <MenuItem Header="导入PascalVOC(_V)" cm:Message.Attach="ImportPascal()" />
                         <MenuItem Header="导入YOLO-det(_T)" cm:Message.Attach="ImportYoloDet()" />
                         <MenuItem Header="导入YOLO-seg(_G)" cm:Message.Attach="ImportYoloSeg()" />
+                        <MenuItem Header="导入YOLO-obb(_B)" cm:Message.Attach="ImportYoloObb()" />
                         <MenuItem Header="导出PascalVOC(_P)" cm:Message.Attach="ExportPascal()" />
                         <MenuItem Header="导出YOLO-det(_D)" cm:Message.Attach="ExportYoloDet()" />
                         <MenuItem Header="导出YOLO-seg(_S)" cm:Message.Attach="ExportYoloSeg()" />
+                        <MenuItem Header="导出YOLO-obb(_O)" cm:Message.Attach="ExportYoloObb()" />
                     </MenuItem>
                     <MenuItem Header="格式(_O)">
                         <MenuItem Header="附带PascalVOC(_P)" IsCheckable="True" IsChecked="{Binding WithPascal}" />
                         <MenuItem Header="附带YOLO-det(_D)" IsCheckable="True" IsChecked="{Binding WithYoloDet}" />
                         <MenuItem Header="附带YOLO-seg(_S)" IsCheckable="True" IsChecked="{Binding WithYoloSeg}" />
+                        <MenuItem Header="附带YOLO-obb(_O)" IsCheckable="True" IsChecked="{Binding WithYoloObb}" />
                     </MenuItem>
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />

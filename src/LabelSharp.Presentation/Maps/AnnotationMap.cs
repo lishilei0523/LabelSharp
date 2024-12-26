@@ -239,6 +239,60 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
+        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetenctions(this IList<Annotation> annotations...
+        /// <summary>
+        /// 映射YOLO定向目标检测标注
+        /// </summary>
+        public static string[] ToYoloObbDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
+        {
+            int imageWidth = imageAnnotation.ImageWidth;
+            int imageHeight = imageAnnotation.ImageHeight;
+            string[] lines = imageAnnotation.Annotations.ToYoloObbDetenctions(imageWidth, imageHeight, labels);
+
+            return lines;
+        }
+        #endregion
+
+        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetenctions(this IList<Annotation> annotations...
+        /// <summary>
+        /// 映射YOLO定向目标检测标注
+        /// </summary>
+        public static string[] ToYoloObbDetenctions(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
+        {
+            IList<string> lines = new List<string>();
+            foreach (Annotation annotation in annotations)
+            {
+                if (annotation.ShapeL is RotatedRectangleL rotatedRectangleL)
+                {
+                    StringBuilder lineBuilder = new StringBuilder();
+                    int labelIndex = labels.IndexOf(annotation.Label);
+                    lineBuilder.Append($"{labelIndex} ");
+
+                    float x1 = rotatedRectangleL.TopLeft.X / (float)imageWidth;
+                    float y1 = rotatedRectangleL.TopLeft.Y / (float)imageHeight;
+                    float x2 = rotatedRectangleL.TopRight.X / (float)imageWidth;
+                    float y2 = rotatedRectangleL.TopRight.Y / (float)imageHeight;
+                    float x3 = rotatedRectangleL.BottomRight.X / (float)imageWidth;
+                    float y3 = rotatedRectangleL.BottomRight.Y / (float)imageHeight;
+                    float x4 = rotatedRectangleL.BottomLeft.X / (float)imageWidth;
+                    float y4 = rotatedRectangleL.BottomLeft.Y / (float)imageHeight;
+                    lineBuilder.Append($"{x1} ");
+                    lineBuilder.Append($"{y1} ");
+                    lineBuilder.Append($"{x2} ");
+                    lineBuilder.Append($"{y2} ");
+                    lineBuilder.Append($"{x3} ");
+                    lineBuilder.Append($"{y3} ");
+                    lineBuilder.Append($"{x4} ");
+                    lineBuilder.Append($"{y4} ");
+
+                    lines.Add(lineBuilder.ToString().Trim());
+                }
+            }
+
+            return lines.ToArray();
+        }
+        #endregion
+
         #region # YOLO目标检测标注映射标注信息 —— static IList<Annotation> FromYoloDetections(this string[] lines...
         /// <summary>
         /// YOLO目标检测标注映射标注信息
@@ -326,6 +380,53 @@ namespace LabelSharp.Presentation.Maps
                     polygonL.Tag = polygon;
 
                     Annotation annotation = new Annotation(label, null, false, false, polygonL, string.Empty);
+                    annotations.Add(annotation);
+                }
+            }
+
+            return annotations;
+        }
+        #endregion
+
+        #region # YOLO定向目标检测标注映射标注信息 —— static IList<Annotation> FromYoloObbDetections(this string[] lines...
+        /// <summary>
+        /// YOLO定向目标检测标注映射标注信息
+        /// </summary>
+        public static IList<Annotation> FromYoloObbDetections(this string[] lines, double imageWidth, double imageHeight, IList<string> labels)
+        {
+            IList<Annotation> annotations = new List<Annotation>();
+            foreach (string line in lines)
+            {
+                string[] words = line.Split(' ');
+
+                //标签索引
+                int labelIndex = int.Parse(words[0]);
+                string label = labels.Count > labelIndex ? labels[labelIndex] : labelIndex.ToString();
+
+                //旋转矩形
+                if (words.Length == 9)
+                {
+                    Point2f point1 = new Point2f(float.Parse(words[1]) * (float)imageWidth, float.Parse(words[2]) * (float)imageHeight);
+                    Point2f point2 = new Point2f(float.Parse(words[3]) * (float)imageWidth, float.Parse(words[4]) * (float)imageHeight);
+                    Point2f point3 = new Point2f(float.Parse(words[5]) * (float)imageWidth, float.Parse(words[6]) * (float)imageHeight);
+                    Point2f point4 = new Point2f(float.Parse(words[7]) * (float)imageWidth, float.Parse(words[8]) * (float)imageHeight);
+                    RotatedRect rotatedRect = Cv2.MinAreaRect(new[] { point1, point2, point3, point4 });
+
+                    int centerX = (int)Math.Ceiling(rotatedRect.Center.X);
+                    int centerY = (int)Math.Ceiling(rotatedRect.Center.Y);
+                    int boxWidth = (int)Math.Ceiling(rotatedRect.Size.Width);
+                    int boxHeight = (int)Math.Ceiling(rotatedRect.Size.Height);
+                    RotatedRectangleVisual2D rotatedRectangle = new RotatedRectangleVisual2D()
+                    {
+                        Center = new Point(rotatedRect.Center.X, rotatedRect.Center.Y),
+                        Size = new Size(rotatedRect.Size.Width, rotatedRect.Size.Height),
+                        Angle = rotatedRect.Angle
+                    };
+                    RotatedRectangleL rotatedRectangleL = new RotatedRectangleL(centerX, centerY, boxWidth, boxHeight, rotatedRect.Angle);
+                    rotatedRectangle.Tag = rotatedRectangleL;
+                    rotatedRectangleL.Tag = rotatedRectangle;
+
+                    Annotation annotation = new Annotation(label, null, false, false, rotatedRectangleL, string.Empty);
                     annotations.Add(annotation);
                 }
             }

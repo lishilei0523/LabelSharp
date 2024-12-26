@@ -15,7 +15,6 @@ using SD.IOC.Core.Mediators;
 using SD.OpenCV.OnnxRuntime.Models;
 using SD.OpenCV.OnnxRuntime.Values;
 using SD.Toolkits.Json;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -439,6 +438,26 @@ namespace LabelSharp.ViewModels.HomeContext
                         Mat result = canvas[rect];
                         results.Add(result);
                     }
+                    if (shapeL is RotatedRectangleL rotatedRectangleL)
+                    {
+                        //生成掩膜
+                        using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[4];
+                        contour[0] = new OpenCvSharp.Point(rotatedRectangleL.TopLeft.X, rotatedRectangleL.TopLeft.Y);
+                        contour[1] = new OpenCvSharp.Point(rotatedRectangleL.TopRight.X, rotatedRectangleL.TopRight.Y);
+                        contour[2] = new OpenCvSharp.Point(rotatedRectangleL.BottomRight.X, rotatedRectangleL.BottomRight.Y);
+                        contour[3] = new OpenCvSharp.Point(rotatedRectangleL.BottomLeft.X, rotatedRectangleL.BottomLeft.Y);
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+
+                        //适用掩膜
+                        using Mat canvas = new Mat();
+                        image.CopyTo(canvas, mask);
+
+                        //提取有效区域
+                        OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
+                        Mat result = canvas[boundingRect];
+                        results.Add(result);
+                    }
                     if (shapeL is CircleL circleL)
                     {
                         //生成掩膜
@@ -574,6 +593,15 @@ namespace LabelSharp.ViewModels.HomeContext
                     {
                         OpenCvSharp.Rect rect = new OpenCvSharp.Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height);
                         await Task.Run(() => mask.Rectangle(rect, Scalar.White, thickness));
+                    }
+                    if (shapeL is RotatedRectangleL rotatedRectangleL)
+                    {
+                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[4];
+                        contour[0] = new OpenCvSharp.Point(rotatedRectangleL.TopLeft.X, rotatedRectangleL.TopLeft.Y);
+                        contour[1] = new OpenCvSharp.Point(rotatedRectangleL.TopRight.X, rotatedRectangleL.TopRight.Y);
+                        contour[2] = new OpenCvSharp.Point(rotatedRectangleL.BottomRight.X, rotatedRectangleL.BottomRight.Y);
+                        contour[3] = new OpenCvSharp.Point(rotatedRectangleL.BottomLeft.X, rotatedRectangleL.BottomLeft.Y);
+                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
                     }
                     if (shapeL is CircleL circleL)
                     {

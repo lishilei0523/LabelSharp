@@ -220,7 +220,7 @@ namespace LabelSharp.ViewModels.HomeContext
         public void OnAnnotationSelect()
         {
             Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            annotation?.Shape.Blink();
+            annotation?.Shape.BlinkStroke();
         }
         #endregion
 
@@ -303,7 +303,7 @@ namespace LabelSharp.ViewModels.HomeContext
         public async void OnShapeDrawn(ShapeEventArgs eventArgs)
         {
             Shape shape = eventArgs.Shape;
-            ShapeL shapeL = eventArgs.ShapeL;
+            ShapeL shapeL = (ShapeL)shape.Tag;
 
             AddViewModel viewModel = ResolveMediator.Resolve<AddViewModel>();
             viewModel.Load(this.Labels);

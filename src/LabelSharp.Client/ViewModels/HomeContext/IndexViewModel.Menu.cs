@@ -25,11 +25,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 using Point = System.Windows.Point;
-using Size = System.Windows.Size;
+using Size = OpenCvSharp.Size;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -566,8 +565,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
-                OpenCvSharp.Size maskSize = new OpenCvSharp.Size(image.Width, image.Height);
+                Size maskSize = new Size(this.SelectedImageAnnotation.ImageWidth, this.SelectedImageAnnotation.ImageHeight);
                 using Mat mask = Mat.Zeros(maskSize, MatType.CV_8UC1);
                 foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
                 {
@@ -687,7 +685,6 @@ namespace LabelSharp.ViewModels.HomeContext
                     annotation.Shape.StrokeThickness = this.BorderThickness;
 
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                     if (!this.Labels.Contains(annotation.Label))
                     {
@@ -728,16 +725,16 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
+                int imageWidth = this.SelectedImageAnnotation.ImageWidth;
+                int imageHeight = this.SelectedImageAnnotation.ImageHeight;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
-                IList<Annotation> annotations = lines.FromYoloDetections(image.Width, image.Height, this.Labels);
+                IList<Annotation> annotations = lines.FromYoloDetections(imageWidth, imageHeight, this.Labels);
                 foreach (Annotation annotation in annotations)
                 {
                     annotation.Shape.Stroke = this.BorderBrush;
                     annotation.Shape.StrokeThickness = this.BorderThickness;
 
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                     if (!this.Labels.Contains(annotation.Label))
                     {
@@ -778,16 +775,16 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                BitmapSource image = this.SelectedImageAnnotation.Image.Value;
+                int imageWidth = this.SelectedImageAnnotation.ImageWidth;
+                int imageHeight = this.SelectedImageAnnotation.ImageHeight;
                 string[] lines = await Task.Run(() => File.ReadAllLines(openFileDialog.FileName));
-                IList<Annotation> annotations = lines.FromYoloSegmentations(image.Width, image.Height, this.Labels);
+                IList<Annotation> annotations = lines.FromYoloSegmentations(imageWidth, imageHeight, this.Labels);
                 foreach (Annotation annotation in annotations)
                 {
                     annotation.Shape.Stroke = this.BorderBrush;
                     annotation.Shape.StrokeThickness = this.BorderThickness;
 
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                     if (!this.Labels.Contains(annotation.Label))
                     {
@@ -955,7 +952,7 @@ namespace LabelSharp.ViewModels.HomeContext
                     RectangleVisual2D rectangle = new RectangleVisual2D()
                     {
                         Location = new Point(detection.Box.X, detection.Box.Y),
-                        Size = new Size(detection.Box.Width, detection.Box.Height),
+                        Size = new System.Windows.Size(detection.Box.Width, detection.Box.Height),
                         Stroke = this.BorderBrush,
                         StrokeThickness = this.BorderThickness
                     };
@@ -966,7 +963,6 @@ namespace LabelSharp.ViewModels.HomeContext
                     Annotation annotation = new Annotation(detection.Label, null, false, false, rectangleL, string.Empty);
 
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                     if (!this.Labels.Contains(detection.Label))
                     {
@@ -1042,7 +1038,6 @@ namespace LabelSharp.ViewModels.HomeContext
                     Annotation annotation = new Annotation(segmentation.Label, null, false, false, polygonL, string.Empty);
 
                     this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Add(annotation);
                     if (!this.Labels.Contains(segmentation.Label))
                     {

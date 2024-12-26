@@ -10,7 +10,6 @@ using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Models;
 using SD.IOC.Core.Mediators;
 using SD.Toolkits.Json;
-using SourceChord.FluentWPF.Animations;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -21,7 +20,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
 
@@ -178,7 +176,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 if (result == MessageBoxResult.OK)
                 {
                     this.SelectedImageAnnotation.Shapes.Remove(annotation.Shape);
-                    this.SelectedImageAnnotation.ShapeLs.Remove(annotation.ShapeL);
                     this.SelectedImageAnnotation.Annotations.Remove(annotation);
                     this.SaveAnnotations();
                 }
@@ -230,24 +227,7 @@ namespace LabelSharp.ViewModels.HomeContext
         public void OnAnnotationSelect()
         {
             Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
-            if (annotation != null)
-            {
-                Shape shape = annotation.Shape;
-                if (shape.Stroke is SolidColorBrush brush)
-                {
-                    BrushAnimation brushAnimation = new BrushAnimation
-                    {
-                        From = new SolidColorBrush(brush.Color.Invert()),
-                        To = shape.Stroke,
-                        Duration = new Duration(TimeSpan.FromSeconds(2))
-                    };
-                    Storyboard storyboard = new Storyboard();
-                    Storyboard.SetTarget(brushAnimation, shape);
-                    Storyboard.SetTargetProperty(brushAnimation, new PropertyPath(Shape.StrokeProperty));
-                    storyboard.Children.Add(brushAnimation);
-                    storyboard.Begin();
-                }
-            }
+            annotation?.Shape.Blink();
         }
         #endregion
 
@@ -348,7 +328,6 @@ namespace LabelSharp.ViewModels.HomeContext
             else
             {
                 this.SelectedImageAnnotation.Shapes.Remove(shape);
-                this.SelectedImageAnnotation.ShapeLs.Remove(shapeL);
             }
 
             //设置光标
@@ -436,7 +415,6 @@ namespace LabelSharp.ViewModels.HomeContext
                 annotation.Shape.StrokeThickness = this.BorderThickness;
 
                 this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
-                this.SelectedImageAnnotation.ShapeLs.Add(annotation.ShapeL);
                 this.SelectedImageAnnotation.Annotations.Add(annotation);
             }
         }
@@ -451,7 +429,6 @@ namespace LabelSharp.ViewModels.HomeContext
             if (this.SelectedImageAnnotation != null)
             {
                 this.SelectedImageAnnotation.Shapes.Clear();
-                this.SelectedImageAnnotation.ShapeLs.Clear();
                 this.SelectedImageAnnotation.Annotations.Clear();
                 this.SelectedImageAnnotation.SelectedAnnotation = null;
             }

@@ -48,6 +48,13 @@ namespace LabelSharp.Presentation.Models
 
         #region # 属性
 
+        #region 图像 —— BitmapSource Image
+        /// <summary>
+        /// 图像
+        /// </summary>
+        public Lazy<BitmapSource> Image { get; set; }
+        #endregion
+
         #region 图像文件夹 —— string ImageFolder
         /// <summary>
         /// 图像文件夹
@@ -76,11 +83,25 @@ namespace LabelSharp.Presentation.Models
         public int ImageIndex { get; set; }
         #endregion
 
-        #region 图像 —— BitmapSource Image
+        #region 图像宽度 —— int ImageWidth
         /// <summary>
-        /// 图像
+        /// 图像宽度
         /// </summary>
-        public Lazy<BitmapSource> Image { get; set; }
+        public int ImageWidth { get; set; }
+        #endregion
+
+        #region 图像高度 —— int ImageHeight
+        /// <summary>
+        /// 图像高度
+        /// </summary>
+        public int ImageHeight { get; set; }
+        #endregion
+
+        #region 图像通道数 —— int ImageChannelsCount
+        /// <summary>
+        /// 图像通道数
+        /// </summary>
+        public int ImageChannelsCount { get; set; }
         #endregion
 
         #region 形状列表 —— ObservableCollection<Shape> Shapes
@@ -127,9 +148,12 @@ namespace LabelSharp.Presentation.Models
         private BitmapSource GetImage()
         {
             using Mat matrix = Cv2.ImRead(this.ImagePath);
-            BitmapSource bitmapSource = matrix.ToBitmapSource();
+            this.ImageWidth = matrix.Width;
+            this.ImageHeight = matrix.Height;
+            this.ImageChannelsCount = matrix.Channels();
+            BitmapSource image = matrix.ToBitmapSource();
 
-            return bitmapSource;
+            return image;
         }
         #endregion
 

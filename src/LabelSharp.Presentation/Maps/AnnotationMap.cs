@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Point = System.Windows.Point;
 using Size = System.Windows.Size;
@@ -39,9 +38,8 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static MeAnnotation ToMeAnnotation(this ImageAnnotation imageAnnotation)
         {
-            BitmapSource image = imageAnnotation.Image.Value;
-            int imageWidth = (int)Math.Ceiling(image.Width);
-            int imageHeight = (int)Math.Ceiling(image.Height);
+            int imageWidth = imageAnnotation.ImageWidth;
+            int imageHeight = imageAnnotation.ImageHeight;
             IList<MeShape> meShapes = imageAnnotation.Annotations.Select(x => x.ToMeShpe()).ToList();
             MeAnnotation meAnnotation = new MeAnnotation(imageAnnotation.ImageName, imageWidth, imageHeight, meShapes);
 
@@ -78,7 +76,6 @@ namespace LabelSharp.Presentation.Maps
                 }
             }
 
-            BitmapSource image = imageAnnotation.Image.Value;
             PascalAnnotation pascalAnnotation = new PascalAnnotation
             {
                 Folder = imageAnnotation.ImageFolder,
@@ -90,9 +87,9 @@ namespace LabelSharp.Presentation.Maps
                 },
                 ImageSize = new ImageSize
                 {
-                    Width = (int)Math.Ceiling(image.Width),
-                    Height = (int)Math.Ceiling(image.Height),
-                    Depth = image.Format == PixelFormats.Gray8 ? 1 : 3
+                    Width = imageAnnotation.ImageWidth,
+                    Height = imageAnnotation.ImageHeight,
+                    Depth = imageAnnotation.ImageChannelsCount
                 },
                 Segmented = 0,
                 Annotations = pascalAnnotationInfos.ToArray()
@@ -140,8 +137,9 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
-            BitmapSource currentImage = imageAnnotation.Image.Value;
-            string[] lines = imageAnnotation.Annotations.ToYoloDetenctions(currentImage.Width, currentImage.Height, labels);
+            int imageWidth = imageAnnotation.ImageWidth;
+            int imageHeight = imageAnnotation.ImageHeight;
+            string[] lines = imageAnnotation.Annotations.ToYoloDetenctions(imageWidth, imageHeight, labels);
 
             return lines;
         }
@@ -185,8 +183,9 @@ namespace LabelSharp.Presentation.Maps
         /// </summary>
         public static string[] ToYoloSegmentations(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
-            BitmapSource currentImage = imageAnnotation.Image.Value;
-            string[] lines = imageAnnotation.Annotations.ToYoloSegmentations(currentImage.Width, currentImage.Height, labels);
+            int imageWidth = imageAnnotation.ImageWidth;
+            int imageHeight = imageAnnotation.ImageHeight;
+            string[] lines = imageAnnotation.Annotations.ToYoloSegmentations(imageWidth, imageHeight, labels);
 
             return lines;
         }

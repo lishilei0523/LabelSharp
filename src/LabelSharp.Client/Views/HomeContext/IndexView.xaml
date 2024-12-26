@@ -281,10 +281,10 @@
                     <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Format}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Width: " FontSize="12" />
-                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Width}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.ImageWidth}" FontSize="12" />
                     <TextBlock Text=" | " FontSize="12" />
                     <TextBlock Text="Height: " FontSize="12" />
-                    <TextBlock Text="{Binding SelectedImageAnnotation.Image.Value.Height}" FontSize="12" />
+                    <TextBlock Text="{Binding SelectedImageAnnotation.ImageHeight}" FontSize="12" />
                 </WrapPanel>
             </Grid>
         </Border>

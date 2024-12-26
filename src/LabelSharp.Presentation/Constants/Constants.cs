@@ -27,6 +27,11 @@ namespace LabelSharp
         public const string MeRectangle = "rectangle";
 
         /// <summary>
+        /// LabelMe旋转矩形
+        /// </summary>
+        public const string MeRotatedRectangle = "rotation";
+
+        /// <summary>
         /// LabelMe圆形
         /// </summary>
         public const string MeCircle = "circle";

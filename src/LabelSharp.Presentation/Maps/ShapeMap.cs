@@ -33,6 +33,10 @@ namespace LabelSharp.Presentation.Maps
             {
                 return Constants.MeRectangle;
             }
+            if (shapeL is RotatedRectangleL)
+            {
+                return Constants.MeRotatedRectangle;
+            }
             if (shapeL is CircleL)
             {
                 return Constants.MeCircle;
@@ -71,6 +75,10 @@ namespace LabelSharp.Presentation.Maps
             if (shapeL is RectangleL rectangleL)
             {
                 return rectangleL.ToMePoints();
+            }
+            if (shapeL is RotatedRectangleL rotatedRectangleL)
+            {
+                return rotatedRectangleL.ToMePoints();
             }
             if (shapeL is CircleL circleL)
             {
@@ -131,6 +139,21 @@ namespace LabelSharp.Presentation.Maps
             mePoints.Add(new[] { (double)rectangleL.TopRight.X, (double)rectangleL.TopRight.Y });
             mePoints.Add(new[] { (double)rectangleL.BottomRight.X, (double)rectangleL.BottomRight.Y });
             mePoints.Add(new[] { (double)rectangleL.BottomLeft.X, (double)rectangleL.BottomLeft.Y });
+
+            return mePoints;
+        }
+        #endregion
+
+        #region # 映射LabelMe点集 —— static IList<double[]> ToMePoints(this RotatedRectangleL...
+        /// <summary>
+        /// 映射LabelMe点集
+        /// </summary>
+        public static IList<double[]> ToMePoints(this RotatedRectangleL rotatedRectangleL)
+        {
+            IList<double[]> mePoints = new List<double[]>();
+            mePoints.Add(new[] { (double)rotatedRectangleL.CenterX, (double)rotatedRectangleL.CenterY });
+            mePoints.Add(new[] { (double)rotatedRectangleL.Width, (double)rotatedRectangleL.Height });
+            mePoints.Add(new[] { (double)rotatedRectangleL.Angle, (double)rotatedRectangleL.Angle });
 
             return mePoints;
         }
@@ -245,6 +268,23 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
+        #region # LabelMe点集映射旋转矩形 —— static RotatedRectangleL ToRotatedRectangleL(this IList<double[]>...
+        /// <summary>
+        /// LabelMe点集映射旋转矩形
+        /// </summary>
+        public static RotatedRectangleL ToRotatedRectangleL(this IList<double[]> mePoints)
+        {
+            int centerX = (int)Math.Ceiling(mePoints[0][0]);
+            int centerY = (int)Math.Ceiling(mePoints[0][1]);
+            int width = (int)Math.Ceiling(mePoints[1][0]);
+            int height = (int)Math.Ceiling(mePoints[1][1]);
+            float angle = (float)(mePoints[2][0]);
+            RotatedRectangleL rotatedRectangleL = new RotatedRectangleL(centerX, centerY, width, height, angle);
+
+            return rotatedRectangleL;
+        }
+        #endregion
+
         #region # LabelMe点集映射圆形 —— static CircleL ToCircleL(this IList<double[]> mePoints)
         /// <summary>
         /// LabelMe点集映射圆形
@@ -354,6 +394,19 @@ namespace LabelSharp.Presentation.Maps
                 shape.Tag = rectangleL;
                 rectangleL.Tag = shape;
                 shapeL = rectangleL;
+            }
+            else if (meShape.ShapeType == Constants.MeRotatedRectangle)
+            {
+                RotatedRectangleL rotatedRectangleL = meShape.Points.ToRotatedRectangleL();
+                RotatedRectangleVisual2D shape = new RotatedRectangleVisual2D
+                {
+                    Center = new Point(rotatedRectangleL.CenterX, rotatedRectangleL.CenterY),
+                    Size = new Size(rotatedRectangleL.Width, rotatedRectangleL.Height),
+                    Angle = rotatedRectangleL.Angle
+                };
+                shape.Tag = rotatedRectangleL;
+                rotatedRectangleL.Tag = shape;
+                shapeL = rotatedRectangleL;
             }
             else if (meShape.ShapeType == Constants.MeCircle)
             {

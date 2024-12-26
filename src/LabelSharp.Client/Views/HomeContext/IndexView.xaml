@@ -110,6 +110,14 @@
                                   Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="CropLandscape" />
                     </ToggleButton>
+                    <ToggleButton ToolTip="旋转矩形" x:Name="RotatedRectangleChecked"
+                              Style="{StaticResource ToggleButton.Styles.ToolBar}">
+                        <iconPacks:PackIconMaterialDesign Kind="CropSquare">
+                            <iconPacks:PackIconMaterialDesign.RenderTransform>
+                                <RotateTransform Angle="45" CenterX="8" CenterY="8" />
+                            </iconPacks:PackIconMaterialDesign.RenderTransform>
+                        </iconPacks:PackIconMaterialDesign>
+                    </ToggleButton>
                     <ToggleButton ToolTip="圆形" x:Name="CircleChecked"
                                   Style="{StaticResource ToggleButton.Styles.ToolBar}">
                         <iconPacks:PackIconMaterialDesign Kind="PanoramaFishEye" />
@@ -163,6 +171,7 @@
                                                  LineChecked="{Binding ElementName=LineChecked, Path=IsChecked, Mode=TwoWay}"
                                                  BrushChecked="{Binding ElementName=BrushChecked, Path=IsChecked, Mode=TwoWay}"
                                                  RectangleChecked="{Binding ElementName=RectangleChecked, Path=IsChecked, Mode=TwoWay}"
+                                                 RotatedRectangleChecked="{Binding ElementName=RotatedRectangleChecked, Path=IsChecked, Mode=TwoWay}"
                                                  CircleChecked="{Binding ElementName=CircleChecked, Path=IsChecked, Mode=TwoWay}"
                                                  EllipseChecked="{Binding ElementName=EllipseChecked, Path=IsChecked, Mode=TwoWay}"
                                                  PolygonChecked="{Binding ElementName=PolygonChecked, Path=IsChecked, Mode=TwoWay}"

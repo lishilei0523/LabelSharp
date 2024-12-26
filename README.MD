@@ -20,7 +20,7 @@
         点、线段、画刷、矩形、旋转矩形、圆形、椭圆形、多边形、折线段标注；
 
     格式部分：
-        导入/导出PascalVOC、YOLO目标检测、YOLO图像分割格式；
+        导入/导出PascalVOC、YOLO目标检测、YOLO图像分割、YOLO定向边框目标检测格式；
         批量PascalVOC格式转换csv格式；
         批量PascalVOC格式转换YOLO目标检测格式；
 

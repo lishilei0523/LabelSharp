@@ -153,8 +153,7 @@
                               cm:Message.Attach="[Event SelectionChanged] = [Action OnImageSelect()]">
                     <mah:FlipView.ItemTemplate>
                         <DataTemplate>
-                            <sd:DrawableCanvasEx Mode="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.CanvasMode, Mode=TwoWay}"
-                                                 BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderBrush}"
+                            <sd:DrawableCanvasEx BorderBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderBrush}"
                                                  BorderThickness="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.BorderThickness}"
                                                  GuideLinesVisibility="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=DataContext.GuideLinesVisibility}"
                                                  ScaleChecked="{Binding ElementName=ScaleChecked, Path=IsChecked, Mode=TwoWay}"
@@ -173,10 +172,10 @@
                                                  cm:Message.Attach="                                                 
                                          [Event ElementDrag] = [Action OnDragElement($source)];
                                          [Event ElementResize] = [Action OnResizeElement($source)];
-                                         [Event ShapeClick] = [Action OnShapeMouseLeftDown($eventArgs)];
+                                         [Event ShapeClick] = [Action OnShapeMouseLeftDown($source,$eventArgs)];
                                          [Event ShapeDrawn] = [Action OnShapeDrawn($eventArgs)];
                                          [Event MouseMove] = [Action OnCanvasMouseMove($source)];
-                                         [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp()];">
+                                         [Event MouseLeftButtonUp] = [Action OnCanvasMouseLeftUp($source)];">
                                 <sd:CanvasEx.BackgroundImage>
                                     <Image Source="{Binding Image.Value}" />
                                 </sd:CanvasEx.BackgroundImage>

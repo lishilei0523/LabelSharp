@@ -38,14 +38,6 @@ namespace LabelSharp.ViewModels.HomeContext
 
         #region # 属性
 
-        #region 操作模式 —— CanvasMode CanvasMode
-        /// <summary>
-        /// 操作模式
-        /// </summary>
-        [DependencyProperty]
-        public CanvasMode CanvasMode { get; set; }
-        #endregion
-
         #region 鼠标X坐标 —— int? MousePositionX
         /// <summary>
         /// 鼠标X坐标
@@ -285,13 +277,13 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 形状鼠标左击事件 —— void OnShapeMouseLeftDown(ShapeEventArgs eventArgs)
+        #region 形状鼠标左击事件 —— void OnShapeMouseLeftDown(CanvasEx canvas...
         /// <summary>
         /// 形状鼠标左击事件
         /// </summary>
-        public void OnShapeMouseLeftDown(ShapeEventArgs eventArgs)
+        public void OnShapeMouseLeftDown(CanvasEx canvas, ShapeEventArgs eventArgs)
         {
-            if (this.CanvasMode != CanvasMode.Draw)
+            if (canvas.Mode != CanvasMode.Draw)
             {
                 Annotation annotation = this.SelectedImageAnnotation.Annotations.SingleOrDefault(x => x.Shape == eventArgs.Shape);
                 if (annotation != null)
@@ -350,13 +342,13 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
-        #region 画布鼠标左键松开事件 —— void OnCanvasMouseLeftUp()
+        #region 画布鼠标左键松开事件 —— void OnCanvasMouseLeftUp(CanvasEx canvas)
         /// <summary>
         /// 画布鼠标左键松开事件
         /// </summary>
-        public void OnCanvasMouseLeftUp()
+        public void OnCanvasMouseLeftUp(CanvasEx canvas)
         {
-            if ((this.CanvasMode == CanvasMode.Drag || this.CanvasMode == CanvasMode.Resize))
+            if (canvas.Mode == CanvasMode.Drag || canvas.Mode == CanvasMode.Resize)
             {
                 this.SaveAnnotations();
             }

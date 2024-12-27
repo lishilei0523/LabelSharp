@@ -15,6 +15,7 @@ using SD.IOC.Core.Mediators;
 using SD.OpenCV.OnnxRuntime.Models;
 using SD.OpenCV.OnnxRuntime.Values;
 using SD.Toolkits.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -1172,6 +1173,77 @@ namespace LabelSharp.ViewModels.HomeContext
                     if (!this.Labels.Contains(segmentation.Label))
                     {
                         this.Labels.Add(segmentation.Label);
+                    }
+                }
+            }
+
+            this.Idle();
+        }
+        #endregion
+
+        #region YOLO定向目标检测 —— async void YoloObbDetect()
+        /// <summary>
+        /// YOLO定向目标检测
+        /// </summary>
+        public async void YoloObbDetect()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            this.Busy();
+
+            ThresholdViewModel viewModel = ResolveMediator.Resolve<ThresholdViewModel>();
+            bool? result = await this._windowManager.ShowDialogAsync(viewModel);
+            if (result == true)
+            {
+                //初始化模型
+                const string modelPath = "Content/Models/yolo11n-obb.onnx";
+                using YoloObbDetector yoloObbDetector = await Task.Run(() => new YoloObbDetector(modelPath));
+                await Task.Run(() => yoloObbDetector.StartSession());
+
+                //执行检测
+                using Mat originalImage = this.SelectedImageAnnotation.Image.Value.ToMat();
+                using Mat image = originalImage.Channels() == 4
+                    ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
+                    : originalImage.Channels() == 1
+                        ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
+                        : originalImage;
+                ObbDetection[] detections = await Task.Run(() => yoloObbDetector.Infer(image, (float)viewModel.Threshold));
+
+                //增加标注
+                foreach (ObbDetection detection in detections)
+                {
+                    RotatedRectangleVisual2D rotatedRectangle = new RotatedRectangleVisual2D()
+                    {
+                        Center = new Point(detection.RotatedBox.Center.X, detection.RotatedBox.Center.Y),
+                        Size = new System.Windows.Size(detection.RotatedBox.Size.Width, detection.RotatedBox.Size.Height),
+                        Angle = detection.RotatedBox.Angle,
+                        Stroke = this.BorderBrush,
+                        StrokeThickness = this.BorderThickness
+                    };
+
+                    int centerX = (int)Math.Ceiling(detection.RotatedBox.Center.X);
+                    int centerY = (int)Math.Ceiling(detection.RotatedBox.Center.Y);
+                    int width = (int)Math.Ceiling(detection.RotatedBox.Size.Width);
+                    int height = (int)Math.Ceiling(detection.RotatedBox.Size.Height);
+                    RotatedRectangleL rotatedRectangleL = new RotatedRectangleL(centerX, centerY, width, height, detection.RotatedBox.Angle);
+                    rotatedRectangle.Tag = rotatedRectangleL;
+                    rotatedRectangleL.Tag = rotatedRectangle;
+
+                    Annotation annotation = new Annotation(detection.Label, null, false, false, rotatedRectangleL, string.Empty);
+
+                    this.SelectedImageAnnotation.Shapes.Add(annotation.Shape);
+                    this.SelectedImageAnnotation.Annotations.Add(annotation);
+                    if (!this.Labels.Contains(detection.Label))
+                    {
+                        this.Labels.Add(detection.Label);
                     }
                 }
             }

@@ -75,6 +75,7 @@
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />
                         <MenuItem Header="YOLO图像分割(_E)" cm:Message.Attach="YoloSegment()" />
+                        <MenuItem Header="YOLO定向目标检测(_O)" cm:Message.Attach="YoloObbDetect()" />
                         <MenuItem Header="PascalVOC → CSV(_C)" cm:Message.Attach="PascalToCsv()" />
                         <MenuItem Header="PascalVOC → YOLO(_Y)" cm:Message.Attach="PascalToYolo()" />
                     </MenuItem>

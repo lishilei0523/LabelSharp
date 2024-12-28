@@ -1369,6 +1369,7 @@ namespace LabelSharp.ViewModels.HomeContext
             docBuilder.AppendLine("鼠标滚轮按下拖动: 移动视口");
             docBuilder.AppendLine("列表功能: 鼠标右键");
             docBuilder.AppendLine("旋转矩形: 编辑模式下同时按下 Ctrl + Alt 调整旋转角度");
+            docBuilder.AppendLine("多边形/折线段: 绘制模式下按下 ESC 取消绘制");
 
             MessageBox.Show(docBuilder.ToString(), "提示", MessageBoxButton.OK, MessageBoxImage.Information);
         }

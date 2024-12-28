@@ -17,7 +17,6 @@ using SD.OpenCV.OnnxRuntime.Values;
 using SD.Toolkits.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -223,7 +222,8 @@ namespace LabelSharp.ViewModels.HomeContext
                 string imagePath = openFileDialog.FileName;
                 string imageName = Path.GetFileName(imagePath);
                 ImageAnnotation imageAnnotation = new ImageAnnotation(this.ImageFolder, imagePath, imageName, 1);
-                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>(new[] { imageAnnotation });
+                this.ImageAnnotations.Clear();
+                this.ImageAnnotations.Add(imageAnnotation);
                 this.SelectedImageAnnotation = imageAnnotation;
             }
         }
@@ -262,7 +262,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 #endregion
 
                 this.DisplayName = $"{Constants.WindowTitle} - {this.ImageFolder}";
-                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
+                this.ImageAnnotations.Clear();
                 int sort = 1;
                 foreach (string imagePath in imagePaths)
                 {
@@ -307,7 +307,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 this.ImageFolder = null;
                 this.SelectedImageAnnotation = null;
                 this.DisplayName = Constants.WindowTitle;
-                this.ImageAnnotations = new ObservableCollection<ImageAnnotation>();
+                this.ImageAnnotations.Clear();
             }
         }
         #endregion
@@ -435,11 +435,12 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
+                const int thickness = -1;
                 using Mat image = this.SelectedImageAnnotation.Image.Value.ToMat();
-                IList<Mat> results = new List<Mat>();
-                foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
+                IDictionary<Mat, string> results = new Dictionary<Mat, string>();
+                foreach (Annotation annotation in this.SelectedImageAnnotation.Annotations)
                 {
-                    const int thickness = -1;
+                    ShapeL shapeL = annotation.ShapeL;
                     if (shapeL is RectangleL rectangleL)
                     {
                         //生成掩膜
@@ -453,7 +454,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                         //提取有效区域
                         Mat result = canvas[rect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                     if (shapeL is RotatedRectangleL rotatedRectangleL)
                     {
@@ -473,7 +474,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         //提取有效区域
                         OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
                         Mat result = canvas[boundingRect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                     if (shapeL is CircleL circleL)
                     {
@@ -491,7 +492,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         int sideSize = circleL.Radius * 2;
                         OpenCvSharp.Rect boundingRect = new OpenCvSharp.Rect(x, y, sideSize, sideSize);
                         Mat result = canvas[boundingRect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                     if (shapeL is EllipseL ellipseL)
                     {
@@ -513,7 +514,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         int height = ellipseL.RadiusY * 2;
                         OpenCvSharp.Rect boundingRect = new OpenCvSharp.Rect(x, y, width, height);
                         Mat result = canvas[boundingRect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                     if (shapeL is PolygonL polygonL)
                     {
@@ -534,7 +535,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         //提取有效区域
                         OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
                         Mat result = canvas[boundingRect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                     if (shapeL is PolylineL polylineL)
                     {
@@ -555,17 +556,35 @@ namespace LabelSharp.ViewModels.HomeContext
                         //提取有效区域
                         OpenCvSharp.Rect boundingRect = Cv2.BoundingRect(contour);
                         Mat result = canvas[boundingRect];
-                        results.Add(result);
+                        results.Add(result, annotation.Label);
                     }
                 }
 
                 string imageName = Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath);
                 string imageExtension = Path.GetExtension(this.SelectedImageAnnotation.ImagePath);
-                for (int index = 0; index < results.Count; index++)
+
+                //分组保存
+                var resultGroups = results
+                    .GroupBy(x => x.Value)
+                    .Select(x => new
+                    {
+                        Label = x.Key,
+                        Images = x.Select(y => y.Key)
+                    });
+                foreach (var resultGroup in resultGroups)
                 {
-                    using Mat imagePart = results[index];
-                    string imagePartPath = $@"{folderDialog.FileName}\{imageName}-Part{index}{imageExtension}";
-                    await Task.Run(() => imagePart.SaveImage(imagePartPath));
+                    string groupFolder = $@"{folderDialog.FileName}\{resultGroup.Label}";
+                    Directory.CreateDirectory(groupFolder);
+
+                    int index = 1;
+                    foreach (Mat result in resultGroup.Images)
+                    {
+                        string imagePartPath = $@"{groupFolder}\{imageName}-{resultGroup.Label}-{index}{imageExtension}";
+                        await Task.Run(() => result.SaveImage(imagePartPath));
+                        result.Dispose();
+
+                        index++;
+                    }
                 }
 
                 this.Idle();

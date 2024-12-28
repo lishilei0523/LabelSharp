@@ -131,25 +131,25 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation...
+        #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetections(this ImageAnnotation imageAnnotation...
         /// <summary>
         /// 映射YOLO目标检测标注
         /// </summary>
-        public static string[] ToYoloDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
+        public static string[] ToYoloDetections(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
             int imageWidth = imageAnnotation.ImageWidth;
             int imageHeight = imageAnnotation.ImageHeight;
-            string[] lines = imageAnnotation.Annotations.ToYoloDetenctions(imageWidth, imageHeight, labels);
+            string[] lines = imageAnnotation.Annotations.ToYoloDetections(imageWidth, imageHeight, labels);
 
             return lines;
         }
         #endregion
 
-        #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetenctions(this IList<Annotation> annotations...
+        #region # 映射YOLO目标检测标注 —— static string[] ToYoloDetections(this IList<Annotation> annotations...
         /// <summary>
         /// 映射YOLO目标检测标注
         /// </summary>
-        public static string[] ToYoloDetenctions(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
+        public static string[] ToYoloDetections(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
         {
             IList<string> lines = new List<string>();
             foreach (Annotation annotation in annotations)
@@ -239,25 +239,25 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetenctions(this IList<Annotation> annotations...
+        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetections(this IList<Annotation> annotations...
         /// <summary>
         /// 映射YOLO定向目标检测标注
         /// </summary>
-        public static string[] ToYoloObbDetenctions(this ImageAnnotation imageAnnotation, IList<string> labels)
+        public static string[] ToYoloObbDetections(this ImageAnnotation imageAnnotation, IList<string> labels)
         {
             int imageWidth = imageAnnotation.ImageWidth;
             int imageHeight = imageAnnotation.ImageHeight;
-            string[] lines = imageAnnotation.Annotations.ToYoloObbDetenctions(imageWidth, imageHeight, labels);
+            string[] lines = imageAnnotation.Annotations.ToYoloObbDetections(imageWidth, imageHeight, labels);
 
             return lines;
         }
         #endregion
 
-        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetenctions(this IList<Annotation> annotations...
+        #region # 映射YOLO定向目标检测标注 —— static string[] ToYoloObbDetections(this IList<Annotation> annotations...
         /// <summary>
         /// 映射YOLO定向目标检测标注
         /// </summary>
-        public static string[] ToYoloObbDetenctions(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
+        public static string[] ToYoloObbDetections(this IList<Annotation> annotations, double imageWidth, double imageHeight, IList<string> labels)
         {
             IList<string> lines = new List<string>();
             foreach (Annotation annotation in annotations)

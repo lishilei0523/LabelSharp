@@ -353,7 +353,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 //附带YOLO-det
                 if (this.WithYoloDet)
                 {
-                    string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
+                    string[] lines = this.SelectedImageAnnotation.ToYoloDetections(this.Labels);
                     string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}.txt";
                     File.WriteAllLines(yoloAnnotationPath, lines);
                 }
@@ -369,7 +369,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 //附带YOLO-obb
                 if (this.WithYoloObb)
                 {
-                    string[] lines = this.SelectedImageAnnotation.ToYoloObbDetenctions(this.Labels);
+                    string[] lines = this.SelectedImageAnnotation.ToYoloObbDetections(this.Labels);
                     string yoloAnnotationPath = $"{this.ImageFolder}/{annotationName}-obb.txt";
                     File.WriteAllLines(yoloAnnotationPath, lines);
                 }
@@ -957,7 +957,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                string[] lines = this.SelectedImageAnnotation.ToYoloDetenctions(this.Labels);
+                string[] lines = this.SelectedImageAnnotation.ToYoloDetections(this.Labels);
                 await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
 
                 this.Idle();
@@ -1029,7 +1029,7 @@ namespace LabelSharp.ViewModels.HomeContext
             {
                 this.Busy();
 
-                string[] lines = this.SelectedImageAnnotation.ToYoloObbDetenctions(this.Labels);
+                string[] lines = this.SelectedImageAnnotation.ToYoloObbDetections(this.Labels);
                 await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, lines));
 
                 this.Idle();
@@ -1339,7 +1339,7 @@ namespace LabelSharp.ViewModels.HomeContext
                         string pascalAnnotationXml = await Task.Run(() => File.ReadAllText(fileName));
                         PascalAnnotation pascalAnnotation = pascalAnnotationXml.AsXmlTo<PascalAnnotation>();
                         IList<Annotation> annotations = pascalAnnotation.FromPascalAnnotation();
-                        string[] yoloAnnotations = annotations.ToYoloDetenctions(pascalAnnotation.ImageSize.Width, pascalAnnotation.ImageSize.Height, this.Labels);
+                        string[] yoloAnnotations = annotations.ToYoloDetections(pascalAnnotation.ImageSize.Width, pascalAnnotation.ImageSize.Height, this.Labels);
 
                         string yoloFileName = Path.GetFileNameWithoutExtension(fileName);
                         string yoloFilePath = $@"{folderDialog.FileName}\{yoloFileName}.txt";

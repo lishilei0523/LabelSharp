@@ -13,7 +13,7 @@ using SD.Infrastructure.WPF.Caliburn.Base;
 using SD.Infrastructure.WPF.Visual2Ds;
 using SD.IOC.Core.Mediators;
 using SD.OpenCV.OnnxRuntime.Models;
-using SD.OpenCV.OnnxRuntime.Values;
+using SD.OpenCV.OnnxRuntime.Results;
 using SD.Toolkits.Json;
 using System;
 using System.Collections.Generic;

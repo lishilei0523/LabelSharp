@@ -91,8 +91,20 @@ namespace LabelSharp.ViewModels.HomeContext
         /// <summary>
         /// 显示参考线
         /// </summary>
-        [DependencyProperty]
-        public bool ShowGuideLines { get; set; }
+        private bool _showGuideLines;
+
+        /// <summary>
+        /// 显示参考线
+        /// </summary>
+        public bool ShowGuideLines
+        {
+            get => this._showGuideLines;
+            set
+            {
+                this.Set(ref this._showGuideLines, value);
+                this.GuideLinesVisibility = value ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
         #endregion
 
         #region 参考线可见性 —— Visibility GuideLinesVisibility
@@ -140,16 +152,6 @@ namespace LabelSharp.ViewModels.HomeContext
         #region # 方法
 
         //常用
-
-        #region 切换参考线 —— void SwitchGuideLinesVisibility()
-        /// <summary>
-        /// 切换参考线
-        /// </summary>
-        public void SwitchGuideLinesVisibility()
-        {
-            this.GuideLinesVisibility = this.ShowGuideLines ? Visibility.Visible : Visibility.Collapsed;
-        }
-        #endregion
 
         #region 重置 —— void Reset()
         /// <summary>

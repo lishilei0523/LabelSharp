@@ -19,9 +19,7 @@
     <mah:MetroWindow.RightWindowCommands>
         <mah:WindowCommands>
             <mah:WindowCommands Margin="0,0,-35,0">
-                <mah:ToggleSwitch OnContent="参考线开" OffContent="参考线关" Height="34" FontSize="14" FontFamily="微软雅黑"
-                                  IsOn="{Binding ShowGuideLines}"
-                                  cm:Message.Attach="[Event Toggled] = [Action SwitchGuideLinesVisibility()]" />
+                <mah:ToggleSwitch Height="34" OnContent="参考线开" OffContent="参考线关" IsOn="{Binding ShowGuideLines}" />
             </mah:WindowCommands>
             <Button Content="重置" cm:Message.Attach="Reset()" />
             <Button Content="样式" cm:Message.Attach="SetStyle()" />

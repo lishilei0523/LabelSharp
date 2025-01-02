@@ -55,14 +55,14 @@
                         <MenuItem Header="切割图像(_C)" cm:Message.Attach="CutImage()" />
                         <MenuItem Header="保存掩膜(_M)" cm:Message.Attach="SaveMask()" />
                         <MenuItem Header="导入标签(_L)" cm:Message.Attach="ImportLabels()" />
-                        <MenuItem Header="导入PascalVOC(_V)" cm:Message.Attach="ImportPascal()" />
-                        <MenuItem Header="导入YOLO-det(_T)" cm:Message.Attach="ImportYoloDet()" />
-                        <MenuItem Header="导入YOLO-seg(_G)" cm:Message.Attach="ImportYoloSeg()" />
-                        <MenuItem Header="导入YOLO-obb(_B)" cm:Message.Attach="ImportYoloObb()" />
-                        <MenuItem Header="导出PascalVOC(_P)" cm:Message.Attach="ExportPascal()" />
-                        <MenuItem Header="导出YOLO-det(_D)" cm:Message.Attach="ExportYoloDet()" />
-                        <MenuItem Header="导出YOLO-seg(_S)" cm:Message.Attach="ExportYoloSeg()" />
-                        <MenuItem Header="导出YOLO-obb(_O)" cm:Message.Attach="ExportYoloObb()" />
+                        <MenuItem Header="导入PascalVOC(_P)" cm:Message.Attach="ImportPascal()" />
+                        <MenuItem Header="导入YOLO-det(_D)" cm:Message.Attach="ImportYoloDet()" />
+                        <MenuItem Header="导入YOLO-seg(_S)" cm:Message.Attach="ImportYoloSeg()" />
+                        <MenuItem Header="导入YOLO-obb(_O)" cm:Message.Attach="ImportYoloObb()" />
+                        <MenuItem Header="导出PascalVOC(_V)" cm:Message.Attach="ExportPascal()" />
+                        <MenuItem Header="导出YOLO-det(_T)" cm:Message.Attach="ExportYoloDet()" />
+                        <MenuItem Header="导出YOLO-seg(_G)" cm:Message.Attach="ExportYoloSeg()" />
+                        <MenuItem Header="导出YOLO-obb(_B)" cm:Message.Attach="ExportYoloObb()" />
                     </MenuItem>
                     <MenuItem Header="格式(_O)">
                         <MenuItem Header="附带PascalVOC(_P)" IsCheckable="True" IsChecked="{Binding WithPascal}" />
@@ -72,7 +72,7 @@
                     </MenuItem>
                     <MenuItem Header="工具(_T)">
                         <MenuItem Header="YOLO目标检测(_D)" cm:Message.Attach="YoloDetect()" />
-                        <MenuItem Header="YOLO图像分割(_E)" cm:Message.Attach="YoloSegment()" />
+                        <MenuItem Header="YOLO图像分割(_S)" cm:Message.Attach="YoloSegment()" />
                         <MenuItem Header="YOLO定向目标检测(_O)" cm:Message.Attach="YoloObbDetect()" />
                         <MenuItem Header="PascalVOC → CSV(_C)" cm:Message.Attach="PascalToCsv()" />
                         <MenuItem Header="PascalVOC → YOLO(_Y)" cm:Message.Attach="PascalToYolo()" />

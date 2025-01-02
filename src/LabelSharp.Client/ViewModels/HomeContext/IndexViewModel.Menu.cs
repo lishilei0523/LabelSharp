@@ -502,8 +502,8 @@ namespace LabelSharp.ViewModels.HomeContext
                         using Mat mask = Mat.Zeros(image.Size(), MatType.CV_8UC1);
                         Point2f center = new Point2f(ellipseL.X, ellipseL.Y);
                         Size2f size = new Size2f(ellipseL.RadiusX * 2, ellipseL.RadiusY * 2);
-                        RotatedRect rect = new RotatedRect(center, size, 0);
-                        await Task.Run(() => mask.Ellipse(rect, Scalar.White, thickness));
+                        RotatedRect rotatedRect = new RotatedRect(center, size, 0);
+                        await Task.Run(() => mask.Ellipse(rotatedRect, Scalar.White, thickness));
 
                         //适用掩膜
                         using Mat canvas = new Mat();
@@ -566,26 +566,25 @@ namespace LabelSharp.ViewModels.HomeContext
                 string imageExtension = Path.GetExtension(this.SelectedImageAnnotation.ImagePath);
 
                 //分组保存
-                var resultGroups = results
-                    .GroupBy(x => x.Value)
-                    .Select(x => new
+                var resultGroups =
+                    from result in results
+                    group result by result.Value
+                    into resultGroup
+                    select new
                     {
-                        Label = x.Key,
-                        Images = x.Select(y => y.Key)
-                    });
+                        Label = resultGroup.Key,
+                        Images = resultGroup.Select(kv => kv.Key).ToArray()
+                    };
                 foreach (var resultGroup in resultGroups)
                 {
                     string groupFolder = $@"{folderDialog.FileName}\{resultGroup.Label}";
                     Directory.CreateDirectory(groupFolder);
 
-                    int index = 1;
-                    foreach (Mat result in resultGroup.Images)
+                    for (int index = 0; index < resultGroup.Images.Length; index++)
                     {
                         string imagePartPath = $@"{groupFolder}\{imageName}-{resultGroup.Label}-{index}{imageExtension}";
+                        using Mat result = resultGroup.Images[index];
                         await Task.Run(() => result.SaveImage(imagePartPath));
-                        result.Dispose();
-
-                        index++;
                     }
                 }
 

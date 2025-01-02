@@ -37,10 +37,12 @@
                                    Style="{StaticResource NumericUpDown.Styles.Fluent}" />
             </sd:FormItem>
             <sd:FormItem Label="是否截断：">
-                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
+                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" 
+                                  Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
             </sd:FormItem>
             <sd:FormItem Label="是否困难：">
-                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
+                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" 
+                                  Style="{StaticResource ToggleSwitch.Styles.Fluent}" />
             </sd:FormItem>
             <sd:FormItem Label="描述：">
                 <TextBox Text="{Binding Description}"

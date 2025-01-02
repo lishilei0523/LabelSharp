@@ -31,10 +31,12 @@
                 <TextBox Text="{Binding GroupId}" IsReadOnly="True" Style="{StaticResource TextBoxRevealStyle}" />
             </sd:FormItem>
             <sd:FormItem Label="是否截断：">
-                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
+                <mah:ToggleSwitch IsOn="{Binding Truncated}" OnContent="是" OffContent="否" 
+                                  Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
             </sd:FormItem>
             <sd:FormItem Label="是否困难：">
-                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
+                <mah:ToggleSwitch IsOn="{Binding Difficult}" OnContent="是" OffContent="否" 
+                                  Style="{StaticResource ToggleSwitch.Styles.Fluent}" IsEnabled="False" />
             </sd:FormItem>
             <sd:FormItem Label="形状数据：">
                 <TextBox Text="{Binding ShapeText}"

@@ -2,6 +2,7 @@
 using LabelSharp.Presentation.Models;
 using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
+using OpenCvSharp;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.CustomControls;
@@ -22,6 +23,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Path = System.IO.Path;
+using Point = OpenCvSharp.Point;
+using Rect = OpenCvSharp.Rect;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -337,7 +340,7 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             if (this.SelectedImageAnnotation != null)
             {
-                Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
+                System.Windows.Point rectifiedPosition = canvas.RectifiedMousePosition!.Value;
                 this.MousePositionX = (int)Math.Ceiling(rectifiedPosition.X);
                 this.MousePositionY = (int)Math.Ceiling(rectifiedPosition.Y);
             }
@@ -461,6 +464,66 @@ namespace LabelSharp.ViewModels.HomeContext
         {
             string labelsPath = $"{this.ImageFolder}/classes.txt";
             await Task.Run(() => File.WriteAllLines(labelsPath, this.Labels));
+        }
+        #endregion
+
+        #region 绘制掩膜 —— async Task DrawMask(Mat mask...
+        /// <summary>
+        /// 绘制掩膜
+        /// </summary>
+        /// <param name="mask">掩膜</param>
+        /// <param name="shapeLs">形状列表</param>
+        private async Task DrawMask(Mat mask, IList<ShapeL> shapeLs)
+        {
+            const int thickness = -1;
+            foreach (ShapeL shapeL in shapeLs)
+            {
+                if (shapeL is RectangleL rectangleL)
+                {
+                    Rect rect = new Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height);
+                    await Task.Run(() => mask.Rectangle(rect, Scalar.White, thickness));
+                }
+                if (shapeL is RotatedRectangleL rotatedRectangleL)
+                {
+                    Point[] contour = new Point[4];
+                    contour[0] = new Point(rotatedRectangleL.TopLeft.X, rotatedRectangleL.TopLeft.Y);
+                    contour[1] = new Point(rotatedRectangleL.TopRight.X, rotatedRectangleL.TopRight.Y);
+                    contour[2] = new Point(rotatedRectangleL.BottomRight.X, rotatedRectangleL.BottomRight.Y);
+                    contour[3] = new Point(rotatedRectangleL.BottomLeft.X, rotatedRectangleL.BottomLeft.Y);
+                    await Task.Run(() => mask.DrawContours(new[] { contour }, -1, Scalar.White, thickness));
+                }
+                if (shapeL is CircleL circleL)
+                {
+                    await Task.Run(() => mask.Circle(circleL.X, circleL.Y, circleL.Radius, Scalar.White, thickness));
+                }
+                if (shapeL is EllipseL ellipseL)
+                {
+                    Point2f center = new Point2f(ellipseL.X, ellipseL.Y);
+                    Size2f size = new Size2f(ellipseL.RadiusX * 2, ellipseL.RadiusY * 2);
+                    RotatedRect rotatedRect = new RotatedRect(center, size, 0);
+                    await Task.Run(() => mask.Ellipse(rotatedRect, Scalar.White, thickness));
+                }
+                if (shapeL is PolygonL polygonL)
+                {
+                    Point[] contour = new Point[polygonL.Points.Count];
+                    for (int index = 0; index < contour.Length; index++)
+                    {
+                        PointL pointL = polygonL.Points.ElementAt(index);
+                        contour[index] = new Point(pointL.X, pointL.Y);
+                    }
+                    await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+                }
+                if (shapeL is PolylineL polylineL)
+                {
+                    Point[] contour = new Point[polylineL.Points.Count];
+                    for (int index = 0; index < contour.Length; index++)
+                    {
+                        PointL pointL = polylineL.Points.ElementAt(index);
+                        contour[index] = new Point(pointL.X, pointL.Y);
+                    }
+                    await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
+                }
+            }
         }
         #endregion
 

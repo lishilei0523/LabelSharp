@@ -595,6 +595,47 @@ namespace LabelSharp.ViewModels.HomeContext
         }
         #endregion
 
+        #region 应用掩膜 —— async void ApplyMask()
+        /// <summary>
+        /// 应用掩膜
+        /// </summary>
+        public async void ApplyMask()
+        {
+            #region # 验证
+
+            if (this.SelectedImageAnnotation == null)
+            {
+                MessageBox.Show("当前未加载图像！", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            #endregion
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.jpg)|*.jpg|(*.png)|*.png|(*.bmp)|*.bmp",
+                FileName = $"{Path.GetFileNameWithoutExtension(this.SelectedImageAnnotation.ImagePath)}_Masked",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                Size maskSize = new Size(this.SelectedImageAnnotation.ImageWidth, this.SelectedImageAnnotation.ImageHeight);
+                using Mat mask = Mat.Zeros(maskSize, MatType.CV_8UC1);
+                await this.DrawMask(mask, this.SelectedImageAnnotation.ShapeLs);
+
+                //提取有效区域
+                using Mat image = this.SelectedImageAnnotation.Image.Value.ToMat();
+                using Mat result = new Mat();
+                image.CopyTo(result, mask);
+                await Task.Run(() => result.SaveImage(saveFileDialog.FileName));
+
+                this.Idle();
+                this.ToastSuccess("已保存！");
+            }
+        }
+        #endregion
+
         #region 保存掩膜 —— async void SaveMask()
         /// <summary>
         /// 保存掩膜
@@ -624,55 +665,7 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 Size maskSize = new Size(this.SelectedImageAnnotation.ImageWidth, this.SelectedImageAnnotation.ImageHeight);
                 using Mat mask = Mat.Zeros(maskSize, MatType.CV_8UC1);
-                foreach (ShapeL shapeL in this.SelectedImageAnnotation.ShapeLs)
-                {
-                    const int thickness = -1;
-                    if (shapeL is RectangleL rectangleL)
-                    {
-                        OpenCvSharp.Rect rect = new OpenCvSharp.Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height);
-                        await Task.Run(() => mask.Rectangle(rect, Scalar.White, thickness));
-                    }
-                    if (shapeL is RotatedRectangleL rotatedRectangleL)
-                    {
-                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[4];
-                        contour[0] = new OpenCvSharp.Point(rotatedRectangleL.TopLeft.X, rotatedRectangleL.TopLeft.Y);
-                        contour[1] = new OpenCvSharp.Point(rotatedRectangleL.TopRight.X, rotatedRectangleL.TopRight.Y);
-                        contour[2] = new OpenCvSharp.Point(rotatedRectangleL.BottomRight.X, rotatedRectangleL.BottomRight.Y);
-                        contour[3] = new OpenCvSharp.Point(rotatedRectangleL.BottomLeft.X, rotatedRectangleL.BottomLeft.Y);
-                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
-                    }
-                    if (shapeL is CircleL circleL)
-                    {
-                        await Task.Run(() => mask.Circle(circleL.X, circleL.Y, circleL.Radius, Scalar.White, thickness));
-                    }
-                    if (shapeL is EllipseL ellipseL)
-                    {
-                        Point2f center = new Point2f(ellipseL.X, ellipseL.Y);
-                        Size2f size = new Size2f(ellipseL.RadiusX * 2, ellipseL.RadiusY * 2);
-                        RotatedRect rect = new RotatedRect(center, size, 0);
-                        await Task.Run(() => mask.Ellipse(rect, Scalar.White, thickness));
-                    }
-                    if (shapeL is PolygonL polygonL)
-                    {
-                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polygonL.Points.Count];
-                        for (int index = 0; index < polygonL.Points.Count; index++)
-                        {
-                            PointL pointL = polygonL.Points.ElementAt(index);
-                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
-                        }
-                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
-                    }
-                    if (shapeL is PolylineL polylineL)
-                    {
-                        OpenCvSharp.Point[] contour = new OpenCvSharp.Point[polylineL.Points.Count];
-                        for (int index = 0; index < polylineL.Points.Count; index++)
-                        {
-                            PointL pointL = polylineL.Points.ElementAt(index);
-                            contour[index] = new OpenCvSharp.Point(pointL.X, pointL.Y);
-                        }
-                        await Task.Run(() => mask.DrawContours(new[] { contour }, 0, Scalar.White, thickness));
-                    }
-                }
+                await this.DrawMask(mask, this.SelectedImageAnnotation.ShapeLs);
 
                 await Task.Run(() => mask.SaveImage(saveFileDialog.FileName));
 
@@ -691,7 +684,7 @@ namespace LabelSharp.ViewModels.HomeContext
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
                 Title = "请选择标签文件",
-                Filter = "标注文件(*.txt)|*.txt",
+                Filter = "标签文件(*.txt)|*.txt",
                 AddExtension = true,
                 RestoreDirectory = true
             };
@@ -710,7 +703,7 @@ namespace LabelSharp.ViewModels.HomeContext
                 await this.SaveLabels();
 
                 this.Idle();
-                this.ToastSuccess("已保存！");
+                this.ToastSuccess("导入成功！");
             }
         }
         #endregion
@@ -910,6 +903,31 @@ namespace LabelSharp.ViewModels.HomeContext
 
                 this.Idle();
                 this.ToastSuccess("导入成功！");
+            }
+        }
+        #endregion
+
+        #region 导出标签 —— async void ExportLabels()
+        /// <summary>
+        /// 导出标签
+        /// </summary>
+        public async void ExportLabels()
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog
+            {
+                Filter = "(*.txt)|*.txt",
+                FileName = "classes",
+                AddExtension = true,
+                RestoreDirectory = true
+            };
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                this.Busy();
+
+                await Task.Run(() => File.WriteAllLines(saveFileDialog.FileName, this.Labels));
+
+                this.Idle();
+                this.ToastSuccess("已保存！");
             }
         }
         #endregion

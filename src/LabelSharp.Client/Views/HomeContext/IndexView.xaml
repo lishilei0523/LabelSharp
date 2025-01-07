@@ -250,6 +250,7 @@
                                     <MenuItem Header="查看(_L)" cm:Message.Attach="LookAnnotation()" />
                                     <MenuItem Header="编辑(_E)" cm:Message.Attach="UpdateAnnotation()" />
                                     <MenuItem Header="删除(_D)" cm:Message.Attach="RemoveAnnotation()" />
+                                    <MenuItem Header="GrabCut分割(_G)" cm:Message.Attach="GrabCutSegment()" />
                                 </ContextMenu>
                             </ListBox.ContextMenu>
                         </ListBox>

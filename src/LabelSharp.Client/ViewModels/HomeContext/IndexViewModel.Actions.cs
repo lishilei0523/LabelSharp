@@ -3,6 +3,7 @@ using LabelSharp.Presentation.Models;
 using LabelSharp.ViewModels.AnnotationContext;
 using LabelSharp.ViewModels.CommonContext;
 using OpenCvSharp;
+using OpenCvSharp.WpfExtensions;
 using SD.Infrastructure.Shapes;
 using SD.Infrastructure.WPF.Caliburn.Aspects;
 using SD.Infrastructure.WPF.CustomControls;
@@ -10,6 +11,7 @@ using SD.Infrastructure.WPF.Enums;
 using SD.Infrastructure.WPF.Extensions;
 using SD.Infrastructure.WPF.Models;
 using SD.IOC.Core.Mediators;
+using SD.OpenCV.Primitives.Extensions;
 using SD.Toolkits.Json;
 using System;
 using System.Collections.Generic;
@@ -25,6 +27,7 @@ using System.Windows.Shapes;
 using Path = System.IO.Path;
 using Point = OpenCvSharp.Point;
 using Rect = OpenCvSharp.Rect;
+using Size = OpenCvSharp.Size;
 
 namespace LabelSharp.ViewModels.HomeContext
 {
@@ -176,6 +179,76 @@ namespace LabelSharp.ViewModels.HomeContext
                     this.SelectedImageAnnotation.Annotations.Remove(annotation);
                     this.SaveAnnotations();
                 }
+            }
+        }
+        #endregion
+
+        #region GrabCut分割 —— async void GrabCutSegment()
+        /// <summary>
+        /// GrabCut分割
+        /// </summary>
+        public async void GrabCutSegment()
+        {
+            Annotation annotation = this.SelectedImageAnnotation?.SelectedAnnotation;
+            if (annotation != null)
+            {
+                this.Busy();
+
+                //数据准备
+                Rect rect = annotation.ShapeL is RectangleL rectangleL
+                    ? new Rect(rectangleL.X, rectangleL.Y, rectangleL.Width, rectangleL.Height)
+                    : new Rect(
+                        new Point(annotation.Shape.RenderedGeometry.Bounds.X,
+                            annotation.Shape.RenderedGeometry.Bounds.Y),
+                        new Size(annotation.Shape.RenderedGeometry.Bounds.Width,
+                            annotation.Shape.RenderedGeometry.Bounds.Height));
+                using Mat originalImage = this.SelectedImageAnnotation.Image.Value.ToMat();
+                using Mat image = originalImage.Channels() == 4
+                    ? originalImage.CvtColor(ColorConversionCodes.BGRA2BGR)
+                    : originalImage.Channels() == 1
+                        ? originalImage.CvtColor(ColorConversionCodes.GRAY2BGR)
+                        : originalImage;
+
+                //分割
+                Mat mask = null;
+                using Mat result = await Task.Run(() => image.GrabCutSegment(rect, out mask));
+
+                //查找轮廓
+                Point[][] contours = { };
+                await Task.Run(() => Cv2.FindContours(mask, out contours, out _, RetrievalModes.List, ContourApproximationModes.ApproxSimple));
+                mask.Dispose();
+
+                //取最大轮廓
+                Point[] contour = contours.OrderByDescending(contour => Cv2.ArcLength(contour, true)).FirstOrDefault();
+                if (contour != null)
+                {
+                    PointCollection points = new PointCollection();
+                    IList<PointL> pointLs = new List<PointL>();
+                    foreach (Point point in contour)
+                    {
+                        System.Windows.Point point2D = new System.Windows.Point(point.X, point.Y);
+                        PointL pointL = new PointL(point.X, point.Y);
+                        points.Add(point2D);
+                        pointLs.Add(pointL);
+                    }
+
+                    Polygon polygon = new Polygon
+                    {
+                        Points = points,
+                        Stroke = this.BorderBrush,
+                        StrokeThickness = this.BorderThickness,
+                        Fill = new SolidColorBrush(Colors.Transparent)
+                    };
+                    PolygonL polygonL = new PolygonL(pointLs);
+                    polygon.Tag = polygonL;
+                    polygonL.Tag = polygon;
+
+                    Annotation polyAnnotation = new Annotation(annotation.Label, annotation.GroupId, annotation.Truncated, annotation.Difficult, polygonL, annotation.Description);
+                    this.SelectedImageAnnotation.Shapes.Add(polygon);
+                    this.SelectedImageAnnotation.Annotations.Add(polyAnnotation);
+                }
+
+                this.Idle();
             }
         }
         #endregion

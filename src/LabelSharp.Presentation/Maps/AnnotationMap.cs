@@ -18,11 +18,11 @@ namespace LabelSharp.Presentation.Maps
     /// </summary>
     public static class AnnotationMap
     {
-        #region # 映射LabelMe形状 —— static MeShape ToMeShpe(this Annotation annotation)
+        #region # 映射LabelMe形状 —— static MeShape ToMeShape(this Annotation annotation)
         /// <summary>
         /// 映射LabelMe形状
         /// </summary>
-        public static MeShape ToMeShpe(this Annotation annotation)
+        public static MeShape ToMeShape(this Annotation annotation)
         {
             string shapeType = annotation.ShapeL.GetShapeType();
             IList<double[]> mePoints = annotation.ShapeL.ToMePoints();
@@ -40,7 +40,7 @@ namespace LabelSharp.Presentation.Maps
         {
             int imageWidth = imageAnnotation.ImageWidth;
             int imageHeight = imageAnnotation.ImageHeight;
-            IList<MeShape> meShapes = imageAnnotation.Annotations.Select(x => x.ToMeShpe()).ToList();
+            IList<MeShape> meShapes = imageAnnotation.Annotations.Select(x => x.ToMeShape()).ToList();
             MeAnnotation meAnnotation = new MeAnnotation(imageAnnotation.ImageName, imageWidth, imageHeight, meShapes);
 
             return meAnnotation;

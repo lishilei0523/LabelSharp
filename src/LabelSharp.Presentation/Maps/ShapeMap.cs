@@ -333,9 +333,9 @@ namespace LabelSharp.Presentation.Maps
         }
         #endregion
 
-        #region # LabelMe点集映射多边形 —— static PolylineL ToPolylineL(this IList<double[]> mePoints)
+        #region # LabelMe点集映射折线段 —— static PolylineL ToPolylineL(this IList<double[]> mePoints)
         /// <summary>
-        /// LabelMe点集映射多边形
+        /// LabelMe点集映射折线段
         /// </summary>
         public static PolylineL ToPolylineL(this IList<double[]> mePoints)
         {

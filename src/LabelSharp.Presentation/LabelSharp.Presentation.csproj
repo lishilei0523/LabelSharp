@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="MrAdvice" Version="2.19.1" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.10.0.20241108" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.11.0.20250507" />
     <PackageReference Include="SD.Toolkits.Json" Version="2.1.0" />
     <PackageReference Include="SD.OpenCV.Primitives" Version="1.1.0" />
     <PackageReference Include="SD.Infrastructure" Version="3.8.2" />

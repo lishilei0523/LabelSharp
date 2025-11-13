@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/LabelSharp.Client/LabelSharp.Client.csproj" />
+  <Project Path="src/LabelSharp.Presentation/LabelSharp.Presentation.csproj" />
+</Solution>

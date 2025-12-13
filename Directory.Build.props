@@ -1,0 +1,18 @@
+<Project DefaultTargets="Build">
+  <PropertyGroup>
+    <LangVersion>Latest</LangVersion>
+    <BaseOutputPath>bin\</BaseOutputPath>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoDefaultLaunchSettingsFile>True</NoDefaultLaunchSettingsFile>
+  </PropertyGroup>
+
+  <!--Version-->
+  <PropertyGroup>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <FileVersion>$(Version)</FileVersion>
+    <Authors>Lee</Authors>
+    <Company>SD</Company>
+    <Copyright>Copyright © SD $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+  </PropertyGroup>
+</Project>

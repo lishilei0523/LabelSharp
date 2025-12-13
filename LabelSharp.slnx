@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/00 - Global/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+  </Folder>
   <Project Path="src/LabelSharp.Client/LabelSharp.Client.csproj" />
   <Project Path="src/LabelSharp.Presentation/LabelSharp.Presentation.csproj" />
 </Solution>

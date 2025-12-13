@@ -1,10 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net48</TargetFramework>
-    <LangVersion>8.0</LangVersion>
-    <Authors>Lee</Authors>
-    <Company>SD</Company>
-    <Copyright>Copyright © SD 2025</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

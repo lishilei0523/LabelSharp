@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.23.2" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
     <PackageReference Include="MahApps.Metro" Version="2.4.11" />
     <PackageReference Include="MahApps.Metro.IconPacks.MaterialDesign" Version="6.2.1" />
     <PackageReference Include="FluentWPF" Version="0.10.2" />
@@ -38,15 +38,15 @@
       <ExcludeAssets>contentFiles</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
-    <PackageReference Include="MrAdvice" Version="2.19.1" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.11.0.20250507" />
-    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.11.0.20250507" />
-    <PackageReference Include="SD.Common" Version="4.0.0" />
-    <PackageReference Include="SD.Toolkits.Json" Version="4.0.0" />
-    <PackageReference Include="SD.IOC.Core" Version="1.4.0" />
+    <PackageReference Include="MrAdvice" Version="2.20.5" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.13.0.20260318" />
+    <PackageReference Include="OpenCvSharp4.runtime.win" Version="4.13.0.20260302" />
+    <PackageReference Include="SD.Common" Version="4.0.1" />
+    <PackageReference Include="SD.Toolkits.Json" Version="4.0.1" />
+    <PackageReference Include="SD.IOC.Core" Version="1.4.1" />
     <PackageReference Include="SD.OpenCV.Primitives" Version="1.1.0" />
     <PackageReference Include="SD.OpenCV.OnnxRuntime" Version="1.2.0" />
-    <PackageReference Include="SD.Infrastructure" Version="4.0.0" />
+    <PackageReference Include="SD.Infrastructure" Version="4.0.1" />
     <PackageReference Include="SD.Infrastructure.WPF" Version="4.0.0" />
     <PackageReference Include="SD.Infrastructure.WPF.Caliburn" Version="4.0.0" />
   </ItemGroup>

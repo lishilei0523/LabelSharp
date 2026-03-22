@@ -4,11 +4,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MrAdvice" Version="2.19.1" />
-    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.11.0.20250507" />
-    <PackageReference Include="SD.Toolkits.Json" Version="4.0.0" />
+    <PackageReference Include="MrAdvice" Version="2.20.5" />
+    <PackageReference Include="OpenCvSharp4.WpfExtensions" Version="4.13.0.20260318" />
+    <PackageReference Include="SD.Toolkits.Json" Version="4.0.1" />
     <PackageReference Include="SD.OpenCV.Primitives" Version="1.1.0" />
-    <PackageReference Include="SD.Infrastructure" Version="4.0.0" />
+    <PackageReference Include="SD.Infrastructure" Version="4.0.1" />
     <PackageReference Include="SD.Infrastructure.WPF" Version="4.0.0" />
     <PackageReference Include="SD.Infrastructure.WPF.Caliburn" Version="4.0.0" />
   </ItemGroup>
